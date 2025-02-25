@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Map with Last Updated Time and Pythagorean Distance</title>
+  <!-- Leaflet CSS and JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Raleway', sans-serif;
+      background: #f0f0f0;
+    }
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    .map-container {
+      width: 480px;
+      height: 100%;
+      background: #fff;
+      border: 1px solid #ddd;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      margin: 0;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+    .sidebar {
+      flex: 1;
+      padding: 20px;
+      background: linear-gradient(145deg, #fafafa, #f0f0f0);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .sidebar h2 {
+      margin-top: 0;
+      font-size: 24px;
+      color: #d42e2e;
+    }
+    .sidebar p {
+      font-size: 18px;
+      color: #555;
+      text-align: center;
+      margin: 10px 0;
+    }
+    .sidebar .updated-time {
+      font-size: 20px;
+      color: #3498db;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    .yes{
+      display: none;
+    }
+    /* .color{
+      font-size: 20px;
+      color: red;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    } */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="map-container">
+      <div id="map"></div>
+    </div>
+    <div class="sidebar">
+      <h2>Administration Building(Main Gate) Stop</h2>
+      <p>Last Updated:</p>
+      <p class="updated-time" id="lastUpdate">Loading...</p>
+      <p>Current Speed:</p>
+      <p class="updated-time" id="Speed">Calculating...</p>
+      <p id="heading">Next Bus in:</p>
+      <p class="updated-time" id="Nextstop">...</p>
+    </div>
+  </div>
+  
+  <script>
+    // Initialize the Leaflet map
+    var map = L.map('map').setView([51.505, -0.09], 13);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+    var marker;
+
+    // Coordinates of the static bus stop
+    var latitude_stop = 15.4871767;
+    var longitude_stop =  74.9339327;
+
+     // Add a marker and label for the stop "Admin block (Main Gate) stop"
+    var stopMarker = L.marker([latitude_stop, longitude_stop]).addTo(map);
+    stopMarker.bindPopup("<b>Admin block (Main Gate) stop</b>").openPopup();
+    
+    // Initialization of the stops and time according to it
+    const stops = [
+      { name: "Hostel PC", time: "08:00:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "Main Gate", time: "08:05:00", latitude: 34.0522, longitude: -118.2437 },
+      { name: "Bhoopali", time: "08:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Jubli Circle", time: "08:40:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bust Stand Dharwad", time: "08:50:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "09:10:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "09:20:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "12:10:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "A1-A2 Block", time: "12:15:00", latitude: 34.0522, longitude: -118.2437 },
+      { name: "Main Gate", time: "12:20:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "12:40:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "12:45:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "13:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "13:05:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "13:10:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "14:50:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "A1-A2 Block", time: "14:55:00", latitude: 34.0522, longitude: -118.2437 },
+      { name: "Main Gate", time: "15:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "15:20:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "16:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "16:50:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "16:55:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "17:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "17:15:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "A1-A2 Block", time: "17:20:00", latitude: 34.0522, longitude: -118.2437 },
+      { name: "Main Gate", time: "17:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "18:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "18:10:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "18:15:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "18:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "18:40:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bus Stand Dharwad", time: "19:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bus Stand Dharwad", time: "19:05:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "19:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "19:30:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "19:45:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "20:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "20:05:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "Main Gate", time: "20:10:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "20:30:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "20:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "20:50:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "21:05:00", latitude: 51.5074, longitude: -0.1278 },
+    ];
+
+    // Function to convert UTC to IST string
+    function convertUTCtoIST(utcDateString) {
+      const utcDate = new Date(utcDateString);
+      const istOptions = { 
+        timeZone: 'Asia/Kolkata',
+        hour12: false,
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+      };
+      return utcDate.toLocaleString('en-IN', istOptions);
+    }
+
+    // Function to convert HH:MM:SS to total seconds
+    function timeToSeconds(time) {
+      const [hours, minutes, seconds] = time.split(":").map(Number);
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+
+    // Function to update map data and determine arrival time for next bus
+    function updateMapData() {
+  fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=2')
+    .then(response => response.json())
+    .then(data => {
+      if (!data.feeds || data.feeds.length === 0) {
+        throw new Error("No data available.");
+      }
+
+      var latestFeed = data.feeds[data.feeds.length - 1];
+      var lat = parseFloat(latestFeed.field1);
+      var lon = parseFloat(latestFeed.field2);
+      var spd = parseInt(latestFeed.field3);
+      var lastUpdatedUTC = latestFeed.created_at;
+      var lastUpdatedIST = convertUTCtoIST(lastUpdatedUTC);
+      const stop_name = "Main Gate"; 
+      var time_in_next_bus = 0;
+      var dir = stops[0].name;
+
+      var [date, currtime] = lastUpdatedIST.split(",");
+      currtime = currtime.trim();
+
+      // Determine the next bus in minutes
+      for (let i = 0; i < stops.length - 1; i++) {
+        if (timeToSeconds(currtime) < timeToSeconds(stops[i].time) && stops[i].name == stop_name) {
+          time_in_next_bus = timeToSeconds(stops[i].time) - timeToSeconds(currtime);
+          dir = stops[i+1].name;
+          break;
+        }
+      }
+      time_in_next_bus = parseInt(time_in_next_bus / 60);
+      console.log(time_in_next_bus);
+      var hours = parseInt(time_in_next_bus/60);
+      var min = parseInt(time_in_next_bus%60);
+
+      time_in_next_bus = `${hours} hours ${min} minutes to ${dir}`;
+      if(hours==0)
+      {
+        time_in_next_bus = `${min} minutes to ${dir}`;
+      }
+      let flag = 0;
+
+      if (!stops[stops.length - 1].time || timeToSeconds(currtime) > timeToSeconds(stops[stops.length - 1].time) || timeToSeconds(currtime)<timeToSeconds(stops[0].time)) {
+        time_in_next_bus = "Shuttle service is closed. The next bus will start from 8:00 AM tomorrow";
+        flag = 1;
+      }
+
+      console.log("time in next bus:", time_in_next_bus);
+
+      // Update marker on the map
+      if (marker) {
+        map.removeLayer(marker);
+      }
+      marker = L.circle([lat, lon], {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.5,
+        radius: 20
+      }).addTo(map);
+      map.setView([lat, lon], 18);
+
+      // Update the "Last Updated" text
+      document.getElementById("lastUpdate").innerText = lastUpdatedIST;
+      document.getElementById("Speed").innerText = spd + " km/h";
+
+      let ns = document.getElementById("Nextstop"); // FIXED ID REFERENCE
+      ns.innerText = time_in_next_bus;
+
+      let hd = document.getElementById("heading");
+      if (flag) {
+        console.log(flag);
+        hd.classList.add("yes");
+        ns.style.color = "#de595b";
+      }
+    })
+    .catch(error => {
+      console.error('Fetch Error:', error);
+      document.getElementById("lastUpdate").innerText = "Error loading update.";
+      document.getElementById("Speed").innerText = "Error calculating distance.";
+      document.getElementById("Nextstop").innerText = "Error retrieving next bus.";
+    });
+}
+
+
+    // Initial fetch on page load and update every minute
+    updateMapData();
+    setInterval(updateMapData, 20000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bus Tracker - CLT</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
+    #map { height: 400px; width: 80%; margin: 20px auto; }
+    #info { margin: 10px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>Bus Tracker - CLT</h1>
+
+  <div id="info">
+    <p><strong>Last Updated:</strong> <span id="lastUpdated">-</span></p>
+    <p><strong>Bus Speed:</strong> <span id="speed">0</span> km/h</p>
+    <p><strong>Bus will arrive in:</strong> <span id="dist-clt">-</span> mins</p>
+    <p><strong>Expected Arrival Time:</strong> <span id="arrival-time">-</span></p>
+    <p><strong>Bus is near:</strong> <span id="busNear">N/A</span></p>
+  </div>
+
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Coordinates of the stops bus visits
+    const stops = [
+      { name: "CLT", coords: [15.48359, 74.93414] },
+      { name: "A1", coords: [15.485164, 74.936475] },
+      { name: "Admin", coords: [15.486793, 74.934476] },
+      { name: "Hostel", coords: [15.483449, 74.939138] },
+      { name: "Main-Gate", coords: [15.487754, 74.933632]},
+      {name: "Bhoopali", coords:[]}
+    ];
+
+    // Finding nearest stop.
+    function findNearestStop(busLat, busLon) {
+      let nearest = stops[0];
+      let minDistance = calculateDistance(busLat, busLon, stops[0].coords[0], stops[0].coords[1]);
+
+      stops.forEach(stop => {
+        let d = calculateDistance(busLat, busLon, stop.coords[0], stop.coords[1]);
+        if (d < minDistance) {
+          minDistance = d;
+          nearest = stop;
+        }
+      });
+      return nearest.name;
+    }
+
+    // Using Haversine formula to calculate distance
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Earth's radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    let map = L.map('map').setView([15.48359, 74.93414], 16);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let busMarker = null;
+
+    function updateMap(lat, lon) {
+      if (busMarker) {
+        busMarker.setLatLng([lat, lon]);
+      } else {
+        busMarker = L.marker([lat, lon]).addTo(map).bindPopup("Bus Location").openPopup();
+      }
+      map.setView([lat, lon], 16);
+    }
+
+    // To find estimated time of arraival
+    function updateCLTArrival(busLat, busLon, busSpeed) {
+      const distance = calculateDistance(busLat, busLon, 15.48359, 74.93414);
+
+      if (busSpeed > 0) {
+        let etaMinutes = ((distance / busSpeed) * 60).toFixed(1);
+        let arrivalTime = new Date(Date.now() + etaMinutes * 60000);
+
+        document.getElementById("dist-clt").textContent = etaMinutes;
+        document.getElementById("arrival-time").textContent = arrivalTime.toLocaleTimeString();
+      } else {
+        document.getElementById("dist-clt").textContent = "Using Schedule";
+        document.getElementById("arrival-time").textContent = getNextScheduledTime();
+      }
+    }
+
+    // Bus schedule.
+    function getNextScheduledTime() {
+      const schedule = [
+        ["08:00 AM", "Hostel-PC"], ["08:05 AM", "Main-Gate"],
+        ["08:25 AM", "Bhoopali"], ["08:40 AM", "CLT"],
+        ["09:20 AM", "Hostel-PC"], ["12:10 PM", "Hostel-PC"],
+        ["12:20 PM", "Main-Gate"], ["01:00 PM", "CLT"],
+        ["03:20 PM", "Bhoopali"], ["05:45 PM", "CLT"],
+        ["07:30 PM", "CLT"], ["08:50 PM", "CLT"]
+      ];
+
+      let now = new Date();
+      let nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+      for (let [time, stop] of schedule) {
+        let timeParts = time.match(/\d+/g).map(Number);
+        let isPM = time.includes("PM") && timeParts[0] !== 12;
+        let timeInMinutes = (isPM ? timeParts[0] + 12 : timeParts[0]) * 60 + timeParts[1];
+
+        if (timeInMinutes > nowMinutes) return `${time} @ ${stop}`; 
+      }
+      return "N/A";
+    }
+
+    function fetchBusLocation() {
+      fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=2')
+        .then(response => response.json())
+        .then(data => {
+          const latest = data.feeds[data.feeds.length - 1];
+          const lat = parseFloat(latest.field1);
+          const lon = parseFloat(latest.field2);
+          const busSpeed = parseFloat(latest.field3);
+          const timestamp = new Date(latest.created_at);
+
+          if (!isNaN(lat) && !isNaN(lon) && !isNaN(busSpeed)) {
+            updateMap(lat, lon);
+            updateCLTArrival(lat, lon, busSpeed);
+            document.getElementById("lastUpdated").textContent = timestamp.toLocaleTimeString();
+            document.getElementById("speed").textContent = busSpeed.toFixed(2);
+            document.getElementById("busNear").textContent = findNearestStop(lat, lon);
+          }
+        })
+        .catch(error => console.error('Error fetching bus location:', error));
+    }
+
+    fetchBusLocation();
+    setInterval(fetchBusLocation, 60000);
+  </script>
+</body>
+</html>

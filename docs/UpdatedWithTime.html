@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Bus Tracker</title>
+
+  <!-- Leaflet CSS for map styling -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+  <!-- End Feature: Map CSS Setup -->
+
+  <!-- Leaflet JS library -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <!-- End Feature: Map JS Setup -->
+
+  <style>
+    /* Basic CSS stylings*/
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #map {
+      height: 600px;
+      width: 80%;
+      margin: auto;
+    }
+    #info {
+      margin: 10px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Live Bus Tracker</h1>
+  
+  <!-- Feature: Display Last Updated Time and Speed -->
+  <div id="info">
+    <p><strong>Last Updated:</strong> <span id="lastUpdated">-</span></p>
+    <p><strong>Speed:</strong> <span id="speed"></span> km/h</p>
+  </div>
+  <!-- End Feature: Last Updated Time & Speed Display -->
+
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <script>
+    var map = L.map('map').setView([51.505, -0.09], 13);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var busMarker = null;
+
+    // Variables to store the previous bus location and time for speed calculation
+    var prevLat = null, prevLon = null, prevTime = null;
+
+    // Fetching bus location using API
+    function fetchBusLocation() {
+      // Replace 'your-api-endpoint' with the actual endpoint URL
+      fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=2')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      // Replace 'fieldToParse' with the name of the field you want to parse
+      //const lat = data.fieldToParse;
+      .then(data => {
+        console.log("Data received:", data);
+
+        // Parse the latest latitude, longitude, and timestamp from the API response
+        var lat = parseFloat(data.feeds[data.feeds.length - 1].field1);
+        var lon = parseFloat(data.feeds[data.feeds.length - 1].field2);
+        var spd = parseInt(data.feeds[data.feeds.length - 1].field3);
+        document.getElementById("speed").textContent = spd;
+        var timestamp = new Date(data.feeds[data.feeds.length - 1].created_at);
+
+        // Ensure the latitude and longitude are valid numbers before updating the map
+        if (!isNaN(lat) && !isNaN(lon)) {
+          updateMap(lat, lon, timestamp);
+        } else {
+          console.error("Invalid location data:", lat, lon);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching bus location:', error);
+      });
+    }
+
+
+    // Updating the map with new bus location, update the timestamp, and calculate speed
+    function updateMap(lat, lon, timestamp) {
+      // Plot the current bus location on the map:
+      if (busMarker) {
+        // If bus mark is already present then we are updating the lat and long.
+        busMarker.setLatLng([lat, lon]);
+      } else {
+        // If it is not present, we are creating a new marker and add it to the map.
+        busMarker = L.marker([lat, lon]).addTo(map)
+          .bindPopup("Bus Location")
+          .openPopup();
+      }
+      map.setView([lat, lon], 18);
+
+
+      document.getElementById("lastUpdated").textContent = timestamp.toLocaleTimeString();
+
+
+     /* // Calculating bus speed using 2 feilds we fetched.
+      if (prevLat !== null && prevLon !== null && prevTime !== null) {
+        var distance = calculateDistance(prevLat, prevLon, lat, lon); // Distance in km
+        var timeDiff = (timestamp - prevTime) / 1000 / 3600; // Time difference in hours
+        var speed = timeDiff > 0 ? (distance / timeDiff).toFixed(2) : 0; // Speed in km/h
+        document.getElementById("speed").textContent = speed;
+      }*/
+     
+
+      // Update previous coordinates and timestamp for the next calculation cycle
+      prevLat = lat;
+      prevLon = lon;
+      prevTime = timestamp;
+    }
+
+
+    //Using Haversine formula to calculate the distance between two points using lats and longs (in km)
+    function calculateDistance(lat1, lon1, lat2, lon2) { //Funtion to calc dist
+      const R = 6378; // Earth's radius in kilometers
+      const distLat = (lat2 - lat1) * Math.PI / 180;
+      const distLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(distLat / 2) * Math.sin(distLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(distLon / 2) * Math.sin(distLon / 2);
+      const c = 2 * R * Math.asin(Math.sqrt(a));
+      return c;
+    }
+
+
+    fetchBusLocation();
+    setInterval(fetchBusLocation, 60000); // To Fetch the bus location every minute.
+
+  </script>
+</body>
+</html>
