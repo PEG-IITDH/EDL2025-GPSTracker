@@ -24,7 +24,7 @@
       height: 100vh;
     }
     .map-container {
-      width: 480px;
+      width: 50%;
       height: 100%;
       background: #fff;
       border: 1px solid #ddd;
@@ -92,7 +92,7 @@
   
   <script>
     // Initialize the Leaflet map
-    var map = L.map('map').setView([51.505, -0.09], 13);
+    var map = L.map('map').setView([51.505, -0.09], 11);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap'
@@ -212,12 +212,14 @@
           if (marker) {
             map.removeLayer(marker);
           }
-          marker = L.circle([lat, lon], {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5,
-            radius: 20
-          }).addTo(map);
+          var emojiIcon = L.divIcon({
+            html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🚍</div>',
+            className: 'emoji-marker',
+            iconSize: [45, 45],
+            iconAnchor: [15, 15] // Centers the icon on the location
+          });
+
+          marker = L.marker([lat, lon], { icon: emojiIcon }).addTo(map);
           map.setView([lat, lon], 18);
 
           // Update the "Last Updated" text
