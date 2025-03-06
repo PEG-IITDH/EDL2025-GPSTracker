@@ -86,7 +86,7 @@
       <div id="map"></div>
     </div>
     <div class="sidebar">
-      <h2>Admin block & Maingate Stop (Beta Testing)</h2>
+      <h2>A1-A2 Block Bus Stop (Beta Testing)</h2>
       <p>Last Updated:</p>
       <p class="updated-time" id="lastUpdate">Loading...</p>
       <p>Status:</p>
@@ -113,7 +113,7 @@
 
      // Add a marker and label for the stop "Admin block (Main Gate) stop"
     var stopMarker = L.marker([latitude_stop, longitude_stop]).addTo(map);
-    stopMarker.bindPopup("<b>Admin block & Maingate Stop</b>").openPopup();
+    stopMarker.bindPopup("<b>A1 block</b>").openPopup();
     
     // Initialization of the stops and time according to it
     const stop1 = [
@@ -290,7 +290,7 @@
         var spd = parseInt(latestFeed.speed);
         var lastUpdatedUTC = latestFeed.timestamp;
         var lastUpdatedIST = convertUTCtoIST(lastUpdatedUTC);
-        const stop_name = "Main Gate"; 
+        const stop_name = "A1-A2 Block"; 
         var time_in_next_bus = 0;
         var dir = stops[0].name;
 
