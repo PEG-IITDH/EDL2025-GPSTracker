@@ -87,10 +87,10 @@
     </div>
     <div class="sidebar">
       <h2>New Bus Stand Dharwad (Beta Testing)</h2>
-      <p>Last Updated:</p>
-      <p class="updated-time" id="lastUpdate">Loading...</p>
       <p>Status:</p>
       <p class="updated-time" id="Status">Loading...</p>
+      <p>Last Updated:</p>
+      <p class="updated-time" id="lastUpdate">Loading...</p>
       <p>Current Speed:</p>
       <p class="updated-time" id="Speed">Calculating...</p>
       <p id="heading">Next Bus in:</p>
@@ -262,16 +262,16 @@
           }
         }
 
-        // show realtime day and time 
-        var today = new Date();
-        var istTime = new Date(today.getTime() + (5.5 * 60 * 60 * 1000));
+        // Get real-time IST
+        var istTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        var dateObj = new Date(istTime);
         var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        var currentDay = days[istTime.getDay()];
-        var hours = istTime.getHours().toString().padStart(2, '0');  
-        var minutes = istTime.getMinutes().toString().padStart(2, '0');
-        var seconds = istTime.getSeconds().toString().padStart(2, '0');
+        var currentDay = days[dateObj.getDay()];
+        var hours = dateObj.getHours().toString().padStart(2, '0');
+        var minutes = dateObj.getMinutes().toString().padStart(2, '0');
+        var seconds = dateObj.getSeconds().toString().padStart(2, '0');
         var currentISTTime = hours + ":" + minutes + ":" + seconds;
-        let stops = stop1;
+        var stops;
         if(currentDay=="Saturday" || currentDay == "Sunday")
         {
             stops = stop2;

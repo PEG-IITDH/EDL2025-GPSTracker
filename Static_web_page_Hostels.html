@@ -87,10 +87,10 @@
     </div>
     <div class="sidebar">
       <h2>Hostel PC Stop (Beta Testing)</h2>
-      <p>Last Updated:</p>
-      <p class="updated-time" id="lastUpdate">Loading...</p>
       <p>Status:</p>
       <p class="updated-time" id="Status">Loading...</p>
+      <p>Last Updated:</p>
+      <p class="updated-time" id="lastUpdate">Loading...</p>
       <p>Current Speed:</p>
       <p class="updated-time" id="Speed">Calculating...</p>
       <p id="heading">Next Bus in:</p>
@@ -121,7 +121,7 @@
       { name: "Main Gate", time: "08:05:00", latitude: 34.0522, longitude: -118.2437 },
       { name: "Bhoopali", time: "08:25:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Jubli Circle", time: "08:40:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "New Bust Stand Dharwad", time: "08:50:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bus Stand Dharwad", time: "08:50:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "09:10:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "09:20:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "12:10:00", latitude: 40.7128, longitude: -74.0060 },
@@ -164,29 +164,25 @@
       { name: "Hostel PC", time: "21:05:00", latitude: 51.5074, longitude: -0.1278 },
     ];
     const stop2 = [
-    { name: "Hostel PC", time: "08:00:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "Main Gate", time: "08:05:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Bhoopali", time: "08:25:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Jubli Circle", time: "08:40:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "New Bust Stand Dharwad", time: "08:50:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "09:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "09:20:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "12:10:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "A1-A2 Block", time: "12:15:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Main Gate", time: "12:20:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "12:40:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "12:45:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "13:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "13:05:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "13:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "14:50:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "A1-A2 Block", time: "14:55:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Main Gate", time: "15:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "15:20:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "16:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "16:50:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "16:55:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "17:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "10:00:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "Main Gate", time: "10:05:00", latitude: 34.0522, longitude: -118.2437 },
+      { name: "Bhoopali", time: "10:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bus Stand Dharwad", time: "10:45:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bus Stand Dharwad", time: "10:50:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "11:10:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "11:20:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "12:30:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "Main Gate", time: "12:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "12:55:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "13:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "13:15:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "13:20:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "14:00:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "Main Gate", time: "14:05:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "14:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "14:30:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "14:45:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "14:50:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "17:15:00", latitude: 40.7128, longitude: -74.0060 },
       { name: "A1-A2 Block", time: "17:20:00", latitude: 34.0522, longitude: -118.2437 },
       { name: "Main Gate", time: "17:25:00", latitude: 51.5074, longitude: -0.1278 },
@@ -266,16 +262,16 @@
           }
         }
 
-        // show realtime day and time 
-        var today = new Date();
-        var istTime = new Date(today.getTime() + (5.5 * 60 * 60 * 1000));
+        // Get real-time IST
+        var istTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        var dateObj = new Date(istTime);
         var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        var currentDay = days[istTime.getDay()];
-        var hours = istTime.getHours().toString().padStart(2, '0');  
-        var minutes = istTime.getMinutes().toString().padStart(2, '0');
-        var seconds = istTime.getSeconds().toString().padStart(2, '0');
+        var currentDay = days[dateObj.getDay()];
+        var hours = dateObj.getHours().toString().padStart(2, '0');
+        var minutes = dateObj.getMinutes().toString().padStart(2, '0');
+        var seconds = dateObj.getSeconds().toString().padStart(2, '0');
         var currentISTTime = hours + ":" + minutes + ":" + seconds;
-        let stops = stop1;
+        var stops;
         if(currentDay=="Saturday" || currentDay == "Sunday")
         {
             stops = stop2;
