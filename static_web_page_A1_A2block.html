@@ -105,7 +105,11 @@
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
+    let tailMarkerGroup = L.layerGroup().addTo(map);
     var marker;
+    let tail1=null;
+    let tail2=null;
+    let tail3=null;
 
     // Coordinates of the static bus stop
     var latitude_stop = 15.484642;
@@ -232,6 +236,18 @@
       return hours * 3600 + minutes * 60 + seconds;
     }
 
+    //Function to update marker 
+    function updateTailMarker(newLat, newLng,lastTailMarker) {
+      var sign = L.divIcon({
+        html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🔹</div>',
+        className: 'emoji-marker',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15] // Centers the icon on the location
+      });
+      // Remove the previous marker if it exists
+      L.marker([newLat, newLng],{ icon: sign }).addTo(tailMarkerGroup); // Add new marker
+    }
+    
     // Function to update map data and determine arrival time for next bus
     function updateMapData() {
         fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
@@ -250,21 +266,17 @@
           lastFiveEntries.push(entry);
         });
 
-        // Plot the first 4 points
-        for (let i = 0; i < 4; i++) {
-          if (lastFiveEntries[i]) {
-              let lat = lastFiveEntries[i].latitude;
-              let lon = lastFiveEntries[i].longitude;
-              let timeRecorded = convertUTCtoIST(lastFiveEntries[i].timestamp);
-
-              L.circleMarker([lat, lon], {
-                color: "#3498db",
-                radius: 3,
-                fillColor: "#3498db",
-                fillOpacity: 0.8
-              }).bindPopup(`Past Location (${i + 1}): ${timeRecorded}`).addTo(map);
-          }
-        }
+       // Plot the first 3 points
+       tailMarkerGroup.clearLayers(); // Remove all previous markers in the group
+        let lat1 = lastFiveEntries[1].latitude;
+        let lon1 = lastFiveEntries[1].longitude;
+        let lat2 = lastFiveEntries[2].latitude;
+        let lon2 = lastFiveEntries[2].longitude;
+        let lat3 = lastFiveEntries[3].latitude;
+        let lon3 = lastFiveEntries[3].longitude;
+        updateTailMarker(lat1,lon1,tail1);
+        updateTailMarker(lat2,lon2,tail2);
+        updateTailMarker(lat3,lon3,tail3);
 
         // Get real-time IST
         var istTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
