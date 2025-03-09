@@ -107,6 +107,7 @@
     }).addTo(map);
     let tailMarkerGroup = L.layerGroup().addTo(map);
     var marker;
+    let tail0=null;
     let tail1=null;
     let tail2=null;
     let tail3=null;
@@ -247,7 +248,7 @@
       // Remove the previous marker if it exists
       L.marker([newLat, newLng],{ icon: sign }).addTo(tailMarkerGroup); // Add new marker
     }
-    
+
     // Function to update map data and determine arrival time for next bus
     function updateMapData() {
         fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
@@ -268,24 +269,27 @@
 
        // Plot the first 3 points
        tailMarkerGroup.clearLayers(); // Remove all previous markers in the group
+        let lat0 = lastFiveEntries[0].latitude;
+        let lon0 = lastFiveEntries[0].longitude;
         let lat1 = lastFiveEntries[1].latitude;
         let lon1 = lastFiveEntries[1].longitude;
         let lat2 = lastFiveEntries[2].latitude;
         let lon2 = lastFiveEntries[2].longitude;
         let lat3 = lastFiveEntries[3].latitude;
         let lon3 = lastFiveEntries[3].longitude;
+        updateTailMarker(lat0,lon0,tail0);
         updateTailMarker(lat1,lon1,tail1);
         updateTailMarker(lat2,lon2,tail2);
         updateTailMarker(lat3,lon3,tail3);
 
         // Get real-time IST
-        var istTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-        var dateObj = new Date(istTime);
+        var dateObj = new Date();
+        var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
         var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        var currentDay = days[dateObj.getDay()];
-        var hours = dateObj.getHours().toString().padStart(2, '0');
-        var minutes = dateObj.getMinutes().toString().padStart(2, '0');
-        var seconds = dateObj.getSeconds().toString().padStart(2, '0');
+        var currentDay = days[istTime.getDay()];
+        var hours = istTime.getHours().toString().padStart(2, '0');
+        var minutes = istTime.getMinutes().toString().padStart(2, '0');
+        var seconds = istTime.getSeconds().toString().padStart(2, '0');
         var currentISTTime = hours + ":" + minutes + ":" + seconds;
         var stops;
         if(currentDay=="Saturday" || currentDay == "Sunday")
@@ -295,7 +299,7 @@
         else{
             stops = stop1;
         }
-
+        console.log(currentDay);
         var latestFeed = lastFiveEntries[lastFiveEntries.length - 1];
         var lat = parseFloat(latestFeed.latitude);
         var lon = parseFloat(latestFeed.longitude);
