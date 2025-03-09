@@ -265,7 +265,7 @@
         // Plot the first 3 points
         tailMarkerGroup.clearLayers(); // Remove all previous markers in the group
         let lat0 = lastFiveEntries[0].latitude;
-        let lon0 = lastFiveEntries[0].longitude0
+        let lon0 = lastFiveEntries[0].longitude;
         let lat1 = lastFiveEntries[1].latitude;
         let lon1 = lastFiveEntries[1].longitude;
         let lat2 = lastFiveEntries[2].latitude;
@@ -279,13 +279,13 @@
 
         // Get real-time IST
         var dateObj = new Date();
-        var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-        var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        var currentDay = days[istTime.getDay()];
-        var hours = istTime.getHours().toString().padStart(2, '0');
-        var minutes = istTime.getMinutes().toString().padStart(2, '0');
-        var seconds = istTime.getSeconds().toString().padStart(2, '0');
-        var currentISTTime = hours + ":" + minutes + ":" + seconds;
+          var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+          var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+          var currentDay = days[istTime.getDay()];
+          var hours = istTime.getHours().toString().padStart(2, '0');
+          var minutes = istTime.getMinutes().toString().padStart(2, '0');
+          var seconds = istTime.getSeconds().toString().padStart(2, '0');
+          var currentISTTime = hours + ":" + minutes + ":" + seconds;
         var stops;
         if(currentDay=="Saturday" || currentDay == "Sunday")
         {
