@@ -21,6 +21,7 @@
     html, body {
       height: 100%;
       margin: 0;
+      overflow: hidden;
       font-family: 'Raleway', sans-serif;
       background: #f0f0f0;
     }
@@ -30,6 +31,7 @@
     .map-container {
       background: #fff;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
     }
     #map {
       width: 100%;
@@ -41,7 +43,6 @@
       background: linear-gradient(145deg, #fafafa, #f0f0f0);
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
     }
     .sidebar h2 {
@@ -61,6 +62,18 @@
     .yes{
       display: none;
     }
+    header{
+        background-color: #fff;
+        padding: 15px 0;
+        text-align: center;
+    }
+    header .container{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
     /* .color{
       font-size: 20px;
       color: red;
@@ -75,13 +88,33 @@
         width: 100%;
         height: 50%;
       }
+      header{
+          height: 10%;
+      }
       .sidebar {
         width: 100%;
         height: 40%;
         font-size: 12px;
+        padding-top: 20px;
+        justify-content: top;
+      }
+      .container{
+          align-items: center;
+      }
+      .container-fluid{
+          align-items: center;
+          background-color: #fff;
       }
       .sidebar h2{
-          font-size: 17px;
+          font-size: 15px;
+      }
+      .image-container{
+            height: 50px;
+            width: 50px;
+        }
+      .image-text{
+            color: red;
+            font-size: 13px;
       }
     }
 
@@ -89,27 +122,43 @@
     @media (min-width: 768px) {
       .map-container {
         width: 50%;
-        height: 100%;
+        height: 80%;
+        border: 5px;
       }
       .sidebar {
         width: 50%;
-        height: 100%;
+        height: 80%;
         font-size: 15px;
+        justify-content: center;
       }
       .sidebar h2 {
           font-size: 20px;
       }
+      .image-container{
+            height: 70px;
+            width: 70px;
+            padding-right: 30px;
+        }
+        .image-text{
+            color: red;
+            font-size: 30px;
+        }
     }
 
   </style>
 </head>
 <body>
+    <header>
+        <div class="container d-flex flex-row">
+            <img class="image-container" src="https://res.cloudinary.com/dnpmv0lyk/image/upload/v1741624989/IITDHLOGO_lxqysu.jpg"/>
+            <h2 class="image-text">Bus Tracking webpage (Beta Testing)</h2>
+        </div>
+    </header>
   <div class="container-fluid d-flex flex-column flex-md-row full-height">
     <div class="map-container">
       <div id="map"></div>
     </div>
     <div class="sidebar">
-      <h2>Bus Tracking webpage (Beta Testing)</h2>
       <p>Status: <span class="updated-time" id="Status">Loading...</span></p>
       <p>Last Updated: <span class="updated-time" id="lastUpdate">Loading...</span></p>
       <p>Current Speed: <span class="updated-time" id="Speed">Calculating...</span></p>
