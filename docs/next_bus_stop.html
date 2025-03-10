@@ -2,7 +2,12 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>Bus tracking website (Beta Testing)</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
   <!-- Leaflet CSS and JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -18,16 +23,11 @@
       margin: 0;
       font-family: 'Raleway', sans-serif;
       background: #f0f0f0;
-      display: flex;
-      flex-direction: column;
     }
-    .container {
-      display: flex;
+    .full-height{
       height: 100vh;
     }
     .map-container {
-      width: 50%;
-      height: 100%; /* 60% of viewport height */
       background: #fff;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     }
@@ -48,6 +48,15 @@
       margin-top: 0;
       font-size: 24px;
       color: #d42e2e;
+      font-weight: bold;
+      text-align: center;
+    }
+    .sidebar h3 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #d42e2e;
+      /* font-weight: bold; */
+      text-align: center;
     }
     .sidebar p {
       font-size: 18px;
@@ -62,6 +71,13 @@
       font-weight: 500;
       letter-spacing: 0.5px;
     }
+    .sidebar .updated-time-not-live{
+      font-size: 20px;
+      color: #de595b;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
     .yes{
       display: none;
     }
@@ -72,15 +88,48 @@
       font-weight: 500;
       letter-spacing: 0.5px;
     } */
+
+    /* Mobile: use vertical stacking (map on top, info below) */
+    @media (max-width: 768px) {
+      .map-container {
+        width: 100%;
+        height: 55vh;
+      }
+      .sidebar {
+        width: 100%;
+        height: 45vh;
+        overflow: auto;
+      }
+    }
+
+    /* Desktop: both columns take full height */
+    @media (min-width: 768px) {
+      .map-container {
+        width: 50%;
+        height: 100%;
+      }
+      .sidebar {
+        width: 100%;
+        height: 100%;
+      }
+      .inner
+      {
+          display: grid;
+          place-content: center;
+      }
+    }
+
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="d-flex flex-column flex-md-row full-height">
     <div class="map-container">
       <div id="map"></div>
     </div>
     <div class="sidebar">
-      <h2>Bus Tracking webpage (Beta Testing)</h2>
+      <div class="inner" style="height:90%">
+      <h2>Bus Tracking webpage</h2>
+      <h3>Beta Testing</h3>
       <p>Status:</p>
       <p class="updated-time" id="Status">Loading...</p>
       <p>Last Updated:</p>
@@ -89,6 +138,7 @@
       <p class="updated-time" id="Speed">Calculating...</p>
       <p id="heading">Next Stop:</p>
       <p class="updated-time" id="Nextstop">...</p>
+      </div>
     </div>
   </div>
   
@@ -101,10 +151,41 @@
     }).addTo(map);
     let tailMarkerGroup = L.layerGroup().addTo(map);
     var marker;
-    let tail0=null;
     let tail1=null;
     let tail2=null;
     let tail3=null;
+    let tail0=null;
+
+    //adding all stops sign
+    var stopmarker = L.divIcon({
+      html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🚏</div>',
+      className: 'stop-marker',
+      iconSize: [20, 20],
+      iconAnchor: [15, 15] // Centers the icon on the location
+    });
+    var latitude_stop1 = 15.484642;
+    var longitude_stop1 =  74.936123;
+    var latitude_stop2 = 15.524774;
+    var longitude_stop2 =  74.924301;
+    var latitude_stop3 = 15.468885;
+    var longitude_stop3 =  74.993304;
+    var latitude_stop4 = 15.483100;
+    var longitude_stop4 =  74.938975;
+    var latitude_stop5 = 15.4871928;
+    var longitude_stop5 =  74.9338791;
+
+
+    var stopmarker1 = L.marker([latitude_stop1, longitude_stop1], { icon: stopmarker }).addTo(map);
+    stopmarker1.bindPopup("<b>A1 block</b>").openPopup();
+    var stopmarker2 = L.marker([latitude_stop2, longitude_stop2], { icon: stopmarker }).addTo(map);
+    stopmarker2.bindPopup("<b>Bhoopali</b>").openPopup();
+    var stopmarker3 = L.marker([latitude_stop3, longitude_stop3], { icon: stopmarker }).addTo(map);
+    stopmarker3.bindPopup("<b>New Bus Stand Dharwad</b>").openPopup();
+    var stopmarker4 = L.marker([latitude_stop4, longitude_stop4], { icon: stopmarker }).addTo(map);
+    stopmarker4.bindPopup("<b>Hostels</b>").openPopup();
+    var stopmarker5 = L.marker([latitude_stop5, longitude_stop5], { icon: stopmarker }).addTo(map);
+    stopmarker5.bindPopup("<b>Admin block & Maingate Stop</b>").openPopup();
+
 
     // Initialization of the stops and time according to it
     const stops = [
@@ -283,13 +364,13 @@
           currtime = currtime.trim();
 
           // Get real-time IST
-          var dateObj = new Date();
-          var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+          var istTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+          var dateObj = new Date(istTime);
           var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-          var currentDay = days[istTime.getDay()];
-          var hours = istTime.getHours().toString().padStart(2, '0');
-          var minutes = istTime.getMinutes().toString().padStart(2, '0');
-          var seconds = istTime.getSeconds().toString().padStart(2, '0');
+          var currentDay = days[dateObj.getDay()];
+          var hours = dateObj.getHours().toString().padStart(2, '0');
+          var minutes = dateObj.getMinutes().toString().padStart(2, '0');
+          var seconds = dateObj.getSeconds().toString().padStart(2, '0');
           var currentISTTime = hours + ":" + minutes + ":" + seconds;
           var stop_thatday;
           if(currentDay=="Saturday" || currentDay=="Sunday")
@@ -338,8 +419,19 @@
           else{
             statu = "Not Live";
           }
+          if(statu==="Not Live")
+          {
+            let a=document.getElementById("Status")
+            a.classList.remove("updated-time");
+            a.classList.add("updated-time-not-live");
+          }
+          else
+          {
+            let a=document.getElementById("Status")
+            a.classList.remove("updated-time-not-live");
+            a.classList.add("updated-time");
+          }
           // Update the "Last Updated" text
-
           document.getElementById("lastUpdate").innerText = lastUpdatedIST;
           document.getElementById("Status").innerText = statu;
           document.getElementById("Speed").innerText = spd + " km/h";

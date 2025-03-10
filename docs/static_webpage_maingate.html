@@ -68,6 +68,13 @@
       font-weight: 500;
       letter-spacing: 0.5px;
     }
+    .sidebar .updated-time-not-live{
+      font-size: 20px;
+      color: #de595b;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
     .yes{
       display: none;
     }
@@ -112,8 +119,8 @@
     let tail2=null;
     let tail3=null;
     // Coordinates of the static bus stop
-    var latitude_stop = 15.484642;
-    var longitude_stop =  74.936123;
+    var latitude_stop = 15.4871928;
+    var longitude_stop =  74.9338791;
 
      // Add a marker and label for the stop "Admin block (Main Gate) stop"
     var stopMarker = L.marker([latitude_stop, longitude_stop]).addTo(map);
@@ -371,6 +378,18 @@
         else{
           statu = "Not Live";
         }
+        if(statu==="Not Live")
+          {
+            let a=document.getElementById("Status")
+            a.classList.remove("updated-time");
+            a.classList.add("updated-time-not-live");
+          }
+          else
+          {
+            let a=document.getElementById("Status")
+            a.classList.remove("updated-time-not-live");
+            a.classList.add("updated-time");
+          }
       // Update the "Last Updated" text
       document.getElementById("lastUpdate").innerText = lastUpdatedIST;
       document.getElementById("Status").innerText = statu;

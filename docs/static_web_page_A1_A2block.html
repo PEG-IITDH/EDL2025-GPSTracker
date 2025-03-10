@@ -68,6 +68,13 @@
       font-weight: 500;
       letter-spacing: 0.5px;
     }
+    .sidebar .updated-time-not-live{
+      font-size: 20px;
+      color: #de595b;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
     .yes{
       display: none;
     }
@@ -284,13 +291,13 @@
 
         // Get real-time IST
         var dateObj = new Date();
-        var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-        var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        var currentDay = days[istTime.getDay()];
-        var hours = istTime.getHours().toString().padStart(2, '0');
-        var minutes = istTime.getMinutes().toString().padStart(2, '0');
-        var seconds = istTime.getSeconds().toString().padStart(2, '0');
-        var currentISTTime = hours + ":" + minutes + ":" + seconds;
+          var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+          var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+          var currentDay = days[istTime.getDay()];
+          var hours = istTime.getHours().toString().padStart(2, '0');
+          var minutes = istTime.getMinutes().toString().padStart(2, '0');
+          var seconds = istTime.getSeconds().toString().padStart(2, '0');
+          var currentISTTime = hours + ":" + minutes + ":" + seconds;
         var stops;
         if(currentDay=="Saturday" || currentDay == "Sunday")
         {
@@ -377,6 +384,18 @@
         else{
           statu = "Not Live";
         }
+        if(statu==="Not Live")
+          {
+            let a=document.getElementById("Status")
+            a.classList.remove("updated-time");
+            a.classList.add("updated-time-not-live");
+          }
+          else
+          {
+            let a=document.getElementById("Status")
+            a.classList.remove("updated-time-not-live");
+            a.classList.add("updated-time");
+          }
       // Update the "Last Updated" text
       document.getElementById("lastUpdate").innerText = lastUpdatedIST;
       document.getElementById("Status").innerText = statu;

@@ -68,6 +68,13 @@
       font-weight: 500;
       letter-spacing: 0.5px;
     }
+    .sidebar .updated-time-not-live{
+      font-size: 20px;
+      color: #de595b;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
     .yes{
       display: none;
     }
@@ -371,6 +378,18 @@
         else{
           statu = "Not Live";
         }
+        if(statu==="Not Live")
+          {
+            let a=document.getElementById("Status")
+            a.classList.remove("updated-time");
+            a.classList.add("updated-time-not-live");
+          }
+          else
+          {
+            let a=document.getElementById("Status")
+            a.classList.remove("updated-time-not-live");
+            a.classList.add("updated-time");
+          }
       // Update the "Last Updated" text
       document.getElementById("lastUpdate").innerText = lastUpdatedIST;
       document.getElementById("Status").innerText = statu;
