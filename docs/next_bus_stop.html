@@ -371,14 +371,15 @@
           currtime = currtime.trim();
 
           // Get real-time IST
-          var istTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-          var dateObj = new Date(istTime);
+        var dateObj = new Date();
+          var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
           var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-          var currentDay = days[dateObj.getDay()];
-          var hours = dateObj.getHours().toString().padStart(2, '0');
-          var minutes = dateObj.getMinutes().toString().padStart(2, '0');
-          var seconds = dateObj.getSeconds().toString().padStart(2, '0');
+          var currentDay = days[istTime.getDay()];
+          var hours = istTime.getHours().toString().padStart(2, '0');
+          var minutes = istTime.getMinutes().toString().padStart(2, '0');
+          var seconds = istTime.getSeconds().toString().padStart(2, '0');
           var currentISTTime = hours + ":" + minutes + ":" + seconds;
+          console.log("time is : ",currentISTTime);
           var stop_thatday;
           if(currentDay=="Saturday" || currentDay=="Sunday")
           {
@@ -426,6 +427,7 @@
           else{
             statu = "Not Live";
           }
+          console.log(statu);
           if(statu==="Not Live")
           {
             let a=document.getElementById("Status")
