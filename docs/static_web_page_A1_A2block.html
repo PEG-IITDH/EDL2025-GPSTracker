@@ -314,7 +314,7 @@
         var lastUpdatedUTC = latestFeed.timestamp;
         var lastUpdatedIST = convertUTCtoIST(lastUpdatedUTC);
         const stop_name = "A1-A2 Block"; 
-        var time_in_next_bus = 0;
+        var time_in_next_bus = -1;
         var dir = stops[0].name;
 
         var [date, currtime] = lastUpdatedIST.split(",");
@@ -336,16 +336,21 @@
           break;
         }
       }
-      
-      time_in_next_bus = parseInt(time_in_next_bus / 60);
-      console.log(time_in_next_bus);
-      var hours = parseInt(time_in_next_bus/60);
-      var min = parseInt(time_in_next_bus%60);
-
-      time_in_next_bus = `${hours} hours ${min} minutes to ${dir}`;
-      if(hours==0)
+      if(time_in_next_bus!=-1)
       {
-        time_in_next_bus = `${min} minutes to ${dir}`;
+        time_in_next_bus = parseInt(time_in_next_bus / 60);
+        console.log(time_in_next_bus);
+        var hours = parseInt(time_in_next_bus/60);
+        var min = parseInt(time_in_next_bus%60);
+
+        time_in_next_bus = `${hours} hours ${min} minutes to ${dir}`;
+        if(hours==0)
+        {
+          time_in_next_bus = `${min} minutes to ${dir}`;
+        }
+      }
+      else{
+        time_in_next_bus="No Bus Today";
       }
       let flag = 0;
 

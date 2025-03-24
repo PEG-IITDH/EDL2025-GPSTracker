@@ -143,6 +143,31 @@
       { name: "Main Gate", time: "13:00:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "A1-A2 Block", time: "13:05:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "13:10:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "13:25:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "A1-A2 Block", time: "13:28:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "CLT Stop", time: "13:30:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Admin Building stop", time: "13:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "13:37:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "13:40:00", latitude: 51.5074, longitude: -0.1278 },
+
+      { name: "A1-A2 Block", time: "13:48:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "CLT Stop", time: "13:50:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Admin Building stop", time: "13:55:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "13:57:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "14:00:00", latitude: 51.5074, longitude: -0.1278 },
+
+      { name: "A1-A2 Block", time: "14:08:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "CLT Stop", time: "14:10:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Admin Building stop", time: "14:15:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "14:17:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "14:20:00", latitude: 51.5074, longitude: -0.1278 },
+
+      { name: "A1-A2 Block", time: "14:28:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "CLT Stop", time: "14:30:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Admin Building stop", time: "14:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "14:37:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "14:40:00", latitude: 51.5074, longitude: -0.1278 },
+
       { name: "Hostel PC", time: "14:50:00", latitude: 40.7128, longitude: -74.0060 },
       { name: "A1-A2 Block", time: "14:55:00", latitude: 34.0522, longitude: -118.2437 },
       { name: "Main Gate", time: "15:00:00", latitude: 51.5074, longitude: -0.1278 },
@@ -308,7 +333,7 @@
         var lastUpdatedUTC = latestFeed.timestamp;
         var lastUpdatedIST = convertUTCtoIST(lastUpdatedUTC);
         const stop_name = "Main Gate"; 
-        var time_in_next_bus = 0;
+        var time_in_next_bus = -1;
         var dir = stops[0].name;
 
         var [date, currtime] = lastUpdatedIST.split(",");
@@ -317,7 +342,7 @@
         
       // Determine the next bus in minutes
       for (let i = 0; i < stops.length - 1; i++) {
-        if (timeToSeconds(currtime) < timeToSeconds(stops[i].time) && stops[i].name == stop_name) {
+        if (timeToSeconds(currtime) < timeToSeconds(stops[i].time) && (stops[i].name == stop_name || stops[i].name == "Admin Building Stop")) {
           time_in_next_bus = timeToSeconds(stops[i].time) - timeToSeconds(currtime);
           if(stops[i].name == stops[i+1].name)
           {
@@ -331,15 +356,21 @@
         }
       }
       
-      time_in_next_bus = parseInt(time_in_next_bus / 60);
-      console.log(time_in_next_bus);
-      var hours = parseInt(time_in_next_bus/60);
-      var min = parseInt(time_in_next_bus%60);
-
-      time_in_next_bus = `${hours} hours ${min} minutes to ${dir}`;
-      if(hours==0)
+      if(time_in_next_bus!=-1)
       {
-        time_in_next_bus = `${min} minutes to ${dir}`;
+        time_in_next_bus = parseInt(time_in_next_bus / 60);
+        console.log(time_in_next_bus);
+        var hours = parseInt(time_in_next_bus/60);
+        var min = parseInt(time_in_next_bus%60);
+
+        time_in_next_bus = `${hours} hours ${min} minutes to ${dir}`;
+        if(hours==0)
+        {
+          time_in_next_bus = `${min} minutes to ${dir}`;
+        }
+      }
+      else{
+        time_in_next_bus = "No Bus Today";
       }
       let flag = 0;
 
