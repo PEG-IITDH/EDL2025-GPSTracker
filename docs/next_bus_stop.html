@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <title>Bus tracking website (Beta Testing)</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,16 +12,7 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PXLX7BYBKZ"></script>
-  <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-PXLX7BYBKZ');
-  </script>
+  
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   
@@ -32,17 +22,21 @@
       margin: 0;
       font-family: 'Raleway', sans-serif;
       background: #f0f0f0;
+      overflow: hidden;
     }
     .full-height{
-      height: 100vh;
+      height: 80vh;
     }
     .map-container {
       background: #fff;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     }
     #map {
       width: 100%;
       height: 100%;
+    }
+    .map-sidebar-cont{
+        margin-bottom: 0px;
+        overflow: hidden;
     }
     .sidebar {
       flex: 1;
@@ -50,104 +44,160 @@
       background: linear-gradient(145deg, #fafafa, #f0f0f0);
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      overflow-y: auto;
     }
     .sidebar h2 {
       margin-top: 0;
-      font-size: 24px;
       color: #d42e2e;
-      font-weight: bold;
-      text-align: center;
-    }
-    .sidebar h3 {
-      margin-top: 0;
-      font-size: 18px;
-      color: #d42e2e;
-      /* font-weight: bold; */
-      text-align: center;
     }
     .sidebar p {
-      font-size: 18px;
       color: #555;
       text-align: center;
-      margin: 10px 0;
     }
     .sidebar .updated-time {
-      font-size: 20px;
       color: #3498db;
       font-family: 'Roboto', sans-serif;
-      font-weight: 500;
       letter-spacing: 0.5px;
     }
-    .sidebar .updated-time-not-live{
-      font-size: 20px;
-      color: #de595b;
-      font-family: 'Roboto', sans-serif;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-    }
+    
     .yes{
       display: none;
     }
-    /* .color{
-      font-size: 20px;
-      color: red;
-      font-family: 'Roboto', sans-serif;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-    } */
-
-    /* Mobile: use vertical stacking (map on top, info below) */
-    @media (max-width: 768px) {
+    header{
+        background-color: #fff;
+        padding: 15px 0;
+        text-align: center;
+    }
+    header .container{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0px;
+    }
+    .info-box {
+        background: #eef2f3;
+        padding: 15px;
+        text-align: center;
+        width: 250px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .roll-number{
+        font-family: Sans-Serif;
+    }
+    
+    @media (max-width: 767.98px) {
       .map-container {
         width: 100%;
-        height: 55vh;
+        height: 60%;
+      }
+      .info-box {
+            width: 100%;
+            height: 20%;
+            font-size: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            line-height: 7px;
+      }
+      .info-box h4{
+          font-size: 15px;
+      }
+      header{
+          height: 10%;
       }
       .sidebar {
         width: 100%;
-        height: 45vh;
-        overflow: auto;
+        height: 25%;
+        font-size: 14px;
+        padding-top: 20px;
+        justify-content: center;
+        line-height: 10px;
+        padding: 5px;
+      }
+      .container{
+          align-items: center;
+      }
+      .container-fluid{
+          align-items: center;
+          background-color: #fff;
+	      padding-right: 0px;
+	      padding-left: 0px;
+      }
+      .image-container{
+            height: 50px;
+            width: 50px;
+        }
+      .image-text{
+            color: red;
+            font-size: 13px;
+            padding-right: 15px;
       }
     }
 
     /* Desktop: both columns take full height */
     @media (min-width: 768px) {
       .map-container {
-        width: 60%;
-        height: 100%;
+        width: 50%;
+        height: 90%;
       }
       .sidebar {
-        width: 100%;
-        height: 100%;
+        width: 50%;
+        height: 90%;
+        font-size: 18px;
+        justify-content: center;
+        padding: 5px;
       }
-      .inner
-      {
-          display: grid;
-          place-content: center;
-      }
+      .image-container{
+            height: 70px;
+            width: 70px;
+            padding-right: 30px;
+        }
+        .info-box {
+            width: 100%;
+            font-size: 12px;
+            padding: 8px;
+            margin-top: -15px;
+        }
+        .image-text{
+            color: red;
+            font-size: 30px;
+            padding-left: 10px;
+        }
     }
 
   </style>
 </head>
 <body>
-  <div class="d-flex flex-column flex-md-row full-height">
-    <div class="map-container">
-      <div id="map"></div>
-    </div>
-    <div class="sidebar">
-      <div class="inner" style="height:90%">
-      <h2>Bus Tracking webpage</h2>
-      <h3>Beta Testing</h3>
-      <p>Status: <span class="updated-time" id="Status">Loading...</span></p>
-      <p>Last Updated: <span class="updated-time" id="lastUpdate">Loading...</span></p>
-      <p>Current Speed: <span class="updated-time" id="Speed">Calculating...</span></p>
-      
-      <p id="heading">Next Stop:</p>
-      <p class="updated-time" id="Nextstop">...</p>
+    <header>
+        <div class="container d-flex flex-row">
+            <img class="image-container" src="https://res.cloudinary.com/dnpmv0lyk/image/upload/v1741624989/IITDHLOGO_lxqysu.jpg"/>
+            <h2 class="image-text">Bus Tracking webpage (Beta Testing)</h2>
+        </div>
+    </header>
+    <div class="container-fluid map-sidebar-cont">
+      <div class="d-flex flex-column flex-md-row full-height">
+        <div class="map-container">
+          <div id="map"></div>
+        </div>
+        <div class="sidebar">
+          <p>Status: <span class="updated-time" id="Status">Loading...</span></p>
+          <p>Last Updated: <span class="updated-time" id="lastUpdate">Loading...</span></p>
+          <p>Current Speed: <span class="updated-time" id="Speed">Calculating...</span></p>
+          <div>
+              <p id="repMsg"></p>
+              <p id="heading">Upcoming Stops:</p>
+              <p class="updated-time" id="Nextstop">...</p>
+              <p class="updated-time" id="next1stop">...</p>
+              <p class="updated-time" id="next2stops">...</p>
+          </div>
+          <p>We’d love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog">Feedback!</a></p>
+        </div>
+      </div>
+      <div class="info-box">
+            <p>Developed By <strong>Likhitha, Akshata, Aman</strong> under the Supervisor: <strong>Prof. Abhijit Kshirsagar and Prof. Amar Kumar</strong></p>
       </div>
     </div>
-  </div>
   
   <script>
     // Initialize the Leaflet map
@@ -158,41 +208,9 @@
     }).addTo(map);
     let tailMarkerGroup = L.layerGroup().addTo(map);
     var marker;
-    let tail1=null;
-    let tail2=null;
-    let tail3=null;
-    let tail0=null;
-
-    //adding all stops sign
-    var stopmarker = L.divIcon({
-      html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🚏</div>',
-      className: 'stop-marker',
-      iconSize: [20, 20],
-      iconAnchor: [15, 15] // Centers the icon on the location
-    });
-    var latitude_stop1 = 15.484642;
-    var longitude_stop1 =  74.936123;
-    var latitude_stop2 = 15.524774;
-    var longitude_stop2 =  74.924301;
-    var latitude_stop3 = 15.468885;
-    var longitude_stop3 =  74.993304;
-    var latitude_stop4 = 15.483100;
-    var longitude_stop4 =  74.938975;
-    var latitude_stop5 = 15.4871928;
-    var longitude_stop5 =  74.9338791;
-
-
-    var stopmarker1 = L.marker([latitude_stop1, longitude_stop1], { icon: stopmarker }).addTo(map);
-    stopmarker1.bindPopup("<b>A1 block</b>").openPopup();
-    var stopmarker2 = L.marker([latitude_stop2, longitude_stop2], { icon: stopmarker }).addTo(map);
-    stopmarker2.bindPopup("<b>Bhoopali</b>").openPopup();
-    var stopmarker3 = L.marker([latitude_stop3, longitude_stop3], { icon: stopmarker }).addTo(map);
-    stopmarker3.bindPopup("<b>New Bus Stand Dharwad</b>").openPopup();
-    var stopmarker4 = L.marker([latitude_stop4, longitude_stop4], { icon: stopmarker }).addTo(map);
-    stopmarker4.bindPopup("<b>Hostels</b>").openPopup();
-    var stopmarker5 = L.marker([latitude_stop5, longitude_stop5], { icon: stopmarker }).addTo(map);
-    stopmarker5.bindPopup("<b>Admin block & Maingate Stop</b>").openPopup();
-
+    let tail1 = null;
+    let tail2 = null;
+    let tail3 = null;
 
     // Initialization of the stops and time according to it
     const stops = [
@@ -211,31 +229,6 @@
       { name: "Main Gate", time: "13:00:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "A1-A2 Block", time: "13:05:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "13:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "13:25:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "A1-A2 Block", time: "13:28:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "CLT Stop", time: "13:30:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Admin Building stop", time: "13:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "13:37:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "13:40:00", latitude: 51.5074, longitude: -0.1278 },
-
-      { name: "A1-A2 Block", time: "13:48:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "CLT Stop", time: "13:50:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Admin Building stop", time: "13:55:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "13:57:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "14:00:00", latitude: 51.5074, longitude: -0.1278 },
-
-      { name: "A1-A2 Block", time: "14:08:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "CLT Stop", time: "14:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Admin Building stop", time: "14:15:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "14:17:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "14:20:00", latitude: 51.5074, longitude: -0.1278 },
-
-      { name: "A1-A2 Block", time: "14:28:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "CLT Stop", time: "14:30:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Admin Building stop", time: "14:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "14:37:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "14:40:00", latitude: 51.5074, longitude: -0.1278 },
-
       { name: "Hostel PC", time: "14:50:00", latitude: 40.7128, longitude: -74.0060 },
       { name: "A1-A2 Block", time: "14:55:00", latitude: 34.0522, longitude: -118.2437 },
       { name: "Main Gate", time: "15:00:00", latitude: 51.5074, longitude: -0.1278 },
@@ -373,15 +366,12 @@
 
         // Plot the first 3 points
         tailMarkerGroup.clearLayers(); // Remove all previous markers in the group
-        let lat0 = lastFiveEntries[0].latitude;
-        let lon0 = lastFiveEntries[0].longitude;
         let lat1 = lastFiveEntries[1].latitude;
         let lon1 = lastFiveEntries[1].longitude;
         let lat2 = lastFiveEntries[2].latitude;
         let lon2 = lastFiveEntries[2].longitude;
         let lat3 = lastFiveEntries[3].latitude;
         let lon3 = lastFiveEntries[3].longitude;
-        updateTailMarker(lat0,lon0,tail0);
         updateTailMarker(lat1,lon1,tail1);
         updateTailMarker(lat2,lon2,tail2);
         updateTailMarker(lat3,lon3,tail3);
@@ -392,37 +382,53 @@
           var spd = parseInt(latestFeed.speed);
           var lastUpdatedUTC = latestFeed.timestamp;
           var lastUpdatedIST = convertUTCtoIST(lastUpdatedUTC);
+          let repMsg = "";
+          let next_1_stop_text = "";
+          let next_2_stop_text = "";
+
           var [date, currtime] = lastUpdatedIST.split(",");
           currtime = currtime.trim();
 
           // Get real-time IST
-        var dateObj = new Date();
-          var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-          var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-          var currentDay = days[istTime.getDay()];
-          var hours = istTime.getHours().toString().padStart(2, '0');
-          var minutes = istTime.getMinutes().toString().padStart(2, '0');
-          var seconds = istTime.getSeconds().toString().padStart(2, '0');
-          var currentISTTime = hours + ":" + minutes + ":" + seconds;
-          console.log("time is : ",currentISTTime);
-          var stop_thatday;
-          if(currentDay=="Saturday" || currentDay=="Sunday")
-          {
-            stop_thatday = stop2;
-          }
-          else{
-            stop_thatday = stops;
-          }
+          // Calculate current IST time reliably by adding 5.5 hours to UTC
+        var nowUTC = new Date();
+        var nowIST = new Date(nowUTC.getTime() + 5.5 * 60 * 60 * 1000);
+        var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        var currentDay = days[nowIST.getUTCDay()];
+        
+        // Use currentDay to choose the correct stops
+        var stop_thatday;
+        if (currentDay === "Saturday" || currentDay === "Sunday") {
+          stop_thatday = stop2;
+        } else {
+          stop_thatday = stops;
+        }
           // Determine the next stop
           var next_stop = stop_thatday[0].name;
           for (let i = 0; i < stop_thatday.length - 1; i++) {
             if (isTimeInInterval(currtime, stop_thatday[i].time, stop_thatday[i + 1].time)) {
-              next_stop = stop_thatday[i + 1].name;
+              next_stop = `${stop_thatday[i + 1].name} at ${stop_thatday[i+1].time}`;
+             if(i+2 < stop_thatday.length){
+                  next_stop1 = stop_thatday[i+2].name;
+                  next_1_stop_text = `${next_stop1} at ${stop_thatday[i+2].time}`;
+                  next_2_stop_text = "";
+              }
+              if(i+3 < stop_thatday.length){
+                  next_stop1 = stop_thatday[i+2].name;
+                  next_stop2 = stop_thatday[i+3].name;
+                  next_1_stop_text = `${next_stop1} at ${stop_thatday[i+2].time}`;
+                  next_2_stop_text = `${next_stop2} at ${stop_thatday[i+3].time}`;
+              } 
+              if(i === stop_thatday.length-1){
+                  document.getElementById("heading").innerText = "Next Stop";
+              }
             }
           }
           let flag=0;
           if (timeToSeconds(currtime) > timeToSeconds(stop_thatday[stop_thatday.length - 1].time) || timeToSeconds(currtime)<timeToSeconds(stops[0].time)) {
             next_stop = "Shuttle service is closed ,The next bus will start from 8:00 AM tomorrow";
+            next_1_stop_text = "";
+            next_2_stop_text = "";
             flag=1;
           }
           // Update marker on the map
@@ -444,40 +450,52 @@
           else{
             map.setView([lat, lon], 17.5);
           }
-          var statu;
-          if(Math.abs(timeToSeconds(currentISTTime)-timeToSeconds(currtime))<300)
-          {
-            statu = "Live";
-          }
-          else{
-            statu = "Not Live";
-          }
-          console.log(statu);
-          if(statu==="Not Live")
-          {
-            let a=document.getElementById("Status")
-            a.classList.remove("updated-time");
-            a.classList.add("updated-time-not-live");
-          }
-          else
-          {
-            let a=document.getElementById("Status")
-            a.classList.remove("updated-time-not-live");
-            a.classList.add("updated-time");
-          }
-          // Update the "Last Updated" text
+          
+          var lastUpdatedDate = new Date(latestFeed.timestamp);
+          var currentDate = new Date();
+          var diffSeconds = (currentDate.getTime() - lastUpdatedDate.getTime()) / 1000;
+          var statu = diffSeconds < 300 ? "Live" : "Not Live";
           document.getElementById("lastUpdate").innerText = lastUpdatedIST;
-          document.getElementById("Status").innerText = statu;
-          document.getElementById("Speed").innerText = spd + " km/h";
-          let ns=document.getElementById("Nextstop");
-          ns.innerText = next_stop;
-          let hd=document.getElementById("heading");
-          if(flag)
-          {
-            console.log(flag);
-            hd.classList.add("yes");
-            ns.style.color="#de595b";
-          }
+          
+          fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
+            .then(response => response.json())
+            .then(data1 => {
+              if(data1.feeds && data1.feeds.length > 0) {
+                var repMsg = data1.feeds[0].field1;
+              } else {
+                document.getElementById("Status").innerText = "No repair message available.";
+              }
+              if(repMsg === "" || repMsg.toUpperCase() === "OK"){
+                  document.getElementById("Status").innerText = statu;
+                  document.getElementById("Speed").innerText = spd + " km/h";
+                  let ns=document.getElementById("Nextstop");
+                  ns.innerText = next_stop;
+                  let hd=document.getElementById("heading").style.display = "Block";
+                  document.getElementById("next2stops").innerText = next_2_stop_text;
+                  document.getElementById("next1stop").innerText = next_1_stop_text;
+                  if(flag)
+                  {
+                    console.log(flag);
+                    hd.classList.add("yes");
+                    ns.style.color="#de595b";
+                  }
+              }
+              else{
+              // When the bus is under repair, show the error messages:
+                  let head = "Bus is currently unavailable due to " + repMsg;
+                  document.getElementById("Status").innerText = repMsg;
+                  document.getElementById("Speed").innerText = "N/A";
+                  //document.getElementById("lastUpdate").innerText = "N/A";
+                  document.getElementById("Nextstop").style.display = "none";
+                  document.getElementById("next1stop").style.display = "none"
+                  document.getElementById("next2stops").style.display = "none";
+                  document.getElementById("heading").innerText = head;
+              }
+            })
+            .catch(error => {
+              console.error('Fetch Error (Repair Message):', error);
+              document.getElementById("repMsg").style.display = "none";
+            });
 
         })
         .catch(error => {
@@ -486,8 +504,8 @@
           document.getElementById("Speed").innerText = "Error calculating distance.";
         });
     }
+    
 
-    // Initial fetch on page load and update every minute
     updateMapData();
     setInterval(updateMapData, 60000);
   </script>
