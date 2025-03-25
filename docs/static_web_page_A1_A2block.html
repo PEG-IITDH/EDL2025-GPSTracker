@@ -125,7 +125,7 @@
 
      // Add a marker and label for the stop "Admin block (Main Gate) stop"
     var stopMarker = L.marker([latitude_stop, longitude_stop]).addTo(map);
-    stopMarker.bindPopup("<b>A1 block</b>").openPopup();
+    stopMarker.bindPopup("<b>A1-A2 block stop</b>").openPopup();
     
     // Initialization of the stops and time according to it
     const stop1 = [
@@ -348,6 +348,7 @@
         {
           time_in_next_bus = `${min} minutes to ${dir}`;
         }
+
       }
       else{
         time_in_next_bus="No Bus Today";
