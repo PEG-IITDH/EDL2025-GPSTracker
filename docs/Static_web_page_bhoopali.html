@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Bus Tracking website (Beta testing)</title>
   <!-- Leaflet CSS and JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -21,6 +22,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     html, body {
       height: 100%;
       margin: 0;
@@ -33,9 +39,10 @@
     }
     .map-container {
       width: 50%;
-      height: 100%; /* 60% of viewport height */
+      height: 100%;
       background: #fff;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      overflow: hidden;
     }
     #map {
       width: 100%;
@@ -49,6 +56,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      overflow-y: auto;
     }
     .sidebar h2 {
       margin-top: 0;
@@ -56,21 +64,12 @@
       color: #d42e2e;
     }
     .sidebar p {
-      font-size: 18px;
       color: #555;
       text-align: center;
       margin: 10px 0;
     }
     .sidebar .updated-time {
-      font-size: 20px;
       color: #3498db;
-      font-family: 'Roboto', sans-serif;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-    }
-    .sidebar .updated-time-not-live{
-      font-size: 20px;
-      color: #de595b;
       font-family: 'Roboto', sans-serif;
       font-weight: 500;
       letter-spacing: 0.5px;
@@ -78,13 +77,38 @@
     .yes{
       display: none;
     }
-    /* .color{
-      font-size: 20px;
-      color: red;
-      font-family: 'Roboto', sans-serif;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-    } */
+
+    /* MEDIA QUERY for smaller screens: stack map above, sidebar below */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        height: 100%; /* let content dictate height */
+        width: 100%;
+      }
+      .map-container {
+        width: 100%;
+        height: 50vh; /* map occupies half viewport height */
+      }
+      .sidebar {
+        width: 100%;
+        height: 50vh;
+        line-height: 1;
+      }
+      .sidebar p {
+        font-size: 16px;
+      }
+      .sidebar .updated-time{
+        font-size: 14px;
+      }
+    }
+    @media (min-width: 768px) {
+      .sidebar p{
+        font-size: 20px;
+      }
+      .sidebar .updated-time{
+        font-size: 18px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -100,7 +124,7 @@
       <p class="updated-time" id="lastUpdate">Loading...</p>
       <p>Current Speed:</p>
       <p class="updated-time" id="Speed">Calculating...</p>
-      <p id="heading">Next Bus in:</p>
+      <p id="heading">Upcoming Rides:</p>
       <p class="updated-time" id="Nextstop">...</p>
     </div>
   </div>
@@ -114,11 +138,9 @@
     }).addTo(map);
     let tailMarkerGroup = L.layerGroup().addTo(map);
     var marker;
-    let tail0=null;
     let tail1=null;
     let tail2=null;
     let tail3=null;
-
     // Coordinates of the static bus stop
     var latitude_stop = 15.524774;
     var longitude_stop =  74.924301;
@@ -129,95 +151,120 @@
     
     // Initialization of the stops and time according to it
     const stop1 = [
-    { name: "Hostel PC", time: "08:00:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "Main Gate", time: "08:05:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Bhoopali", time: "08:25:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Jubli Circle", time: "08:40:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "New Bus Stand Dharwad", time: "08:50:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "09:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "09:20:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "12:10:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "A1-A2 Block", time: "12:15:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Main Gate", time: "12:20:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "12:40:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "12:45:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "13:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "13:05:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "13:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "14:50:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "A1-A2 Block", time: "14:55:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Main Gate", time: "15:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "15:20:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "16:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "16:50:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "16:55:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "17:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "17:15:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "A1-A2 Block", time: "17:20:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Main Gate", time: "17:25:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "18:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "18:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "18:15:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "18:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "18:40:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "New Bus Stand Dharwad", time: "19:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "New Bus Stand Dharwad", time: "19:05:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "19:25:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "19:30:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "19:45:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "20:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "20:05:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "Main Gate", time: "20:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "20:30:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "20:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "20:50:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "21:05:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "08:00:00", latitude: 15.48312, longitude: 74.93887 },
+      { name: "Main Gate", time: "08:05:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "Bhoopali", time: "08:25:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "Jubli Circle", time: "08:40:00",latitude: 15.45807,longitude:  75.00765 },
+      { name: "New Bus Stand Dharwad", time: "08:50:00", latitude: 15.46887, longitude: 74.99317 },
+      { name: "Main Gate", time: "09:10:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "Hostel PC", time: "09:20:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Hostel PC", time: "12:10:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "A1-A2 Block", time: "12:15:00",latitude: 15.48519, longitude: 74.93587 },
+      { name: "Main Gate", time: "12:20:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "Bhoopali", time: "12:40:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "Bhoopali", time: "12:45:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "Main Gate", time: "13:00:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "A1-A2 Block", time: "13:05:00",latitude: 15.48519, longitude: 74.93587 },
+      { name: "Hostel PC", time: "13:10:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Hostel PC", time: "13:25:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "A1-A2 Block", time: "13:28:00", latitude: 15.48519, longitude: 74.93587 },
+      { name: "CLT Stop", time: "13:30:00", latitude: 15.48415, longitude: 74.93517},
+      { name: "Admin Building stop", time: "13:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "13:37:00",latitude: 15.48519, longitude: 74.93587 },
+      { name: "Hostel PC", time: "13:40:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "A1-A2 Block", time: "13:48:00",latitude: 15.48519, longitude: 74.93587 },
+      { name: "CLT Stop", time: "13:50:00",latitude: 15.48415, longitude: 74.93517 },
+      { name: "Admin Building stop", time: "13:55:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "13:57:00",latitude: 15.48519, longitude: 74.93587 },
+      { name: "Hostel PC", time: "14:00:00",latitude: 15.48312, longitude: 74.93887},
+      { name: "A1-A2 Block", time: "14:08:00",latitude: 15.48519, longitude: 74.93587 },
+      { name: "CLT Stop", time: "14:10:00",latitude: 15.48415, longitude: 74.93517},
+      { name: "Admin Building stop", time: "14:15:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "14:17:00",latitude: 15.48519, longitude: 74.93587 },
+      { name: "Hostel PC", time: "14:20:00", latitude: 15.48312, longitude: 74.93887},
+
+      { name: "A1-A2 Block", time: "14:28:00",latitude: 15.48519, longitude: 74.93587},
+      { name: "CLT Stop", time: "14:30:00",latitude: 15.48415, longitude: 74.93517},
+      { name: "Admin Building stop", time: "14:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "14:37:00",latitude: 15.48519, longitude: 74.93587 },
+      { name: "Hostel PC", time: "14:40:00",latitude: 15.48312, longitude: 74.93887},
+
+      { name: "Hostel PC", time: "14:50:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "A1-A2 Block", time: "14:55:00",latitude: 15.48519, longitude: 74.93587},
+      { name: "Main Gate", time: "15:00:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "Bhoopali", time: "15:20:00",latitude: 15.52469, longitude:  74.92439 },
+      { name: "Bhoopali", time: "16:35:00", latitude: 15.52469, longitude:  74.92439},
+      { name: "Main Gate", time: "16:50:00",  latitude: 15.48807, longitude: 74.93360},
+      { name: "A1-A2 Block", time: "16:55:00",latitude: 15.48519, longitude: 74.93587 },
+      { name: "Hostel PC", time: "17:00:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Hostel PC", time: "17:15:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "A1-A2 Block", time: "17:20:00",latitude: 15.48519, longitude: 74.93587 },
+      { name: "Main Gate", time: "17:25:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "Bhoopali", time: "17:45:00",latitude: 15.52469, longitude:  74.92439 },
+      { name: "Bhoopali", time: "17:45:00",latitude: 15.52469, longitude:  74.92439},
+      { name: "Main Gate", time: "18:00:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "Hostel PC", time: "18:10:00",latitude: 15.48312, longitude: 74.93887},
+      { name: "Main Gate", time: "18:15:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "Bhoopali", time: "18:35:00",latitude: 15.52469, longitude:  74.92439 },
+      { name: "Bhoopali", time: "18:40:00",latitude: 15.52469, longitude:  74.92439 },
+      { name: "New Bus Stand Dharwad", time: "19:00:00", latitude: 15.46887, longitude: 74.99317 },
+      { name: "New Bus Stand Dharwad", time: "19:05:00", latitude: 15.46887, longitude: 74.99317},
+      { name: "Bhoopali", time: "19:25:00",latitude: 15.52469, longitude:  74.92439 },
+      { name: "Bhoopali", time: "19:30:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "Main Gate", time: "19:45:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "Hostel PC", time: "20:00:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Hostel PC", time: "20:05:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Main Gate", time: "20:10:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "Bhoopali", time: "20:30:00",latitude: 15.52469, longitude:  74.92439},
+      { name: "Bhoopali", time: "20:35:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "Main Gate", time: "20:50:00", latitude: 15.48807, longitude: 74.93360 },
+      { name: "Hostel PC", time: "21:05:00", latitude: 15.48312, longitude: 74.93887},
+      {name: "Hostel PC", time: "22:40:00", latitude: 15.48807, longitude: 74.93360 }
     ];
     const stop2 = [
-      { name: "Hostel PC", time: "10:00:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "Main Gate", time: "10:05:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Bhoopali", time: "10:25:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "New Bus Stand Dharwad", time: "10:45:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "New Bus Stand Dharwad", time: "10:50:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "11:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "11:20:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "12:30:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "Main Gate", time: "12:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "12:55:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "13:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "13:15:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "13:20:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "14:00:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "Main Gate", time: "14:05:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "14:25:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "14:30:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "14:45:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "14:50:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "17:15:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "A1-A2 Block", time: "17:20:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Main Gate", time: "17:25:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "18:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "18:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "18:15:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "18:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "18:40:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "New Bus Stand Dharwad", time: "19:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "New Bus Stand Dharwad", time: "19:05:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "19:25:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "19:30:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "19:45:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "20:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "20:05:00", latitude: 40.7128, longitude: -74.0060 },
-      { name: "Main Gate", time: "20:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "20:30:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "20:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Main Gate", time: "20:50:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Hostel PC", time: "21:05:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "10:00:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Main Gate", time: "10:05:00", latitude: 15.48807, longitude: 74.93360},
+      { name: "Bhoopali", time: "10:25:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "New Bus Stand Dharwad", time: "10:45:00",  latitude: 15.46887, longitude: 74.99317 },
+      { name: "New Bus Stand Dharwad", time: "10:50:00", latitude: 15.46887, longitude: 74.99317},
+      { name: "Main Gate", time: "11:10:00", latitude: 15.48807, longitude: 74.93360},
+      { name: "Hostel PC", time: "11:20:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Hostel PC", time: "12:30:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Main Gate", time: "12:35:00",latitude: 15.48807, longitude: 74.93360},
+      { name: "Bhoopali", time: "12:55:00",latitude: 15.52469, longitude:  74.92439 },
+      { name: "Bhoopali", time: "13:00:00",latitude: 15.52469, longitude:  74.92439 },
+      { name: "Main Gate", time: "13:15:00", latitude: 15.48807, longitude: 74.93360},
+      { name: "Hostel PC", time: "13:20:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Hostel PC", time: "14:00:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Main Gate", time: "14:05:00", latitude: 15.48807, longitude: 74.93360},
+      { name: "Bhoopali", time: "14:25:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "Bhoopali", time: "14:30:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "Main Gate", time: "14:45:00",latitude: 15.48807, longitude: 74.93360},
+      { name: "Hostel PC", time: "14:50:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Hostel PC", time: "17:15:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "A1-A2 Block", time: "17:20:00",latitude: 15.48519, longitude: 74.93587},
+      { name: "Main Gate", time: "17:25:00", latitude: 15.48807, longitude: 74.93360},
+      { name: "Bhoopali", time: "17:45:00",latitude: 15.52469, longitude:  74.92439 },
+      { name: "Bhoopali", time: "17:45:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "Main Gate", time: "18:00:00", latitude: 15.48807, longitude: 74.93360},
+      { name: "Hostel PC", time: "18:10:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Main Gate", time: "18:15:00", latitude: 15.48807, longitude: 74.93360},
+      { name: "Bhoopali", time: "18:35:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "Bhoopali", time: "18:40:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "New Bus Stand Dharwad", time: "19:00:00", latitude: 15.46887, longitude: 74.99317 },
+      { name: "New Bus Stand Dharwad", time: "19:05:00",  latitude: 15.46887, longitude: 74.99317 },
+      { name: "Bhoopali", time: "19:25:00",latitude: 15.52469, longitude:  74.92439 },
+      { name: "Bhoopali", time: "19:30:00",latitude: 15.52469, longitude:  74.92439},
+      { name: "Main Gate", time: "19:45:00", latitude: 15.48807, longitude: 74.93360},
+      { name: "Hostel PC", time: "20:00:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Hostel PC", time: "20:05:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "Main Gate", time: "20:10:00", latitude: 15.48807, longitude: 74.93360},
+      { name: "Bhoopali", time: "20:30:00", latitude: 15.52469, longitude:  74.92439},
+      { name: "Bhoopali", time: "20:35:00", latitude: 15.52469, longitude:  74.92439 },
+      { name: "Main Gate", time: "20:50:00", latitude: 15.48807, longitude: 74.93360},
+      { name: "Hostel PC", time: "21:05:00", latitude: 15.48312, longitude: 74.93887},
     ];
+    
     // Function to convert UTC to IST string
     function convertUTCtoIST(utcDateString) {
       const utcDate = new Date(utcDateString);
@@ -239,7 +286,6 @@
       const [hours, minutes, seconds] = time.split(":").map(Number);
       return hours * 3600 + minutes * 60 + seconds;
     }
-
     //Function to update marker 
     function updateTailMarker(newLat, newLng,lastTailMarker) {
       var sign = L.divIcon({
@@ -251,179 +297,135 @@
       // Remove the previous marker if it exists
       L.marker([newLat, newLng],{ icon: sign }).addTo(tailMarkerGroup); // Add new marker
     }
+
     // Function to update map data and determine arrival time for next bus
     function updateMapData() {
-        fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
-      .then(response => response.json())
-      .then(data => {
-        let lastFiveEntries = [];
-        
-        // Iterate over the last 5 entries and store them in an array
-        data.feeds.slice(-5).forEach(feed => {
-          let entry = {
-            latitude: parseFloat(feed.field1),
-            longitude: parseFloat(feed.field2),
-            speed: parseInt(feed.field3),
-            timestamp: feed.created_at
-          };
-          lastFiveEntries.push(entry);
-        });
+      fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
+        .then(response => response.json())
+        .then(data => {
+          let lastFiveEntries = [];
+          
+          // Process the last 5 entries from the feed
+          data.feeds.slice(-5).forEach(feed => {
+            let entry = {
+              latitude: parseFloat(feed.field1),
+              longitude: parseFloat(feed.field2),
+              speed: parseInt(feed.field3),
+              timestamp: feed.created_at
+            };
+            lastFiveEntries.push(entry);
+          });
 
-        // Plot the first 3 points
-        tailMarkerGroup.clearLayers(); // Remove all previous markers in the group
-        let lat0 = lastFiveEntries[0].latitude;
-        let lon0 = lastFiveEntries[0].longitude;
-        let lat1 = lastFiveEntries[1].latitude;
-        let lon1 = lastFiveEntries[1].longitude;
-        let lat2 = lastFiveEntries[2].latitude;
-        let lon2 = lastFiveEntries[2].longitude;
-        let lat3 = lastFiveEntries[3].latitude;
-        let lon3 = lastFiveEntries[3].longitude;
-        updateTailMarker(lat0,lon0,tail0);
-        updateTailMarker(lat1,lon1,tail1);
-        updateTailMarker(lat2,lon2,tail2);
-        updateTailMarker(lat3,lon3,tail3);
+          // Plot tail markers for the 3 previous positions
+          tailMarkerGroup.clearLayers();
+          let lat1 = lastFiveEntries[1].latitude;
+          let lon1 = lastFiveEntries[1].longitude;
+          let lat2 = lastFiveEntries[2].latitude;
+          let lon2 = lastFiveEntries[2].longitude;
+          let lat3 = lastFiveEntries[3].latitude;
+          let lon3 = lastFiveEntries[3].longitude;
+          updateTailMarker(lat1, lon1, tail1);
+          updateTailMarker(lat2, lon2, tail2);
+          updateTailMarker(lat3, lon3, tail3);
 
-        // Get real-time IST
-        var dateObj = new Date();
-          var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-          var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-          var currentDay = days[istTime.getDay()];
-          var hours = istTime.getHours().toString().padStart(2, '0');
-          var minutes = istTime.getMinutes().toString().padStart(2, '0');
-          var seconds = istTime.getSeconds().toString().padStart(2, '0');
+          // Get current IST time details
+          var istTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+          var dateObj = new Date(istTime);
+          var hours = dateObj.getHours().toString().padStart(2, '0');
+          var minutes = dateObj.getMinutes().toString().padStart(2, '0');
+          var seconds = dateObj.getSeconds().toString().padStart(2, '0');
           var currentISTTime = hours + ":" + minutes + ":" + seconds;
-        var stops;
-        if(currentDay=="Saturday" || currentDay == "Sunday")
-        {
-            stops = stop2;
-        }
-        else{
-            stops = stop1;
-        }
+          
+          // Choose timetable based on day (weekday vs. weekend)
+          var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+          var currentDay = days[dateObj.getDay()];
+          var stops = (currentDay=="Saturday" || currentDay=="Sunday") ? stop2 : stop1;
 
-        var latestFeed = lastFiveEntries[lastFiveEntries.length - 1];
-        var lat = parseFloat(latestFeed.latitude);
-        var lon = parseFloat(latestFeed.longitude);
-        var spd = parseInt(latestFeed.speed);
-        var lastUpdatedUTC = latestFeed.timestamp;
-        var lastUpdatedIST = convertUTCtoIST(lastUpdatedUTC);
-        const stop_name = "Bhoopali"; 
-        var time_in_next_bus = -1;
-        var dir = stops[0].name;
+          var latestFeed = lastFiveEntries[lastFiveEntries.length - 1];
+          var lat = parseFloat(latestFeed.latitude);
+          var lon = parseFloat(latestFeed.longitude);
+          var spd = parseInt(latestFeed.speed);
+          var lastUpdatedUTC = latestFeed.timestamp;
+          var lastUpdatedIST = convertUTCtoIST(lastUpdatedUTC);
 
-        var [date, currtime] = lastUpdatedIST.split(",");
-        currtime = currtime.trim();
-
-        
-      // Determine the next bus in minutes
-      for (let i = 0; i < stops.length - 1; i++) {
-        if (timeToSeconds(currtime) < timeToSeconds(stops[i].time) && stops[i].name == stop_name) {
-          time_in_next_bus = timeToSeconds(stops[i].time) - timeToSeconds(currtime);
-          if(stops[i].name == stops[i+1].name)
-          {
-            dir = stops[i+2].name;
+          // Filter timetable for upcoming departures from "Hostel PC"
+          let upcomingDepartures = [];
+          for (let i = 0; i < stops.length; i++) {
+            // Only consider stops from "Hostel PC" in the future
+            if (stops[i].name === "Bhoopali" && timeToSeconds(currentISTTime) < timeToSeconds(stops[i].time)) {
+              // Only add this departure if the next stop exists and isn't "Hostel PC"
+              if (i + 1 < stops.length && stops[i+1].name !== "Bhoopali") {
+                upcomingDepartures.push({
+                  departureTime: stops[i].time,
+                  destination: stops[i+1].name
+                });
+              }
+            }
           }
-          else
-          {
-            dir = stops[i+1].name;
+          // Limit to the first three upcoming departures
+          upcomingDepartures = upcomingDepartures.slice(0, 3);
+          
+          // Build display string with time differences
+          let upcomingStr = "";
+          if (upcomingDepartures.length > 0) {
+            upcomingDepartures.forEach((dep, index) => {
+              let diffSeconds = timeToSeconds(dep.departureTime) - timeToSeconds(currentISTTime);
+              let diffMinutes = Math.floor(diffSeconds / 60);
+              upcomingStr += `Bhoopali to ${dep.destination} at ${dep.departureTime}`;
+              if (index < upcomingDepartures.length - 1) {
+                upcomingStr += " \n ";
+              }
+            });
+          } else {
+            upcomingStr = "Shuttle service is closed. The next bus will start from 8:00 AM tomorrow";
           }
-          break;
-        }
-      }
-      if(time_in_next_bus!=-1)
-      {
-        time_in_next_bus = parseInt(time_in_next_bus / 60);
-        console.log(time_in_next_bus);
-        var hours = parseInt(time_in_next_bus/60);
-        var min = parseInt(time_in_next_bus%60);
+          
+          console.log("Upcoming Departures:", upcomingStr);
 
-        time_in_next_bus = `${hours} hours ${min} minutes to ${dir}`;
-        if(hours==0)
-        {
-          time_in_next_bus = `${min} minutes to ${dir}`;
-        }
-      }
-      else{
-        time_in_next_bus = "No Bus Today";
-      }
-      let flag = 0;
-
-      if (!stops[stops.length - 1].time || timeToSeconds(currtime) > timeToSeconds(stops[stops.length - 1].time) || timeToSeconds(currtime)<timeToSeconds(stops[0].time)) {
-        time_in_next_bus = "Shuttle service is closed. The next bus will start from 8:00 AM tomorrow";
-        flag = 1;
-      }
-
-      console.log("time in next bus:", time_in_next_bus);
-
-      // Update marker on the map
-      if (marker) {
-        map.removeLayer(marker);
-      }
-      var emojiIcon = L.divIcon({
-        html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🚍</div>',
-        className: 'emoji-marker',
-        iconSize: [60, 60],
-        iconAnchor: [15, 15] // Centers the icon on the location
-      });
-
-      marker = L.marker([lat, lon], { icon: emojiIcon }).addTo(map);
-      if(spd>5)
-      {
-        map.setView([lat, lon], 16.5);
-      }
-      else{
-        map.setView([lat, lon], 17.5);
-      }
-      //implementing live status
-      var statu;
-        if(Math.abs(timeToSeconds(currentISTTime)-timeToSeconds(currtime))<300)
-        {
-          statu = "Live";
-        }
-        else{
-          statu = "Not Live";
-        }
-        if(statu==="Not Live")
-          {
-            let a=document.getElementById("Status")
-            a.classList.remove("updated-time");
-            a.classList.add("updated-time-not-live");
+          // Update marker on the map
+          if (marker) {
+            map.removeLayer(marker);
           }
-          else
-          {
-            let a=document.getElementById("Status")
-            a.classList.remove("updated-time-not-live");
-            a.classList.add("updated-time");
+          var emojiIcon = L.divIcon({
+            html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🚍</div>',
+            className: 'emoji-marker',
+            iconSize: [60, 60],
+            iconAnchor: [15, 15]
+          });
+
+          marker = L.marker([lat, lon], { icon: emojiIcon }).addTo(map);
+          if (spd > 5) {
+            map.setView([lat, lon], 16.5);
+          } else {
+            map.setView([lat, lon], 17.5);
           }
-      // Update the "Last Updated" text
-      document.getElementById("lastUpdate").innerText = lastUpdatedIST;
-      document.getElementById("Status").innerText = statu;
-      document.getElementById("Speed").innerText = spd + " km/h";
+          
+          var lastUpdatedDate = new Date(latestFeed.timestamp);
+          var currentDate = new Date();
+          var diffSeconds = (currentDate.getTime() - lastUpdatedDate.getTime()) / 1000;
+          var statu = diffSeconds < 300 ? "Live" : "Not Live";
+          document.getElementById("lastUpdate").innerText = lastUpdatedIST;
 
-      let ns = document.getElementById("Nextstop"); // FIXED ID REFERENCE
-      ns.innerText = time_in_next_bus;
+          
+          // Update sidebar elements
+          document.getElementById("lastUpdate").innerText = lastUpdatedIST;
+          document.getElementById("Status").innerText = statu;
+          document.getElementById("Speed").innerText = spd + " km/h";
+          document.getElementById("Nextstop").innerText = upcomingStr;
+        })
+        .catch(error => {
+          console.error('Fetch Error:', error);
+          document.getElementById("lastUpdate").innerText = "Error loading update.";
+          document.getElementById("Status").innerText = "Error loading update.";
+          document.getElementById("Speed").innerText = "Error calculating distance.";
+          document.getElementById("Nextstop").innerText = "Error retrieving upcoming departures.";
+        });
+    }
 
-      let hd = document.getElementById("heading");
-      if (flag) {
-        console.log(flag);
-        hd.classList.add("yes");
-        ns.style.color = "#de595b";
-      }
-    })
-    .catch(error => {
-      console.error('Fetch Error:', error);
-      document.getElementById("lastUpdate").innerText = "Error loading update.";
-      document.getElementById("Status").innerText = "Error loading update.";
-      document.getElementById("Speed").innerText = "Error calculating distance.";
-      document.getElementById("Nextstop").innerText = "Error retrieving next bus.";
-    });
-}
-
-
-    // Initial fetch on page load and update every minute
+    // Initial fetch on page load and update every 20 seconds (or adjust as needed)
     updateMapData();
-    setInterval(updateMapData, 20000);
+    setInterval(updateMapData, 60000);
+
   </script>
 </body>
 </html>
