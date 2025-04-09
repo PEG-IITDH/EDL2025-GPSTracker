@@ -27,88 +27,168 @@
       margin: 0;
       padding: 0;
     }
+
+
     html, body {
       height: 100%;
       margin: 0;
       font-family: 'Raleway', sans-serif;
-      background: #f0f0f0;
+      background: #FFFEFC;
+      color: #120020;
     }
+
     .container {
       display: flex;
       height: 100vh;
+      gap: 10px;
+      padding: 10px;
     }
+
     .map-container {
       width: 50%;
       height: 100%;
-      background: #fff;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      background: #E6DDE7;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      border: 2px solid #120020;
       overflow: hidden;
+      transition: transform 0.3s ease-in-out;
     }
+
+    .map-container:hover {
+      transform: scale(1.02);
+    }
+
     #map {
       width: 100%;
       height: 100%;
     }
+
     .sidebar {
       flex: 1;
-      padding: 20px;
-      background: linear-gradient(145deg, #fafafa, #f0f0f0);
+      padding: 25px;
+      background: #E6DDE7;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       overflow-y: auto;
+      border-radius: 12px;
+      border: 2px solid #120020;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
     }
+
     .sidebar h2 {
       margin-top: 0;
-      font-size: 24px;
-      color: #d42e2e;
+      color: #4A194F;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-bottom: 3px solid #FCA311;
+      padding-bottom: 5px;
     }
+
     .sidebar p {
-      color: #555;
+      color: #120020;
       text-align: center;
       margin: 10px 0;
+      font-size: 18px;
     }
+
     .sidebar .updated-time {
-      color: #3498db;
+      color: #4A194F;
       font-family: 'Roboto', sans-serif;
-      font-weight: 500;
-      letter-spacing: 0.5px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      font-size: 16px;
     }
-    .yes{
+
+    .yes {
       display: none;
+    }
+
+    /* Add hover effect to sidebar text */
+    .sidebar p:hover, .sidebar h2:hover {
+      color: #FCA311;
+      transition: color 0.3s ease-in-out;
+    }
+
+    /* Button styles */
+    .btn {
+      padding: 12px 24px;
+      border: 2px solid #120020;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background-color: #4A194F;
+      color: #FFFEFC;
+    }
+
+    .btn-primary:hover {
+      background-color: #FCA311;
+      color: #120020;
+    }
+
+    .btn-danger {
+      background-color: #FCA311;
+      color: #120020;
+    }
+
+    .btn-danger:hover {
+      background-color: #4A194F;
+      color: #FFFEFC;
     }
 
     /* MEDIA QUERY for smaller screens: stack map above, sidebar below */
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
-        height: 100%; /* let content dictate height */
+        height: auto; /* let content dictate height */
         width: 100%;
+        padding: 5px;
       }
+
       .map-container {
         width: 100%;
         height: 50vh; /* map occupies half viewport height */
       }
+
       .sidebar {
         width: 100%;
-        height: 50vh;
-        line-height: 1;
+        height: auto;
+        padding: 20px;
       }
+
       .sidebar p {
         font-size: 16px;
       }
-      .sidebar .updated-time{
+
+      .sidebar .updated-time {
         font-size: 14px;
       }
+      .sidebar h2{
+	      font-size: 20px;
+      }
     }
+
     @media (min-width: 768px) {
-      .sidebar p{
+      .sidebar p {
         font-size: 20px;
       }
-      .sidebar .updated-time{
+
+      .sidebar .updated-time {
         font-size: 18px;
       }
+      .sidebar h2{
+	      font-size: 26px;
+      }
     }
+
+
   </style>
 </head>
 <body>
@@ -151,75 +231,78 @@
     
     // Initialization of the stops and time according to it
     const stop1 = [
-      { name: "Hostel PC", time: "08:00:00", latitude: 15.48312, longitude: 74.93887 },
-      { name: "Main Gate", time: "08:05:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "Bhoopali", time: "08:25:00", latitude: 15.52469, longitude:  74.92439 },
-      { name: "Jubli Circle", time: "08:40:00",latitude: 15.45807,longitude:  75.00765 },
-      { name: "New Bus Stand Dharwad", time: "08:50:00", latitude: 15.46887, longitude: 74.99317 },
-      { name: "Main Gate", time: "09:10:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "Hostel PC", time: "09:20:00", latitude: 15.48312, longitude: 74.93887},
-      { name: "Hostel PC", time: "12:10:00", latitude: 15.48312, longitude: 74.93887},
-      { name: "A1-A2 Block", time: "12:15:00",latitude: 15.48519, longitude: 74.93587 },
-      { name: "Main Gate", time: "12:20:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "Bhoopali", time: "12:40:00", latitude: 15.52469, longitude:  74.92439 },
-      { name: "Bhoopali", time: "12:45:00", latitude: 15.52469, longitude:  74.92439 },
-      { name: "Main Gate", time: "13:00:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "A1-A2 Block", time: "13:05:00",latitude: 15.48519, longitude: 74.93587 },
-      { name: "Hostel PC", time: "13:10:00", latitude: 15.48312, longitude: 74.93887},
-      { name: "Hostel PC", time: "13:25:00", latitude: 15.48312, longitude: 74.93887},
-      { name: "A1-A2 Block", time: "13:28:00", latitude: 15.48519, longitude: 74.93587 },
-      { name: "CLT Stop", time: "13:30:00", latitude: 15.48415, longitude: 74.93517},
+    { name: "Hostel PC", time: "08:00:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "Main Gate", time: "08:05:00", latitude: 34.0522, longitude: -118.2437 },
+      { name: "Bhoopali", time: "08:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Jubli Circle", time: "08:40:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bus Stand Dharwad", time: "08:50:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "09:10:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "09:20:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Hostel PC", time: "12:10:00", latitude: 40.7128, longitude: -74.0060 },
+      // { name: "A1-A2 Block", time: "12:15:00", latitude: 34.0522, longitude: -118.2437 },
+      // { name: "Main Gate", time: "12:20:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Bhoopali", time: "12:40:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Bhoopali", time: "12:45:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Main Gate", time: "13:00:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "A1-A2 Block", time: "13:05:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Hostel PC", time: "13:10:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "13:25:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "A1-A2 Block", time: "13:28:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "CLT Stop", time: "13:30:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Admin Building stop", time: "13:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "13:37:00",latitude: 15.48519, longitude: 74.93587 },
-      { name: "Hostel PC", time: "13:40:00", latitude: 15.48312, longitude: 74.93887},
-      { name: "A1-A2 Block", time: "13:48:00",latitude: 15.48519, longitude: 74.93587 },
-      { name: "CLT Stop", time: "13:50:00",latitude: 15.48415, longitude: 74.93517 },
+      { name: "A1-A2 Block", time: "13:37:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "13:40:00", latitude: 51.5074, longitude: -0.1278 },
+
+      { name: "A1-A2 Block", time: "13:48:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "CLT Stop", time: "13:50:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Admin Building stop", time: "13:55:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "13:57:00",latitude: 15.48519, longitude: 74.93587 },
-      { name: "Hostel PC", time: "14:00:00",latitude: 15.48312, longitude: 74.93887},
-      { name: "A1-A2 Block", time: "14:08:00",latitude: 15.48519, longitude: 74.93587 },
-      { name: "CLT Stop", time: "14:10:00",latitude: 15.48415, longitude: 74.93517},
+      { name: "A1-A2 Block", time: "13:57:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "14:00:00", latitude: 51.5074, longitude: -0.1278 },
+
+      { name: "A1-A2 Block", time: "14:08:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "CLT Stop", time: "14:10:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Admin Building stop", time: "14:15:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "14:17:00",latitude: 15.48519, longitude: 74.93587 },
-      { name: "Hostel PC", time: "14:20:00", latitude: 15.48312, longitude: 74.93887},
+      { name: "A1-A2 Block", time: "14:17:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "14:20:00", latitude: 51.5074, longitude: -0.1278 },
 
-      { name: "A1-A2 Block", time: "14:28:00",latitude: 15.48519, longitude: 74.93587},
-      { name: "CLT Stop", time: "14:30:00",latitude: 15.48415, longitude: 74.93517},
+      { name: "A1-A2 Block", time: "14:28:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "CLT Stop", time: "14:30:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Admin Building stop", time: "14:35:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "A1-A2 Block", time: "14:37:00",latitude: 15.48519, longitude: 74.93587 },
-      { name: "Hostel PC", time: "14:40:00",latitude: 15.48312, longitude: 74.93887},
+      { name: "A1-A2 Block", time: "14:37:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "14:40:00", latitude: 51.5074, longitude: -0.1278 },
 
-      { name: "Hostel PC", time: "14:50:00", latitude: 15.48312, longitude: 74.93887},
-      { name: "A1-A2 Block", time: "14:55:00",latitude: 15.48519, longitude: 74.93587},
-      { name: "Main Gate", time: "15:00:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "Bhoopali", time: "15:20:00",latitude: 15.52469, longitude:  74.92439 },
-      { name: "Bhoopali", time: "16:35:00", latitude: 15.52469, longitude:  74.92439},
-      { name: "Main Gate", time: "16:50:00",  latitude: 15.48807, longitude: 74.93360},
-      { name: "A1-A2 Block", time: "16:55:00",latitude: 15.48519, longitude: 74.93587 },
-      { name: "Hostel PC", time: "17:00:00", latitude: 15.48312, longitude: 74.93887},
-      { name: "Hostel PC", time: "17:15:00", latitude: 15.48312, longitude: 74.93887},
-      { name: "A1-A2 Block", time: "17:20:00",latitude: 15.48519, longitude: 74.93587 },
-      { name: "Main Gate", time: "17:25:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "Bhoopali", time: "17:45:00",latitude: 15.52469, longitude:  74.92439 },
-      { name: "Bhoopali", time: "17:45:00",latitude: 15.52469, longitude:  74.92439},
-      { name: "Main Gate", time: "18:00:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "Hostel PC", time: "18:10:00",latitude: 15.48312, longitude: 74.93887},
-      { name: "Main Gate", time: "18:15:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "Bhoopali", time: "18:35:00",latitude: 15.52469, longitude:  74.92439 },
-      { name: "Bhoopali", time: "18:40:00",latitude: 15.52469, longitude:  74.92439 },
-      { name: "New Bus Stand Dharwad", time: "19:00:00", latitude: 15.46887, longitude: 74.99317 },
-      { name: "New Bus Stand Dharwad", time: "19:05:00", latitude: 15.46887, longitude: 74.99317},
-      { name: "Bhoopali", time: "19:25:00",latitude: 15.52469, longitude:  74.92439 },
-      { name: "Bhoopali", time: "19:30:00", latitude: 15.52469, longitude:  74.92439 },
-      { name: "Main Gate", time: "19:45:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "Hostel PC", time: "20:00:00", latitude: 15.48312, longitude: 74.93887},
-      { name: "Hostel PC", time: "20:05:00", latitude: 15.48312, longitude: 74.93887},
-      { name: "Main Gate", time: "20:10:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "Bhoopali", time: "20:30:00",latitude: 15.52469, longitude:  74.92439},
-      { name: "Bhoopali", time: "20:35:00", latitude: 15.52469, longitude:  74.92439 },
-      { name: "Main Gate", time: "20:50:00", latitude: 15.48807, longitude: 74.93360 },
-      { name: "Hostel PC", time: "21:05:00", latitude: 15.48312, longitude: 74.93887},
-      {name: "Hostel PC", time: "22:40:00", latitude: 15.48807, longitude: 74.93360 }
+      { name: "Hostel PC", time: "14:50:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "A1-A2 Block", time: "14:55:00", latitude: 34.0522, longitude: -118.2437 },
+      { name: "Main Gate", time: "15:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "15:20:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "16:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "16:50:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "A1-A2 Block", time: "16:55:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "17:00:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Hostel PC", time: "17:15:00", latitude: 40.7128, longitude: -74.0060 },
+      // { name: "A1-A2 Block", time: "17:20:00", latitude: 34.0522, longitude: -118.2437 },
+      // { name: "Main Gate", time: "17:25:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Bhoopali", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Bhoopali", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Main Gate", time: "18:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "18:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "18:30:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "High Court", time: "18:45:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Bhoopali", time: "18:40:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bus Stand Dharwad", time: "19:00:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bus Stand Dharwad", time: "19:05:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "Bhoopali", time: "19:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "19:30:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "19:40:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "19:45:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "19:50:00", latitude: 40.7128, longitude: -74.0060 },
+      { name: "Main Gate", time: "19:55:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "High Court", time: "20:10:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bus Stand Dharwad", time: "20:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "New Bus Stand Dharwad", time: "20:30:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Bhoopali", time: "20:55:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Main Gate", time: "21:05:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "Hostel PC", time: "21:10:00", latitude: 51.5074, longitude: -0.1278 }
     ];
     const stop2 = [
       { name: "Hostel PC", time: "10:00:00", latitude: 15.48312, longitude: 74.93887},
