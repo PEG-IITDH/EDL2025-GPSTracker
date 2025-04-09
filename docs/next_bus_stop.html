@@ -220,6 +220,35 @@
     let tail2 = null;
     let tail3 = null;
 
+     //adding all stops sign
+     var stopmarker = L.divIcon({
+      html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🚏</div>',
+      className: 'stop-marker',
+      iconSize: [20, 20],
+      iconAnchor: [15, 15] // Centers the icon on the location
+    });
+    var latitude_stop1 = 15.484642;
+    var longitude_stop1 =  74.936123;
+    var latitude_stop2 = 15.524774;
+    var longitude_stop2 =  74.924301;
+    var latitude_stop3 = 15.468885;
+    var longitude_stop3 =  74.993304;
+    var latitude_stop4 = 15.483100;
+    var longitude_stop4 =  74.938975;
+    var latitude_stop5 = 15.4871928;
+    var longitude_stop5 =  74.9338791;
+
+
+    var stopmarker1 = L.marker([latitude_stop1, longitude_stop1], { icon: stopmarker }).addTo(map);
+    stopmarker1.bindPopup("<b>A1 block</b>").openPopup();
+    var stopmarker2 = L.marker([latitude_stop2, longitude_stop2], { icon: stopmarker }).addTo(map);
+    stopmarker2.bindPopup("<b>Bhoopali</b>").openPopup();
+    var stopmarker3 = L.marker([latitude_stop3, longitude_stop3], { icon: stopmarker }).addTo(map);
+    stopmarker3.bindPopup("<b>New Bus Stand Dharwad</b>").openPopup();
+    var stopmarker4 = L.marker([latitude_stop4, longitude_stop4], { icon: stopmarker }).addTo(map);
+    stopmarker4.bindPopup("<b>Hostels</b>").openPopup();
+    var stopmarker5 = L.marker([latitude_stop5, longitude_stop5], { icon: stopmarker }).addTo(map);
+    stopmarker5.bindPopup("<b>Admin block & Maingate Stop</b>").openPopup();
     // Initialization of the stops and time according to it
     const stops = [
       { name: "Hostel PC", time: "08:00:00", latitude: 40.7128, longitude: -74.0060 },

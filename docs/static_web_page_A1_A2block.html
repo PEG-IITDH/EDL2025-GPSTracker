@@ -338,6 +338,28 @@
       { name: "Main Gate", time: "20:45:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "20:50:00", latitude: 51.5074, longitude: -0.1278 }
     ];
+    // Using Haversine formula to calculate distance
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Earth's radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    //function to calculate zoom
+    function getZoomlevel(dist)
+    {
+      if(dist<=0.37)return 17;
+      else if(dist<=0.75 && dist>0.37)return 16;
+      else if(dist<=1.5 && dist>0.75)return 15;
+      else if(dist<=3 && dist>1.5)return 14;
+      else if(dist<=6 && dist>3)return 13;
+      else if(dist<=12 && dist>6)return 12;
+      else return 11;
+    }
     
     // Function to convert UTC to IST string
     function convertUTCtoIST(utcDateString) {
@@ -466,13 +488,13 @@
             iconSize: [60, 60],
             iconAnchor: [15, 15]
           });
-
+          //Dynamic Zoom
+          let dist_1=calculateDistance(lat,lon,latitude_stop,longitude_stop);
+          var zoom = getZoomlevel(dist_1);
+          console.log("distance from the stop :",dist_1,"and zoom :",zoom);
+    
           marker = L.marker([lat, lon], { icon: emojiIcon }).addTo(map);
-          if (spd > 5) {
-            map.setView([lat, lon], 16.5);
-          } else {
-            map.setView([lat, lon], 17.5);
-          }
+          map.setView([lat, lon], zoom);
           
           var lastUpdatedDate = new Date(latestFeed.timestamp);
           var currentDate = new Date();
