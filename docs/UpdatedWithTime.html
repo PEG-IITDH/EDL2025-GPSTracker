@@ -39,9 +39,10 @@
 
     .container {
       display: flex;
-      height: 100vh;
+      height: 90vh;
       gap: 10px;
       padding: 10px;
+      background:#EBD3F8;
     }
 
     .map-container {
@@ -159,7 +160,7 @@
 
       .sidebar {
         width: 100%;
-        height: auto;
+        height: 80px;
         padding: 20px;
       }
 
@@ -173,7 +174,27 @@
       .sidebar h2{
 	font-size: 20px;
       }
+.image-text{
+        font-size: 12px;
+      }
+      .image-container{
+        width:100px;
+      }
+
+        .image-text{
+        padding: 4px;
+	color: #FFFFFF;
+        }
+
+        .but{
+          font-size: 10px;
+          border-radius: 8px;
+	  width: 80px
+        }
+	
     }
+
+    
 
     @media (min-width: 768px) {
       .sidebar p {
@@ -186,12 +207,135 @@
       .sidebar h2{
 	font-size: 26px;
       }
+ .image-container{
+        width:100px;
+        padding: 0px 50px 0px 8px;}
+
+        .image-text{
+        padding: 8px 300px 0px 450px;
+         color:#FFFFFF;
+        }
+        .but{
+          font-size: 15px;
+          border-radius: 12px;
+	  width: 110px;
+        }
+
+   	
     }
+
+.head-cont{
+background:#89288f;
+height:45px;
+display:flex;
+
+}
+.info-box {
+            width: 100%;
+            height: 20px;
+            font-size: 10px;
+            padding: 10px;
+            display: flex; 
+    align-items: center;
+    justify-content: center;
+            line-height: 7px;
+      }
+      .info-box h4{
+          font-size: 15px;
+      }
+.but {
+  background-color: #1e81b0;
+  color: white;
+  border: none;
+  height: 35px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* Center text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.2;
+
+  transition: background-color 0.3s ease;
+}
+
+.but:hover {
+  background-color: #76b5c5;
+}
+
+.dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+    }
+
+        .dropdown-content a {
+            color: black;
+            padding: 10px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: red;
+      color: white;
+      border-radius: 50%;
+      padding: 3px 8px;
+      font-size: 12px;
+    }
+
+
 
 
   </style>
 </head>
 <body>
+
+ <div class="head-cont">
+  <img class="image-container" src="https://res.cloudinary.com/dnpmv0lyk/image/upload/v1741624989/IITDHLOGO_lxqysu.jpg" />
+  <h2 class="image-text">Bus Tracking webpage (Beta Testing)</h2>
+  
+  <div class="dropdown">
+            <button class="but">Static Display <span id="notificationBadge" class="notification-badge" style="display: none;"></span></button>
+            <div class="dropdown-content">
+              <a href="https://peg-iitdh.github.io/EDL2025-GPSTracker/Static_web_page_Hostels.html" data-stop="Hostel PC">Hostel PC</a>
+              <a href="https://peg-iitdh.github.io/EDL2025-GPSTracker/static_webpage_maingate.html" data-stop="Admin Block and Main Gate">Admin Block and Main Gate</a>
+              <a href="https://peg-iitdh.github.io/EDL2025-GPSTracker/static_web_page_dharwad_bus_stand.html" data-stop="New Bus Stand Dharwad">New Bus Stand</a>
+              <a href="https://peg-iitdh.github.io/EDL2025-GPSTracker/Static_web_page_bhoopali.html" data-stop="Bhoopali">Bhoopali</a>
+              <a href="https://peg-iitdh.github.io/EDL2025-GPSTracker/static_web_page_A1_A2block.html" data-stop="A1-A2  Stop">A1-A2 Stop</a>
+              <a href="https://peg-iitdh.github.io/EDL2025-GPSTracker/next_bus_stop.html" data-stop="Live Bus Track">Live Bus Track</a>
+            </div>
+          </div>
+
+  <a class="but" href="https://peg-iitdh.github.io/EDL2025-GPSTracker/">Home </a>
+</div>
+
+
+
+
   <div class="container">
     <div class="map-container">
       <div id="map"></div>
@@ -360,6 +504,7 @@
       else if(dist<=12 && dist>6)return 12;
       else return 11;
     }
+    
     // Function to convert UTC to IST string
     function convertUTCtoIST(utcDateString) {
       const utcDate = new Date(utcDateString);
@@ -424,7 +569,7 @@
           updateTailMarker(lat3, lon3, tail3);
 
           // Get current IST time details
-          var istTime = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+          var istTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
           var dateObj = new Date(istTime);
           var hours = dateObj.getHours().toString().padStart(2, '0');
           var minutes = dateObj.getMinutes().toString().padStart(2, '0');
@@ -487,6 +632,7 @@
             iconSize: [60, 60],
             iconAnchor: [15, 15]
           });
+
           //Dynamic Zoom
           let dist_1=calculateDistance(lat,lon,latitude_stop,longitude_stop);
           var zoom = getZoomlevel(dist_1);
@@ -522,5 +668,9 @@
     setInterval(updateMapData, 60000);
 
   </script>
+<div class="info-box">
+            <p>Developed By <strong>Likhitha, Akshata & Aman</strong> under the Supervision of <strong>Prof. Abhijit Kshirsagar and Prof. Amar Kumar</strong></p>
+      </div>
+    </div>
 </body>
 </html>
