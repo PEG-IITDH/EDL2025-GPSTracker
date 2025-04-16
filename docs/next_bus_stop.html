@@ -885,8 +885,8 @@ function updateMapData() {
           // dist.push(calculateDistance(lat,lon,latitude_stop6,longitude_stop6));
           var minDistance = Math.min(...dist);
           zoom = getZoomlevel(minDistance);
+          marker = L.marker([lat, lon], { icon: emojiIcon }).addTo(map);
           map.setView([lat, lon], zoom);
-          console.log("zoom : ",zoom);
         
         var lastUpdatedDate = new Date(latestFeed.timestamp);
         var currentDate = new Date();
