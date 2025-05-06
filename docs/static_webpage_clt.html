@@ -358,7 +358,7 @@ input:checked ~ .slide {
       </a>      
       <nav style="height:5%;background-color: #89288f; position:relative;">
         <div style="color: #f7efefe2; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight:600;">
-            Admin Building/Maingate Stop 
+            CLT Bus Stop
         </div>          
         <label>
           <input type="checkbox">
@@ -427,12 +427,12 @@ input:checked ~ .slide {
       let tail3=null;
   
       // Coordinates of the static bus stop
-    var latitude_stop = 15.487251;
-    var longitude_stop =  74.933753;
+    var latitude_stop = 15.484245;
+    var longitude_stop =  74.934798;
 
      // Add a marker and label for the stop "Admin block (Main Gate) stop"
     var stopMarker = L.marker([latitude_stop, longitude_stop]).addTo(map);
-    stopMarker.bindPopup("<b>Admin block & Maingate Stop</b>").openPopup();
+    stopMarker.bindPopup("<b>CLT</b>").openPopup();
       
       // Initialization of the stops and time according to it
       const stop1 = [
@@ -657,7 +657,7 @@ input:checked ~ .slide {
           var spd = parseInt(latestFeed.speed);
           var lastUpdatedUTC = latestFeed.timestamp;
           var lastUpdatedIST = convertUTCtoIST(lastUpdatedUTC);
-          const stop_name = "Main Gate"; 
+          const stop_name = "CLT Stop"; 
           var time_in_next_bus = -1;
           var dir = stops[0].name;
   

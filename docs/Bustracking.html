@@ -8,7 +8,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap JS (with Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
   <!-- Leaflet CSS and JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -30,7 +35,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;700&family=Roboto:wght@400;500&display=swap');
 
-    html, body {
+html, body {
   height: 100%;
   margin: 0;
   font-family: 'Raleway', sans-serif;
@@ -291,7 +296,73 @@ input:checked ~ .slide {
     left: 1490px;
     width: 35px;
 } */
-
+ /* Alert modal styles */
+ .alert-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      z-index: 1000;
+      max-width: 80%;
+      width: 400px;
+      text-align: center;
+      display: none;
+    }
+    
+    .alert-modal h3 {
+      color: #4A194F;
+      margin-bottom: 15px;
+    }
+    
+    .alert-modal p {
+      margin-bottom: 20px;
+    }
+    
+    .alert-modal button {
+      background-color: #4A90E2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .alert-modal button:hover {
+      background-color: #3a7bc8;
+    }
+    
+    /* User preferences form */
+    .preferences-form {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 500px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-group select, .form-group input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    
 /* Mobile Layout */
 @media (max-width: 768px) {
 .maincontent{
@@ -345,8 +416,6 @@ input:checked ~ .slide {
     width: 35px;
     }
 }
-
-
   </style>
 </head>
 <body>
@@ -358,7 +427,7 @@ input:checked ~ .slide {
       </a>      
       <nav style="height:5%;background-color: #89288f; position:relative;">
         <div style="color: #f7efefe2; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight:600;">
-            Admin Building/Maingate Stop 
+            Bus Tracking Webpage 
         </div>          
         <label>
           <input type="checkbox">
@@ -400,43 +469,181 @@ input:checked ~ .slide {
             <p>Status: <span class="updated-time" id="Status">Loading...</span></p>
             <p>Last Updated: <span class="updated-time" id="lastUpdate">Loading...</span></p>
             <p>Current Speed: <span class="updated-time" id="Speed">Calculating...</span></p>
-            <p id="heading">Upcoming Buses in:</p>
+            <p id="heading">Upcoming Stops:</p>
             <p class="updated-time" id="Nextstop">...</p>
             <p class="updated-time" id="next1stop">...</p>
             <p class="updated-time" id="next2stops">...</p>
-            <p>We’d love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog" style="color:#89288f">Feedback!</a></p>
+            <center><button type="button" class="btn btn-primary"style="background-color: #802485;border: black;border-width: 50px;width: 55%;" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo"><i class="fa-solid fa-bell me-2"></i>Create Alert!</button></center>
+            <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog" style="color:#89288f">Feedback!</a></p>
+            </div>
+        </div>
+         <!-- Modal HTML -->
+         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h3 style="font-size: 1.4rem;color:#802485;font-weight: 600;">Create Alert!</h3>
+                </div>
+                <div class="preferences-form">
+                    <div class="form-group">
+                      <label for="fromLocation">From Location:</label>
+                      <select id="fromLocation" class="form-control">
+                        <option value="">Select starting point</option>
+                        <option value="Hostel PC">Hostel PC</option>
+                        <option value="Main Gate">Main Gate</option>
+                        <option value="Bhoopali">Bhoopali</option>
+                        <option value="Jubli Circle">Jubli Circle</option>
+                        <option value="New Bus Stand Dharwad">New Bus Stand Dharwad</option>
+                        <option value="A1-A2 Block">A1-A2 Block</option>
+                        <option value="CLT Stop">CLT Stop</option>
+                        <option value="Admin Building stop">Admin Building stop</option>
+                        <option value="High Court">High Court</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="toLocation">To Location:</label>
+                      <select id="toLocation" class="form-control">
+                        <option value="">Select destination</option>
+                        <option value="Hostel PC">Hostel PC</option>
+                        <option value="Main Gate">Main Gate</option>
+                        <option value="Bhoopali">Bhoopali</option>
+                        <option value="Jubli Circle">Jubli Circle</option>
+                        <option value="New Bus Stand Dharwad">New Bus Stand Dharwad</option>
+                        <option value="A1-A2 Block">A1-A2 Block</option>
+                        <option value="CLT Stop">CLT Stop</option>
+                        <option value="Admin Building stop">Admin Building stop</option>
+                        <option value="High Court">High Court</option>
+                      </select>
+                    </div>
 
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="savePreferences" class="btn btn-primary" style="background-color: #802485;border: black;"data-bs-dismiss="modal">Save Preferences</button>
+                </div>
+            </div>
+            
+    </div>
+  
+    </div>
           </div>
         </div>
     </div>
-  
-    </div>
-  
-    <script>
-      // Initialize the Leaflet map
-      var map = L.map('map').setView([51.505, -0.09], 13);
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
-      let tailMarkerGroup = L.layerGroup().addTo(map);
-      var marker;
-      let tail0=null;
-      let tail1=null;
-      let tail2=null;
-      let tail3=null;
-  
-      // Coordinates of the static bus stop
-    var latitude_stop = 15.487251;
-    var longitude_stop =  74.933753;
+  <!-- Alert Modal -->
+  <div id="alertModal" class="alert-modal">
+    <h3>Bus Alert!</h3>
+    <p id="alertMessage"></p>
+    <button id="closeAlert">OK</button>
+  </div>
+</div>
+  <script>
+    // Initialize the Leaflet map
+    var map = L.map('map').setView([51.505, -0.09], 13);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+    let tailMarkerGroup = L.layerGroup().addTo(map);
+    var marker;
+    let tail1=null;
+    let tail2=null;
+    let tail3=null;
+    let tail0=null;
 
-     // Add a marker and label for the stop "Admin block (Main Gate) stop"
-    var stopMarker = L.marker([latitude_stop, longitude_stop]).addTo(map);
-    stopMarker.bindPopup("<b>Admin block & Maingate Stop</b>").openPopup();
+    //adding all stops sign
+    var stopmarker = L.divIcon({
+      html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🚏</div>',
+      className: 'stop-marker',
+      iconSize: [20, 20],
+      iconAnchor: [15, 15] // Centers the icon on the location
+    });
+    var latitude_stop1 = 15.484642;
+    var longitude_stop1 =  74.936123;
+    var latitude_stop2 = 15.524774;
+    var longitude_stop2 =  74.924301;
+    var latitude_stop3 = 15.468885;
+    var longitude_stop3 =  74.993304;
+    var latitude_stop4 = 15.483100;
+    var longitude_stop4 =  74.938975;
+    var latitude_stop5 = 15.4871928;
+    var longitude_stop5 =  74.9338791;
+    var latitude_stop6 = 15.516927030540144;
+    var longitude_stop6 = 74.92713221527937;
+
+    const stops_popups = [
+      { coords: [latitude_stop1, longitude_stop1], label: "A1 block" },
+      { coords: [latitude_stop2, longitude_stop2], label: "Bhoopali" },
+      { coords: [latitude_stop3, longitude_stop3], label: "New Bus Stand Dharwad" },
+      { coords: [latitude_stop4, longitude_stop4], label: "Hostels" },
+      { coords: [latitude_stop5, longitude_stop5], label: "Admin block & Maingate Stop" },
+      { coords: [latitude_stop6, longitude_stop6], label: "High Court" },
+    ];
+
+    stops_popups.forEach((stop) => {
+      const marker = L.marker(stop.coords, { icon: stopmarker }).addTo(map);
+
+      const popupContent = `
+        <div style="
+          font-size: 14px;
+          font-weight: 500;
+          font-family: 'Roboto', sans-serif;
+          padding: 2px 4px;
+          color: #202124;
+        ">
+          ${stop.label}
+        </div>
+      `;
+
+      const popup = L.popup({ closeOnClick: true, autoClose: false, className: 'gm-style-popup' })
+        .setContent(popupContent);
+
+      marker.bindPopup(popup).openPopup();
+    });
+    // Alert message
+    // User preferences with localStorage for persistence
+    let userPreferences = {
+      fromLocation: localStorage.getItem('fromLocation') || '',
+      toLocation: localStorage.getItem('toLocation') || '',
+      alertShown: false
+    };
+    
+    // Set form values from stored preferences
+    if (userPreferences.fromLocation) {
+      document.getElementById('fromLocation').value = userPreferences.fromLocation;
+    }
+    if (userPreferences.toLocation) {
+      document.getElementById('toLocation').value = userPreferences.toLocation;
+    }
+    
+    // Alert modal elements
+    const alertModal = document.getElementById('alertModal');
+    const alertMessage = document.getElementById('alertMessage');
+    const closeAlert = document.getElementById('closeAlert');
+    
+    // Close alert modal
+    closeAlert.addEventListener('click', () => {
+      alertModal.style.display = 'none';
+    });
+    
+    // Save user preferences
+    document.getElementById('savePreferences').addEventListener('click', () => {
+      userPreferences.fromLocation = document.getElementById('fromLocation').value;
+      userPreferences.toLocation = document.getElementById('toLocation').value;
+      userPreferences.alertShown = false; // Reset alert flag when preferences change
       
-      // Initialization of the stops and time according to it
-      const stop1 = [
-      { name: "Hostel PC", time: "08:00:00", latitude: 40.7128, longitude: -74.0060 },
+      // Save to localStorage
+      localStorage.setItem('fromLocation', userPreferences.fromLocation);
+      localStorage.setItem('toLocation', userPreferences.toLocation);
+      
+      if (userPreferences.fromLocation && userPreferences.toLocation) {
+        alert('Preferences saved! You will receive alerts when the bus is approaching your selected locations.');
+      } else {
+        alert('Please select both "From" and "To" locations.');
+      }
+    });
+
+    // Initialization of the stops and time according to it
+    const stops = [
+    { name: "Hostel PC", time: "08:00:00", latitude: 40.7128, longitude: -74.0060 },
       { name: "Main Gate", time: "08:05:00", latitude: 34.0522, longitude: -118.2437 },
       { name: "Bhoopali", time: "08:25:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Jubli Circle", time: "08:40:00", latitude: 51.5074, longitude: -0.1278 },
@@ -508,9 +715,9 @@ input:checked ~ .slide {
       { name: "Bhoopali", time: "20:55:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "21:05:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "21:10:00", latitude: 51.5074, longitude: -0.1278 }
-      ];
-      const stop2 = [
-      { name: "Hostel PC", time: "10:00:00", latitude: 40.7128, longitude: -74.0060 },
+    ];
+    const stop2 = [
+    { name: "Hostel PC", time: "10:00:00", latitude: 40.7128, longitude: -74.0060 },
       { name: "Main Gate", time: "10:05:00", latitude: 34.0522, longitude: -118.2437 },
       { name: "Bhoopali", time: "10:20:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "10:40:00", latitude: 51.5074, longitude: -0.1278 },
@@ -542,7 +749,7 @@ input:checked ~ .slide {
       { name: "Bhoopali", time: "20:35:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "20:45:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "20:50:00", latitude: 51.5074, longitude: -0.1278 }
-      ];
+    ];
     // Using Haversine formula to calculate distance
     function calculateDistance(lat1, lon1, lat2, lon2) {
       const R = 6371; // Earth's radius in km
@@ -557,186 +764,250 @@ input:checked ~ .slide {
     //function to calculate zoom
     function getZoomlevel(dist)
     {
-      if(dist<=0.37)return 17;
-      else if(dist<=0.75 && dist>0.37)return 16;
-      else if(dist<=1.5 && dist>0.75)return 15;
-      else if(dist<=3 && dist>1.5)return 14;
-      else if(dist<=6 && dist>3)return 13;
-      else if(dist<=12 && dist>6)return 12;
+      if(dist<=0.35)return 17;
+      else if(dist<=0.7 && dist>0.35)return 16;
+      else if(dist<=1.4 && dist>0.7)return 15;
+      else if(dist<=2.8 && dist>1.4)return 14;
+      else if(dist<=5.6 && dist>2.8)return 13;
+      else if(dist<=11.2 && dist>5.6)return 12;
       else return 11;
     }
-      // Function to convert UTC to IST string
-      function convertUTCtoIST(utcDateString) {
-        const utcDate = new Date(utcDateString);
-        const istOptions = { 
-          timeZone: 'Asia/Kolkata',
-          hour12: false,
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric',
-          second: 'numeric'
-        };
-        return utcDate.toLocaleString('en-IN', istOptions);
+    // Function to convert UTC to IST string
+    function convertUTCtoIST(utcDateString) {
+      const utcDate = new Date(utcDateString);
+      const istOptions = { 
+        timeZone: 'Asia/Kolkata',
+        hour12: false,
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+      };
+      return utcDate.toLocaleString('en-IN', istOptions);
+    }
+
+    // Function to convert HH:MM:SS to total seconds
+    function timeToSeconds(time) {
+      const [hours, minutes, seconds] = time.split(":").map(Number);
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+
+    // Function to check if the current time is within the given interval
+    function isTimeInInterval(currentTime, startTime, endTime) {
+      const currentSeconds = timeToSeconds(currentTime);
+      const startSeconds = timeToSeconds(startTime);
+      const endSeconds = timeToSeconds(endTime);
+      return currentSeconds >= startSeconds && currentSeconds <= endSeconds;
+    }
+
+    //Function to update marker 
+    function updateTailMarker(newLat, newLng,lastTailMarker) {
+      var sign = L.divIcon({
+        html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🔹</div>',
+        className: 'emoji-marker',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15] // Centers the icon on the location
+      });
+      // Remove the previous marker if it exists
+      L.marker([newLat, newLng],{ icon: sign }).addTo(tailMarkerGroup); // Add new marker
+    }
+    // Function to check if the current time is within the given interval
+    function isTimeInInterval(currentTime, startTime, endTime) {
+      const currentSeconds = timeToSeconds(currentTime);
+      const startSeconds = timeToSeconds(startTime);
+      const endSeconds = timeToSeconds(endTime);
+      return currentSeconds >= startSeconds && currentSeconds <= endSeconds;
+    }
+
+    // Function to update marker 
+    function updateTailMarker(newLat, newLng) {
+      var sign = L.divIcon({
+        html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🔹</div>',
+        className: 'emoji-marker',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15] // Centers the icon on the location
+      });
+      // Add new marker to the layer group
+      L.marker([newLat, newLng], { icon: sign }).addTo(tailMarkerGroup);
+    }
+    
+    // Function to show alert to user
+    function showAlert(message) {
+      if (!userPreferences.alertShown) {
+        alertMessage.textContent = message;
+        alertModal.style.display = 'block';
+        userPreferences.alertShown = true;
+        
+        // Reset alert after 5 minutes (300000 ms) or when modal is closed
+        setTimeout(() => {
+          userPreferences.alertShown = false;
+        }, 60000);
       }
-  
-      // Function to convert HH:MM:SS to total seconds
-      function timeToSeconds(time) {
-        const [hours, minutes, seconds] = time.split(":").map(Number);
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-  
-      //Function to update marker 
-      function updateTailMarker(newLat, newLng,lastTailMarker) {
-        var sign = L.divIcon({
-          html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🔹</div>',
-          className: 'emoji-marker',
-          iconSize: [30, 30],
-          iconAnchor: [15, 15] // Centers the icon on the location
+    }
+    
+  // Function to check if we should alert the user
+    function checkForUserAlert(currentTime, stopSchedule) {
+        // if (!Array.isArray(stopSchedule)) return; // <-- Add this line
+   
+        // Find all instances of fromLocation in the schedule
+        const fromIndices = stopSchedule.reduce((acc, stop, index) => {
+            if (stop.name === userPreferences.fromLocation) acc.push(index);
+            return acc;
+        }, []);
+        
+        if (fromIndices.length === 0) return;
+        
+        // Check each occurrence of fromLocation
+        for (const fromIndex of fromIndices) {
+            // Find the next occurrence of toLocation after this fromLocation
+            const toIndex = stopSchedule.findIndex((stop, index) => 
+                stop.name === userPreferences.toLocation && index > fromIndex
+            );
+            
+            if (toIndex === -1) continue;
+            
+            // Get the time for this fromLocation
+            const fromTime = stopSchedule[fromIndex].time;
+            const fromTimeSeconds = timeToSeconds(fromTime);
+            const currentSeconds = timeToSeconds(currentTime);
+            
+            // Check if current time is within 10 minutes before the fromLocation time
+            if (currentSeconds >= (fromTimeSeconds - 600) && currentSeconds < fromTimeSeconds) {
+                // Calculate minutes until arrival
+                const minutesUntilArrival = Math.ceil((fromTimeSeconds - currentSeconds) / 60);
+                
+                const message = `Bus will arrive at ${userPreferences.fromLocation} in ${minutesUntilArrival} minutes, heading to ${userPreferences.toLocation}.`;
+                showAlert(message);
+                return; // Only show one alert at a time
+            }
+            else if (currentSeconds >= fromTimeSeconds && currentSeconds < fromTimeSeconds + 60) {
+        // Check if current time is within 1 minute after the scheduled time
+        const message = `Bus has arrived at your preferred location.`;
+        showAlert(message);
+        return;
+            }
+        }
+    }
+    // Function to update map data and determine next stop
+    function updateMapData() {
+      fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
+      .then(response => response.json())
+      .then(data => {
+        let lastFiveEntries = [];
+        
+        // Iterate over the last 5 entries and store them in an array
+        data.feeds.slice(-5).forEach(feed => {
+          let entry = {
+            latitude: parseFloat(feed.field1),
+            longitude: parseFloat(feed.field2),
+            speed: parseInt(feed.field3),
+            timestamp: feed.created_at
+          };
+          lastFiveEntries.push(entry);
         });
-        // Remove the previous marker if it exists
-        L.marker([newLat, newLng],{ icon: sign }).addTo(tailMarkerGroup); // Add new marker
-      }
-  
-      // Function to update map data and determine arrival time for next bus
-      function updateMapData() {
-          fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
-        .then(response => response.json())
-        .then(data => {
-          let lastFiveEntries = [];
-          
-          // Iterate over the last 5 entries and store them in an array
-          data.feeds.slice(-5).forEach(feed => {
-            let entry = {
-              latitude: parseFloat(feed.field1),
-              longitude: parseFloat(feed.field2),
-              speed: parseInt(feed.field3),
-              timestamp: feed.created_at
-            };
-            lastFiveEntries.push(entry);
-          });
-          
-  
-         // Plot the first 3 points
-         tailMarkerGroup.clearLayers(); // Remove all previous markers in the group
-          let lat0 = lastFiveEntries[0].latitude;
-          let lon0 = lastFiveEntries[0].longitude;
-          let lat1 = lastFiveEntries[1].latitude;
-          let lon1 = lastFiveEntries[1].longitude;
-          let lat2 = lastFiveEntries[2].latitude;
-          let lon2 = lastFiveEntries[2].longitude;
-          let lat3 = lastFiveEntries[3].latitude;
-          let lon3 = lastFiveEntries[3].longitude;
-          updateTailMarker(lat0,lon0,tail0);
-          updateTailMarker(lat1,lon1,tail1);
-          updateTailMarker(lat2,lon2,tail2);
-          updateTailMarker(lat3,lon3,tail3);
-  
-          // Get real-time IST
-          var dateObj = new Date();
-            var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-            var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            var currentDay = days[istTime.getDay()];
-            var hours = istTime.getHours().toString().padStart(2, '0');
-            var minutes = istTime.getMinutes().toString().padStart(2, '0');
-            var seconds = istTime.getSeconds().toString().padStart(2, '0');
-            var currentISTTime = hours + ":" + minutes + ":" + seconds;
-          var stops;
-          if(currentDay=="Saturday" || currentDay == "Sunday")
-          {
-              stops = stop2;
-          }
-          else{
-              stops = stop1;
-          }
-          console.log(currentDay);
+
+        // Plot the first 3 points
+        tailMarkerGroup.clearLayers(); // Remove all previous markers in the group
+        let lat0 = lastFiveEntries[0].latitude;
+        let lon0 = lastFiveEntries[0].longitude;
+        let lat1 = lastFiveEntries[1].latitude;
+        let lon1 = lastFiveEntries[1].longitude;
+        let lat2 = lastFiveEntries[2].latitude;
+        let lon2 = lastFiveEntries[2].longitude;
+        let lat3 = lastFiveEntries[3].latitude;
+        let lon3 = lastFiveEntries[3].longitude;
+        updateTailMarker(lat0,lon0,tail0);
+        updateTailMarker(lat1,lon1,tail1);
+        updateTailMarker(lat2,lon2,tail2);
+        updateTailMarker(lat3,lon3,tail3);
+
           var latestFeed = lastFiveEntries[lastFiveEntries.length - 1];
           var lat = parseFloat(latestFeed.latitude);
           var lon = parseFloat(latestFeed.longitude);
           var spd = parseInt(latestFeed.speed);
           var lastUpdatedUTC = latestFeed.timestamp;
           var lastUpdatedIST = convertUTCtoIST(lastUpdatedUTC);
-          const stop_name = "Main Gate"; 
-          var time_in_next_bus = -1;
-          var dir = stops[0].name;
-  
           var [date, currtime] = lastUpdatedIST.split(",");
           currtime = currtime.trim();
-          let trip1="";
-          let trip2="";
-          let trip3="";
-  
-        // Filter timetable for upcoming departures from "Hostel PC"
-        let upcomingDepartures = [];
-        for (let i = 0; i < stops.length - 1; i++) {
-          if (timeToSeconds(currtime) < timeToSeconds(stops[i].time) && stops[i].name == stop_name) {
-            time_in_next_bus = timeToSeconds(stops[i].time) - timeToSeconds(currtime);
-            time_in_next_bus = parseInt(time_in_next_bus / 60);
-            var hours = parseInt(time_in_next_bus/60);
-            var min = parseInt(time_in_next_bus%60);
-            time_in_next_bus = `${hours} hours ${min} minutes`;
-            if(hours==0)
-            {
-              time_in_next_bus = `${min} minutes`;
-            }
-            if(stops[i].name == stops[i+1].name)
-            {
-              dir = stops[i+2].name;
-            }
-            else
-            {
-              dir = stops[i+1].name;
-            }
-            upcomingDepartures.push({
-              departureTime: time_in_next_bus,
-              destination: dir
-            });
 
+          // Get real-time IST
+        var dateObj = new Date();
+          var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+          var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+          var currentDay = days[istTime.getDay()];
+          var hours = istTime.getHours().toString().padStart(2, '0');
+          var minutes = istTime.getMinutes().toString().padStart(2, '0');
+          var seconds = istTime.getSeconds().toString().padStart(2, '0');
+          var currentISTTime = hours + ":" + minutes + ":" + seconds;
+          console.log("time is : ",currentISTTime);
+          var stop_thatday;
+          if(currentDay=="Saturday" || currentDay=="Sunday")
+          {
+            stop_thatday = stop2;
           }
-        }
-          console.log(upcomingDepartures);
-        //checking whether bus is there or not 
-        if (upcomingDepartures.length == 0) {
-          trip1 = "No Buses Today";
-        } else {
-          if (upcomingDepartures.length > 0)
-            trip1 = `${upcomingDepartures[0].departureTime} to ${upcomingDepartures[0].destination}`;
-          if (upcomingDepartures.length > 1)
-            trip2 = `${upcomingDepartures[1].departureTime} to ${upcomingDepartures[1].destination}`;
-          if (upcomingDepartures.length > 2)
-            trip3 = `${upcomingDepartures[2].departureTime} to ${upcomingDepartures[2].destination}`;
-        }
+          else{
+            stop_thatday = stops;
+          }
+          // Check for user alerts
+          checkForUserAlert(currtime, stop_thatday);
 
-        let flag = 0;
-  
-        if (!stops[stops.length - 1].time || timeToSeconds(currtime) > timeToSeconds(stops[stops.length - 1].time) || timeToSeconds(currtime)<timeToSeconds(stops[0].time)) {
-          trip1 = "Shuttle service is closed. The next bus will start from 8:00 AM tomorrow";
-          flag = 1;
-        }
-  
-        console.log("time in next bus:", time_in_next_bus);
-  
-        // Update marker on the map and implementing the dynamic zoom
-        if (marker) {
-          map.removeLayer(marker);
-        }
-        var emojiIcon = L.divIcon({
-          html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🚍</div>',
-          className: 'emoji-marker',
-          iconSize: [60, 60],
-          iconAnchor: [15, 15] // Centers the icon on the location
-        });
-        let dist_1=calculateDistance(lat,lon,latitude_stop,longitude_stop);
-        var zoom = getZoomlevel(dist_1);
-        console.log("distance from the stop :",dist_1,"and zoom :",zoom);
-  
-        marker = L.marker([lat, lon], { icon: emojiIcon }).addTo(map);
-        map.setView([lat, lon], zoom);
-        
-        //implementing live status
-        // Displaying the Status of the Bus 
-        var statu;
+          // Determine the next stop
+          var next_stop = stop_thatday[0].name;
+          let next_1_stop_text = "";
+          let next_2_stop_text = "";
+          for (let i = 0; i < stop_thatday.length - 1; i++) {
+            if (isTimeInInterval(currtime, stop_thatday[i].time, stop_thatday[i + 1].time)) {
+              next_stop = `${stop_thatday[i + 1].name} at ${stop_thatday[i+1].time}`;
+             if(i+2 < stop_thatday.length){
+                  next_stop1 = stop_thatday[i+2].name;
+                  next_1_stop_text = `${next_stop1} at ${stop_thatday[i+2].time}`;
+                  next_2_stop_text = "";
+              }
+              if(i+3 < stop_thatday.length){
+                  next_stop1 = stop_thatday[i+2].name;
+                  next_stop2 = stop_thatday[i+3].name;
+                  next_1_stop_text = `${next_stop1} at ${stop_thatday[i+2].time}`;
+                  next_2_stop_text = `${next_stop2} at ${stop_thatday[i+3].time}`;
+              } 
+              if(i === stop_thatday.length-1){
+                  document.getElementById("heading").innerText = "Next Stop";
+              }
+            }
+          }
+          let flag=0;
+          if (timeToSeconds(currtime) > timeToSeconds(stop_thatday[stop_thatday.length - 1].time) || timeToSeconds(currtime)<timeToSeconds(stops[0].time)) {
+            next_stop = "Shuttle service is closed ,The next bus will start from 8:00 AM tomorrow";
+            next_1_stop_text="";
+            next_2_stop_text="";
+            flag=1;
+          }
+          // Update marker on the map
+          if (marker) {
+            map.removeLayer(marker);
+          }
+          var emojiIcon = L.divIcon({
+            html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🚍</div>',
+            className: 'emoji-marker',
+            iconSize: [60, 60],
+            iconAnchor: [15, 15] // Centers the icon on the location
+          });
+
+          marker = L.marker([lat, lon], { icon: emojiIcon }).addTo(map);
+          //Dynamic zoom
+          var dist = [];
+          dist.push(calculateDistance(lat,lon,latitude_stop1,longitude_stop1));
+          dist.push(calculateDistance(lat,lon,latitude_stop2,longitude_stop2));
+          dist.push(calculateDistance(lat,lon,latitude_stop3,longitude_stop3));
+          dist.push(calculateDistance(lat,lon,latitude_stop4,longitude_stop4));
+          dist.push(calculateDistance(lat,lon,latitude_stop5,longitude_stop5));
+          dist.push(calculateDistance(lat,lon,latitude_stop6,longitude_stop6));
+          var minDistance = Math.min(...dist);
+          zoom = getZoomlevel(minDistance);
+          map.setView([lat, lon], zoom);
+          // Displaying the Status of the Bus 
+          var statu;
           var repMsg="";
           fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
             .then(response => response.json())
@@ -777,36 +1048,34 @@ input:checked ~ .slide {
             a.classList.remove("updated-time");
             a.classList.add("updated-time-not-live");
           }
-        // Update the "Last Updated" text
-        document.getElementById("lastUpdate").innerText = lastUpdatedIST;
-        document.getElementById("Status").innerText = statu;
-        document.getElementById("Speed").innerText = spd + " km/h";
-  
-        let ns = document.getElementById("Nextstop"); // FIXED ID REFERENCE
-        ns.innerText = trip1;
-        document.getElementById("next2stops").innerText = trip3;
-        document.getElementById("next1stop").innerText = trip2;
-        let hd = document.getElementById("heading");
-        if (flag) {
-          console.log(flag);
-          hd.classList.add("yes");
-          ns.style.color = "#89288f";
-        }
-      })
-      .catch(error => {
-        console.error('Fetch Error:', error);
-        document.getElementById("lastUpdate").innerText = "Error loading update.";
-        document.getElementById("Status").innerText = "Error loading update.";
-        document.getElementById("Speed").innerText = "Error calculating distance.";
-        document.getElementById("Nextstop").innerText = "Error retrieving next bus.";
-      });
-  }
-  
-  
-      // Initial fetch on page load and update every minute
-      updateMapData();
-      setInterval(updateMapData, 20000);
-    </script>
-  </body>
-  </html>
-  
+          // Update the "Last Updated" text
+          console.log("last updated : ",lastUpdatedIST)
+          document.getElementById("lastUpdate").innerText = lastUpdatedIST;
+          document.getElementById("Status").innerText = statu;
+          document.getElementById("Speed").innerText = spd + " km/h";
+          let ns=document.getElementById("Nextstop");
+          ns.innerText = next_stop;
+          document.getElementById("next2stops").innerText = next_2_stop_text;
+          document.getElementById("next1stop").innerText = next_1_stop_text;
+          let hd=document.getElementById("heading");
+          if(flag)
+          {
+            console.log(flag);
+            hd.classList.add("yes");
+            ns.style.color="#802485";
+          }
+
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            document.getElementById("lastUpdate").innerText = "Error loading update.";
+            document.getElementById("Speed").innerText = "Error Fetching Speed.";
+        });
+    }
+
+    // Initial fetch on page load and update every minute
+    updateMapData();
+    setInterval(updateMapData, 60000);
+  </script>
+</body>
+</html>

@@ -71,35 +71,44 @@ body {
 
 .sidebar {
   flex: 1;
-  padding: 20px;
   background: linear-gradient(145deg, #fafafa, #f0f0f0);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  z-index: 0;
   position: relative;
   width: 100%;
   height: 95%;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-  overflow: hidden; /* Prevent background from spilling out */
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+  z-index: 1; /*Ensure it's above the ::before element */
 }
-
-/* Add a pseudo-element for the background image */
 .sidebar::before {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  /* background-image: url('only_logo2.jpg'); */
+  top: 80%; left: 0; right: 0;
   background-image: url('IITDH_logo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: 50%;
-  opacity: 0.16;
-  z-index: -1; /* This ensures the image stays behind all content */
+  opacity: 0.15; /* Increased for better visibility */
+  z-index: 0; /* Changed from -1 to 0 */
+  pointer-events: none; /* Just to be safe */
 }
 
+.sidebar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
 
+.sidebar > * {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
 
 .sidebar h2 {
   font-size: 24px;
@@ -234,155 +243,9 @@ input:checked ~ .toggle .middle_line {
 input:checked ~ .slide {
   transform: translateX(0);
 }
-.button {
-  display: inline-flex;
-  height: 75px;
-  width: 290px;
-  background-color: #89288f;
-  border: 2.35px solid #89288f;
-  margin: 20px;
-  color: #89288f;
-  text-transform: uppercase;
-  text-decoration: none;
-  font-size: 1em;
-  font-weight: 600;
-  letter-spacing: 1px;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: absolute;
-  top: 25%;
-  left: 48.75%;
-  transform: translateX(-50%);
-  cursor: pointer;
-  box-shadow: 1px 0 10px rgba(0, 0, 0, 0.4);
+.bus{
+    height: 50%;
 }
-
-
-.button a {
-  color: #f0f0f0;
-  font-size: 1.1rem;
-  position: relative;
-  z-index: 2;
-  text-decoration: none;
-  transition: color 0.35s ease;
-  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-}
-
-.slide-bg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: #f0f0f0;
-  top: 0;
-  left: -100%;
-  transition: left 0.35s ease;
-  z-index: 1;
-}
-
-#button-2:hover .slide-bg {
-  left: 0;
-}
-
-#button-2:hover a {
-  color: #89288f;
-}
-/* Grid container for 6 buttons */
-.button-grid {
-  position: absolute;
-  top: 55vh; /* a bit below the main button at 25vh */
-  left: 50%;
-  transform: translateX(-50%);
-  display: grid;
-  grid-template-columns: repeat(3, auto); /* 3 buttons per row */
-  gap: 25px 40px; /* vertical and horizontal space between buttons */
-  justify-content: center;
-}
-
-/* Styling for mini buttons */
-.mini-button {
-  height: 60px;
-  width: 200px;
-  background-color: #89288f;
-  border: 2px solid #89288f;
-  color: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  cursor: pointer;
-  box-shadow: 1px 0 8px rgba(0, 0, 0, 0.3);
-  text-transform: uppercase;
-  font-weight: 600;
-  font-size: 0.95em;
-  letter-spacing: 1px;
-  overflow: hidden;
-}
-
-/* Mini button inner text */
-.mini-button a {
-  color: #f0f0f0;
-  font-size: medium;
-  position: relative;
-  z-index: 2;
-  text-decoration: none;
-  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  transition: color 0.35s ease;
-}
-
-/* Hover background for mini buttons */
-.mini-button .slide-bg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: #f0f0f0;
-  top: 0;
-  left: -100%;
-  transition: left 0.35s ease;
-  z-index: 1;
-}
-
-.mini-button:hover .slide-bg {
-  left: 0;
-}
-
-.mini-button:hover a {
-  color: #89288f;
-}
-.logo {
-  position: absolute;
-  top: 15px;
-  left: 10px; /* This aligns it to the left */
-  width: 70px;
-}
-.headingmain {
-  position: absolute;       /* Required for 'top' to work */
-  top: 12px;                /* Now this will take effect */
-  left: 51%;                /* To center it horizontally */
-  transform: translateX(-50%); /* Perfect horizontal centering */
-  font-size: 2.7rem;
-  font-family: 'Poppin', sans-serif;
-  color: #89288f;
-  font-weight: bolder;
-  text-align: center;
-}
-.subheadingmain{
-  font-size: 1.5rem;
-  position: absolute;
-  font-family: 'Poppin', sans-serif;
-  top: 10%;
-  font-weight: 530;
-  text-align: center;
-  font-family: 'Poppin', sans-serif;
-  color: #89288f;
-}
-.sidetext{
-  position: absolute;font-weight: 600;top: 22%;font-size: 1.35rem;
-}
-.sidetext2{
-  position: absolute;font-weight: 600;top: 51%;font-size: 1.35rem;
-}
-
 /* Mobile Layout */
 @media (max-width: 768px) {
 .maincontent{
@@ -393,6 +256,9 @@ input:checked ~ .slide {
     width: 100%;
     height: 55vh;
   }
+  .bus{
+    height: 30%;
+  }
   .hello{
     z-index: 1001;
     top: 6px;
@@ -401,83 +267,17 @@ input:checked ~ .slide {
     left: 90%;
     width: 35px;
     }
- .sidebar::before {
+    .sidebar::before {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image: url('IITDH_logo2.jpg');
-  /* background-image: url('IITDH_logo.png'); */
+  top: 60%; left: 0; right: 0; bottom: 0;
+  background-image: url('IITDH_logo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: 70%;
-  opacity: 0.16;
-  z-index: -1; /* This ensures the image stays behind all content */
- }
- .button-grid {
-  position: absolute;
-  top: 45vh; /* a bit below the main button at 25vh */
-  left: 50%;
-  transform: translateX(-50%);
-  display: grid;
-  grid-template-columns: repeat(2, auto); /* 3 buttons per row */
-  gap: 25px 40px; /* vertical and horizontal space between buttons */
-  justify-content: center;
-}
-.sidetext2{
-  position: absolute;font-weight: 600;top: 42%;font-size: 1.25rem;
-}
-.sidetext{
-  position: absolute;font-weight: 600;top: 18%;font-size: 1.25rem;
-}
-.logo {
-  position: absolute;
-  top: 10px;
-  left: 4.9%; /* This aligns it to the left */
-  width: 12%;
-}
-.button {
-  display: inline-flex;
-  height: 75px;
-  width: 290px;
-  background-color: #89288f;
-  border: 2.35px solid #89288f;
-  margin: 20px;
-  color: #89288f;
-  text-transform: uppercase;
-  text-decoration: none;
-  font-size: 1em;
-  font-weight: 600;
-  letter-spacing: 1px;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: absolute;
-  top: 20%;
-  left: 45.5%;
-  transform: translateX(-50%);
-  cursor: pointer;
-  box-shadow: 1px 0 10px rgba(0, 0, 0, 0.4);
-}
-.headingmain {
-  position: absolute;       /* Required for 'top' to work */
-  top: 10px;                /* Now this will take effect */
-  left: 55%;                /* To center it horizontally */
-  transform: translateX(-50%); /* Perfect horizontal centering */
-  font-size: 185%;
-  color: #89288f;
-  font-weight: bolder;
-  width: 100%;
-  text-align: center;
-}
-.subheadingmain{
-  font-size: 1.5rem;
-  position: absolute;
-  font-family: 'Poppin', sans-serif;
-  top: 6%;
-  font-weight: 530;
-  text-align: center;
-  font-family: 'Poppin', sans-serif;
-  color: #89288f;
+  opacity: 0.25; /* Increased for better visibility */
+  z-index: 0; /* Changed from -1 to 0 */
+  pointer-events: none; /* Just to be safe */
 }
 }
 
@@ -511,7 +311,7 @@ input:checked ~ .slide {
       </a>      
       <nav style="height:5%;background-color: #89288f; position:relative;">
         <div style="color: #efeaeae2; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight:600;">
-          Main Menu
+          About
         </div>          
         <label>
           <input type="checkbox">
@@ -524,7 +324,7 @@ input:checked ~ .slide {
             <h1>Menu</h1>
             <ul>
               <li style="margin-top: 1rem; color: #eaeaead9; font-weight: 300;">Main Menu</li>
-              <li><a href="homepage.html"><i class="fas fa-home"></i> Home</a></li>
+              <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
               <li style="margin-top: 1rem; color: #eaeaead9; font-weight: 300;">Live Bus Tracking</li>
               <li><a href="Bustracking.html"><i class="fa-solid fa-location-dot"></i> Track Bus</a></li>
               <li style="margin-top: 1rem; color: #eaeaead9; font-weight: 300;">Monitor Stops</li>
@@ -541,27 +341,65 @@ input:checked ~ .slide {
         </label>
       </nav>
       <div class="sidebar">
-        <img src="only_logo2.png" alt="Logo" class="logo">
-        <div class="headingmain">Bus Tracking System</div>
-        <p class ="subheadingmain">Beta version</p>
-        
-        <p class="sidetext">For live tracking of bus click down</p>
-      
-        <div class="button" id="button-2">
-            <div class="slide-bg"></div>
-            <a href="Bustracking.html">Live track Bus</a>
+        <!-- Top Image -->
+        <div class="bus">
+          <img src="bus1.jpg" alt="Campus View" style="height: 100%; width: 100%; object-fit: cover;">
         </div>
-        <p class="sidetext2">Click down for monitoring stops</p>
-        <div class="button-grid">
-            <div class="mini-button" id="button-3"><div class="slide-bg"></div><a href="static_webpage_hostel.html">Hostel PC</a></div>
-            <div class="mini-button" id="button-4"><div class="slide-bg"></div><a href="static_webpage_maingate.html">Maingate</a></div>
-            <div class="mini-button" id="button-5"><div class="slide-bg"></div><a href="static_webpage_A1.html">A1-A2 stop</a></div>
-            <div class="mini-button" id="button-6"><div class="slide-bg"></div><a href="static_webpage_bhoopali.html">Bhoopali</a></div>
-            <div class="mini-button" id="button-7"><div class="slide-bg"></div><a href="static_webpage_clt.html">CLT</a></div>
-            <div class="mini-button" id="button-8"><div class="slide-bg"></div><a href="static_webpage_busstand.html">New Bus stand</a></div>
-          </div>  
-          <p style="position: absolute; top: 88%;">We’d love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog" style="color:#89288f">Feedback!</a></p>                
-          <p style="position: absolute; top: 92%;">For more info <a href="aboutwebpage.html" style="color:#89288f">Click here!</a></p>                
+      
+        <div style="padding:20px;">
+            <h2 style="color: #802485;text-align: left;">About Shuttle Bus Service</h2>
+            <p style="margin-top: 10px; font-size: 16px; line-height: 1.6; color: #333;">
+              The Shuttle Bus Service at IIT Dharwad is designed to provide convenient and reliable transportation between the <strong>Transit Campus</strong>, the <strong>Permanent Campus</strong>, and key locations within the city. This initiative ensures that students, faculty, and staff can travel smoothly for academic, residential, and daily needs.
+              <br><br>
+              The service operates as per the official bus schedule released by the institute. For up-to-date timings and route details, please refer to the <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank" style="color: #89288f; font-weight: 500;">official schedule</a>.
+            </p>
+            <p>Also let us know about your opinion on this website.We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog" style="color:#89288f">Feedback!</a></p>
+          </div>
+          
+          <!-- Contact Info Section -->
+          <div style="padding:20px;">
+            <p style="color: black;text-align: left;font-weight: bold;">Contact Information</p>
+            <p style="margin-top: 10px; font-size: 15px; line-height: 1.6; color: #333;">
+              For any queries or assistance regarding the shuttle bus service, you can reach out to the following personnel:
+            </p>
+            <ul style="margin-top: 10px; padding-left: 20px; font-size: 15px; color: #333;">
+              <li><strong>Prof. Amarkumar Ayodhyasingh Kushwaha</strong><br>
+                📧 amarkumar@iitdh.ac.in
+              </li>
+              <!-- <li style="margin-top:10px;"><strong>Mr. Shankar Patil</strong> – Shuttle Driver (Route A)<br>
+                📞 +91-9123456789
+              </li>
+              <li style="margin-top:10px;"><strong>Mr. Nilesh Jadhav</strong> – Shuttle Driver (Route B)<br>
+                📞 +91-9988776655
+              </li> -->
+            </ul>
+          </div>
+          
+      
+        <!-- Developed By -->
+        <div style="padding:20px;">
+            <h2 style="color: #802485;text-align: left;">Developed By</h2>
+            <p style="margin-top: 10px; font-size: 15px; line-height: 1.6; color: #333;">
+              This project was developed as part of the <strong>Electronic Design Laboratory (EDL) 2025</strong> at the Indian Institute of Technology Dharwad. It is a practical initiative aimed at improving campus transportation through real-time bus tracking and interactive web technologies.
+              <br><br>
+              The system is a step towards building a smarter and more connected campus, integrating concepts from embedded systems, networking, and user-centric design.
+            </p>
+          
+            <p>This project is developed by</p>
+            <ul style="margin-top: 10px; padding-left: 20px; font-size: 15px; color: #333;">
+              <li><strong>Aman Patidar</li>
+              <li>Akshate C S</li>
+              <li>Magham Likhita</strong></li>
+            </ul>
+            <p>Under the supervision of </p>
+            <ul style="margin-top: 10px; padding-left: 20px; font-size: 15px; color: #333;">
+              <li><strong>Prof. Abhijit Kshirsagar</li>
+              <li>Prof. Amarkumar</li>
+            </ul>
+          </div>
+          
+      
+            
       </div>
   
       
