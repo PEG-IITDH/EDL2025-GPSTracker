@@ -648,16 +648,10 @@ input:checked ~ .slide {
       { name: "Bhoopali", time: "08:25:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Jubli Circle", time: "08:40:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "08:50:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "U-Flex Main Gate", time: "09:05:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "09:10:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "09:20:00", latitude: 51.5074, longitude: -0.1278 },
-      // { name: "Hostel PC", time: "12:10:00", latitude: 40.7128, longitude: -74.0060 },
-      // { name: "A1-A2 Block", time: "12:15:00", latitude: 34.0522, longitude: -118.2437 },
-      // { name: "Main Gate", time: "12:20:00", latitude: 51.5074, longitude: -0.1278 },
-      // { name: "Bhoopali", time: "12:40:00", latitude: 51.5074, longitude: -0.1278 },
-      // { name: "Bhoopali", time: "12:45:00", latitude: 51.5074, longitude: -0.1278 },
-      // { name: "Main Gate", time: "13:00:00", latitude: 51.5074, longitude: -0.1278 },
-      // { name: "A1-A2 Block", time: "13:05:00", latitude: 51.5074, longitude: -0.1278 },
-      // { name: "Hostel PC", time: "13:10:00", latitude: 51.5074, longitude: -0.1278 },
+
       { name: "Hostel PC", time: "13:25:00", latitude: 40.7128, longitude: -74.0060 },
       { name: "A1-A2 Block", time: "13:28:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "CLT Stop", time: "13:30:00", latitude: 51.5074, longitude: -0.1278 },
@@ -977,11 +971,22 @@ input:checked ~ .slide {
             }
           }
           let flag=0;
-          if (timeToSeconds(currtime) > timeToSeconds(stop_thatday[stop_thatday.length - 1].time) || timeToSeconds(currtime)<timeToSeconds(stops[0].time)) {
-            next_stop = "Shuttle service is closed ,The next bus will start from 8:00 AM tomorrow";
-            next_1_stop_text="";
-            next_2_stop_text="";
-            flag=1;
+          if(currentDay=="Friday" || currentDay=="Saturday")
+          {
+            if (!stops[stops.length - 1].time || timeToSeconds(currtime) > timeToSeconds(stops[stops.length - 1].time) || timeToSeconds(currtime)<timeToSeconds(stops[0].time)) {
+            next_stop = "Shuttle service is closed. The next bus will start from 10:00 AM";
+            next_1_stop_text = "";
+            next_2_stop_text = "";
+            flag = 1;
+            }
+          }
+          else{
+            if (!stops[stops.length - 1].time || timeToSeconds(currtime) > timeToSeconds(stops[stops.length - 1].time) || timeToSeconds(currtime)<timeToSeconds(stops[0].time)) {
+              next_stop = "Shuttle service is closed. The next bus will start from 08:00 AM";
+              next_1_stop_text = "";
+              next_2_stop_text = "";
+              flag = 1;
+            }
           }
           // Update marker on the map
           if (marker) {
