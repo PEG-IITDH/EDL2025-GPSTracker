@@ -447,7 +447,7 @@ input:checked ~ .slide {
               <li><a href="static_webpage_maingate.html"><i class="fas fa-tv"></i> Maingate Stop</a></li>
               <li><a href="static_webpage_A1.html"><i class="fas fa-tv"></i> A1-A2 block</a></li>
               <li><a href="static_webpage_hostel.html"><i class="fas fa-tv"></i> Hostel PC</a></li>
-              <li><a href="static_webpage_bhoopali.html"><i class="fas fa-tv"></i> Bhoopali Stop</a></li>
+              <li><a href="static_webpage_NFSU_Main_Gate.html"><i class="fas fa-tv"></i> NFSU_Main_Gate Stop</a></li>
               <li><a href="static_webpage_clt.html"><i class="fas fa-tv"></i> CLT Stop</a></li>
               <li><a href="static_webpage_busstand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
               <li style="margin-top: 1rem; color: #eaeaead9; font-weight: 300;">For more info</li>
@@ -491,7 +491,7 @@ input:checked ~ .slide {
                         <option value="">Select starting point</option>
                         <option value="Hostel PC">Hostel PC</option>
                         <option value="Main Gate">Main Gate</option>
-                        <option value="Bhoopali">Bhoopali</option>
+                        <option value="NFSU_Main_Gate">NFSU_Main_Gate</option>
                         <option value="Jubli Circle">Jubli Circle</option>
                         <option value="New Bus Stand Dharwad">New Bus Stand Dharwad</option>
                         <option value="A1-A2 Block">A1-A2 Block</option>
@@ -506,7 +506,7 @@ input:checked ~ .slide {
                         <option value="">Select destination</option>
                         <option value="Hostel PC">Hostel PC</option>
                         <option value="Main Gate">Main Gate</option>
-                        <option value="Bhoopali">Bhoopali</option>
+                        <option value="NFSU_Main_Gate">NFSU_Main_Gate</option>
                         <option value="Jubli Circle">Jubli Circle</option>
                         <option value="New Bus Stand Dharwad">New Bus Stand Dharwad</option>
                         <option value="A1-A2 Block">A1-A2 Block</option>
@@ -571,7 +571,7 @@ input:checked ~ .slide {
 
     const stops_popups = [
       { coords: [latitude_stop1, longitude_stop1], label: "A1 block" },
-      { coords: [latitude_stop2, longitude_stop2], label: "Bhoopali" },
+      { coords: [latitude_stop2, longitude_stop2], label: "NFSU_Main_Gate" },
       { coords: [latitude_stop3, longitude_stop3], label: "New Bus Stand Dharwad" },
       { coords: [latitude_stop4, longitude_stop4], label: "Hostels" },
       { coords: [latitude_stop5, longitude_stop5], label: "Admin block & Maingate Stop" },
@@ -645,7 +645,7 @@ input:checked ~ .slide {
     const stops = [
     { name: "Hostel PC", time: "08:00:00", latitude: 40.7128, longitude: -74.0060 },
       { name: "Main Gate", time: "08:05:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Bhoopali", time: "08:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "NFSU_Main_Gate", time: "08:25:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Jubli Circle", time: "08:40:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "08:50:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "U-Flex Main Gate", time: "09:05:00", latitude: 51.5074, longitude: -0.1278 },
@@ -680,25 +680,25 @@ input:checked ~ .slide {
       { name: "Hostel PC", time: "14:50:00", latitude: 40.7128, longitude: -74.0060 },
       { name: "A1-A2 Block", time: "14:55:00", latitude: 34.0522, longitude: -118.2437 },
       { name: "Main Gate", time: "15:00:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "15:20:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "16:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "NFSU_Main_Gate", time: "15:20:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "NFSU_Main_Gate", time: "16:35:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "16:50:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "A1-A2 Block", time: "16:55:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "17:00:00", latitude: 51.5074, longitude: -0.1278 },
       // { name: "Hostel PC", time: "17:15:00", latitude: 40.7128, longitude: -74.0060 },
       // { name: "A1-A2 Block", time: "17:20:00", latitude: 34.0522, longitude: -118.2437 },
       // { name: "Main Gate", time: "17:25:00", latitude: 51.5074, longitude: -0.1278 },
-      // { name: "Bhoopali", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
-      // { name: "Bhoopali", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "NFSU_Main_Gate", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "NFSU_Main_Gate", time: "17:45:00", latitude: 51.5074, longitude: -0.1278 },
       // { name: "Main Gate", time: "18:00:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "18:25:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "18:30:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "High Court", time: "18:45:00", latitude: 51.5074, longitude: -0.1278 },
-      // { name: "Bhoopali", time: "18:40:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "NFSU_Main_Gate", time: "18:40:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "19:00:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "19:05:00", latitude: 51.5074, longitude: -0.1278 },
-      // { name: "Bhoopali", time: "19:25:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "19:30:00", latitude: 51.5074, longitude: -0.1278 },
+      // { name: "NFSU_Main_Gate", time: "19:25:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "NFSU_Main_Gate", time: "19:30:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "19:40:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "19:45:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "19:50:00", latitude: 40.7128, longitude: -74.0060 },
@@ -706,14 +706,14 @@ input:checked ~ .slide {
       { name: "High Court", time: "20:10:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "20:25:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "20:30:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "20:55:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "NFSU_Main_Gate", time: "20:55:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "21:05:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "21:10:00", latitude: 51.5074, longitude: -0.1278 }
     ];
     const stop2 = [
     { name: "Hostel PC", time: "10:00:00", latitude: 40.7128, longitude: -74.0060 },
       { name: "Main Gate", time: "10:05:00", latitude: 34.0522, longitude: -118.2437 },
-      { name: "Bhoopali", time: "10:20:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "NFSU_Main_Gate", time: "10:20:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "10:40:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "10:50:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "High Court", time: "11:15:00", latitude: 51.5074, longitude: -0.1278 },
@@ -724,7 +724,7 @@ input:checked ~ .slide {
       { name: "High Court", time: "12:50:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "13:05:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "13:15:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "13:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "NFSU_Main_Gate", time: "13:35:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "13:50:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "13:55:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "17:30:00", latitude: 40.7128, longitude: -74.0060 },
@@ -732,7 +732,7 @@ input:checked ~ .slide {
       { name: "High Court", time: "17:50:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "18:05:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "18:10:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "18:30:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "NFSU_Main_Gate", time: "18:30:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "18:40:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "18:45:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "19:35:00", latitude: 40.7128, longitude: -74.0060 },
@@ -740,7 +740,7 @@ input:checked ~ .slide {
       { name: "High Court", time: "19:55:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "20:10:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "New Bus Stand Dharwad", time: "20:15:00", latitude: 51.5074, longitude: -0.1278 },
-      { name: "Bhoopali", time: "20:35:00", latitude: 51.5074, longitude: -0.1278 },
+      { name: "NFSU_Main_Gate", time: "20:35:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Main Gate", time: "20:45:00", latitude: 51.5074, longitude: -0.1278 },
       { name: "Hostel PC", time: "20:50:00", latitude: 51.5074, longitude: -0.1278 }
     ];
