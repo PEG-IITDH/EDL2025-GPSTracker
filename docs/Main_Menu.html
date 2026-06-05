@@ -541,8 +541,22 @@ input:checked ~ .slide {
         </label>
       </nav>
       <div class="sidebar">
-        <img src="only_logo.png" alt="Logo" class="logo">
-        <img src="electronics_logoo.png" alt="Logo" class="logo">
+    <div class="logo-container">
+      <img src="only_logo.png" alt="IITDH Logo" class="logo">
+      <img src="electronics_logoo.png" alt="Electronics Logo" class="logo">
+    </div>
+.logo-container {
+    position: absolute;
+    top: 15px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.logo {
+    width: 70px;
+}
         <div class="headingmain">Bus Tracking System</div>
         
         <p class="sidetext">For live tracking of bus click down</p>
