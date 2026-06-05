@@ -204,7 +204,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background-image: url('IITDH_logo.png');
+      background-image: url('../Pics/IITDH_logo.png');
       background-repeat: no-repeat;
       background-position: center;
       background-size: 50%;
@@ -325,8 +325,8 @@
       left: 50%;
       transform: translateX(-50%);
       display: grid;
-      grid-template-columns: repeat(3, 180px);
-      gap: 20px 30px;
+      grid-template-columns: repeat(2, 180px);
+      gap: 16px 30px;
       justify-content: center;
       z-index: 1;
     }
@@ -374,6 +374,11 @@
     .mini-button:hover .slide-bg { left: 0; }
     .mini-button:hover span       { color: #89288f; }
 
+    .button-grid .mini-button:last-child {
+      grid-column: 1 / -1;
+      justify-self: center;
+    }
+
     /* ─── Footer Notes ─────────────────────────────────── */
     .footer-notes {
       position: absolute;
@@ -400,66 +405,101 @@
     /* ─── MOBILE ───────────────────────────────────────── */
     @media (max-width: 600px) {
       html, body {
-        overflow: auto; /* allow scroll on mobile */
+        height: 100dvh;
+        overflow: hidden;
       }
 
       .page-wrapper {
-        height: auto;
-        min-height: 100vh;
+        height: 100dvh;
+        min-height: 100dvh;
       }
 
       .sidebar {
-        min-height: 95vh;
+        flex: 1;
+        min-height: 0;
+        height: auto;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 8px 10px 72px;
+        overflow: hidden;
       }
 
       .sidebar::before {
-        background-image: url('IITDH_logo2.jpg');
+        background-image: url('../Pics/IITDH_logo2.jpg');
         background-size: 70%;
       }
 
       .headingmain {
-        font-size: 1.35rem;
-        top: 10px;
-        left: 55%;
-        width: 58%;
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        width: 100%;
+        padding-left: 72px;
+        padding-right: 8px;
+        font-size: 1.2rem;
+        line-height: 1.15;
+        white-space: normal;
       }
 
       .iit-logo      { width: 55px; }
       .electronics-logo { width: 42px; }
 
       .sidetext {
-        top: 19%;
+        position: relative;
+        top: auto;
         font-size: 1rem;
+        margin: 22px 0 0;
       }
 
       .main-button {
-        top: 25%;
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
         width: 240px;
-        height: 60px;
+        height: 54px;
       }
 
       .sidetext2 {
-        top: 42%;
+        position: relative;
+        top: auto;
         font-size: 1rem;
+        margin: 8px 0 0;
       }
 
       .button-grid {
-        top: 49%;
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
         grid-template-columns: repeat(2, 150px);
-        gap: 15px 20px;
+        gap: 10px 12px;
       }
 
       .mini-button {
         width: 150px;
-        height: 50px;
+        height: 44px;
         font-size: 0.75em;
       }
 
       .footer-notes {
-        position: relative;
-        bottom: auto;
-        margin-top: 20px;
-        padding-bottom: 20px;
+        position: fixed;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+        left: 0;
+        right: 0;
+        margin-top: 0;
+        padding: 0 12px;
+        gap: 2px;
+        font-size: 0.76rem;
+        line-height: 1.2;
+        text-align: center;
+        pointer-events: auto;
+      }
+
+      .footer-notes p {
+        max-width: 100%;
+        overflow-wrap: anywhere;
       }
     }
 
@@ -468,7 +508,7 @@
       .headingmain { font-size: 1.8rem; }
 
       .button-grid {
-        grid-template-columns: repeat(3, 160px);
+        grid-template-columns: repeat(2, 160px);
         gap: 18px 22px;
       }
 
@@ -500,13 +540,14 @@
             <li class="section-label">Live Bus Tracking</li>
             <li><a href="Bus_Tracking.html"><i class="fa-solid fa-location-dot"></i> Track Bus</a></li>
             <li class="section-label">Monitor Stops</li>
-            <li><a href="static_webpage_maingate.html"><i class="fas fa-tv"></i> Main Gate</a></li>
-            <li><a href="static_webpage_A1.html"><i class="fas fa-tv"></i> A1-A2 block</a></li>
-            <li><a href="static_webpage_hostel.html"><i class="fas fa-tv"></i> Hostel</a></li>
-            <li><a href="static_webpage_NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
-            <li><a href="static_webpage_clt.html"><i class="fas fa-tv"></i> CLT</a></li>
-            <li><a href="static_webpage_busstand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
-            <li class="section-label">For more info</li>
+            <li><a href="Main_Gate.html"><i class="fas fa-tv"></i> Main Gate</a></li>
+            <li><a href="A1.html"><i class="fas fa-tv"></i> A1</a></li>
+            <li><a href="A2.html"><i class="fas fa-tv"></i> A2</a></li>
+            <li><a href="Hostel.html"><i class="fas fa-tv"></i> Hostel</a></li>
+            <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
+            <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
+            <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
+            <li class="section-label">More Information</li>
             <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
           </ul>
         </div>
@@ -516,7 +557,7 @@
 
       <!-- Top-right logo -->
       <a href="https://www.iitdh.ac.in/hi" target="_blank" class="navbar-logo-link">
-        <img src="logo-intranet-white.png" alt="IIT DH Logo">
+        <img src="../Pics/logo-intranet-white.png" alt="IIT DH Logo">
       </a>
     </nav>
 
@@ -525,15 +566,15 @@
 
       <!-- Logos top-left -->
       <div class="logo-container">
-        <img src="only_logo.png"         alt="IITDH Logo"      class="iit-logo">
-        <img src="electronics_club_logo.png" alt="Electronics Logo" class="electronics-logo">
+        <img src="../Pics/only_logo.png"         alt="IITDH Logo"      class="iit-logo">
+        <img src="../Pics/electronics_club_logo.png" alt="Electronics Logo" class="electronics-logo">
       </div>
 
       <!-- Page title -->
       <div class="headingmain">Bus Tracking System</div>
 
       <!-- Live track prompt + button -->
-      <p class="sidetext">For live tracking of bus click below</p>
+      <p class="sidetext">Click below for live bus tracking.</p>
 
       <a href="Bus_Tracking.html" class="main-button">
         <div class="slide-bg"></div>
@@ -541,22 +582,23 @@
       </a>
 
       <!-- Stop monitoring prompt + grid -->
-      <p class="sidetext2">Click below to monitor stops</p>
+      <p class="sidetext2">Click below to monitor stops.</p>
 
       <div class="button-grid">
-        <a href="static_webpage_hostel.html"  class="mini-button"><div class="slide-bg"></div><span>Hostel</span></a>
-        <a href="static_webpage_maingate.html" class="mini-button"><div class="slide-bg"></div><span>Maingate</span></a>
-        <a href="static_webpage_A1.html"       class="mini-button"><div class="slide-bg"></div><span>A1-A2</span></a>
-        <a href="static_webpage_NFSU.html"     class="mini-button"><div class="slide-bg"></div><span>NFSU</span></a>
-        <a href="static_webpage_clt.html"      class="mini-button"><div class="slide-bg"></div><span>CLT</span></a>
-        <a href="static_webpage_busstand.html" class="mini-button"><div class="slide-bg"></div><span>New Bus Stand</span></a>
+        <a href="Main_Gate.html" class="mini-button"><div class="slide-bg"></div><span>Main Gate</span></a>
+        <a href="A1.html"       class="mini-button"><div class="slide-bg"></div><span>A1</span></a>
+        <a href="A2.html"       class="mini-button"><div class="slide-bg"></div><span>A2</span></a>
+        <a href="Hostel.html"  class="mini-button"><div class="slide-bg"></div><span>Hostel</span></a>
+        <a href="NFSU.html"     class="mini-button"><div class="slide-bg"></div><span>NFSU</span></a>
+        <a href="CLT.html"      class="mini-button"><div class="slide-bg"></div><span>CLT</span></a>
+        <a href="Bus_Stand.html" class="mini-button"><div class="slide-bg"></div><span>New Bus Stand</span></a>
       </div>
 
       <!-- Footer notes -->
       <div class="footer-notes">
-        <p style="color: red;">If any issue(s), contact: <a href="mailto:ee23bt041@iitdh.ac.in" style="color:red;">ee23bt041@iitdh.ac.in</a></p>
-        <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog">Feedback!</a></p>
-        <p>For more info <a href="About.html">Click here!</a></p>
+            <p style="color: red;">For any issues, contact: <a href="mailto:ee23bt041@iitdh.ac.in" style="color:red;">ee23bt041@iitdh.ac.in</a></p>
+        <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog">feedback!</a></p>
+        <p>For more information, <a href="About.html">click here</a>.</p>
       </div>
 
     </div><!-- /.sidebar -->
