@@ -43,7 +43,6 @@
       height: 100%;
       font-family: 'Poppins', sans-serif;
       background: linear-gradient(145deg, #fafafa, #f0f0f0);
-      overflow: hidden; /* prevent double scroll */
     }
 
     /* ─── Page Wrapper ─────────────────────────────────── */
@@ -191,7 +190,8 @@
     .sidebar {
       flex: 1;
       position: relative;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -236,10 +236,11 @@
 
     /* ─── Heading ──────────────────────────────────────── */
     .headingmain {
-      position: absolute;
-      top: 12px;
-      left: 50%;
-      transform: translateX(-50%);
+      position: relative;
+      top: auto;
+      left: auto;
+      transform: none;
+      margin-top: 16px;
       font-size: 2.4rem;
       font-family: 'Poppins', sans-serif;
       color: #89288f;
@@ -251,8 +252,9 @@
 
     /* ─── Live Track Button ────────────────────────────── */
     .sidetext {
-      position: absolute;
-      top: 22%;
+      position: relative;
+      top: auto;
+      margin-top: 28px;
       font-weight: 600;
       font-size: 1.2rem;
       text-align: center;
@@ -261,10 +263,11 @@
     }
 
     .main-button {
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translateX(-50%);
+      position: relative;
+      top: auto;
+      left: auto;
+      transform: none;
+      margin-top: 16px;
       display: inline-flex;
       height: 70px;
       width: 280px;
@@ -310,8 +313,9 @@
 
     /* ─── Mini Buttons Grid ────────────────────────────── */
     .sidetext2 {
-      position: absolute;
-      top: 51%;
+      position: relative;
+      top: auto;
+      margin-top: 24px;
       font-weight: 600;
       font-size: 1.2rem;
       text-align: center;
@@ -320,10 +324,11 @@
     }
 
     .button-grid {
-      position: absolute;
-      top: 58%;
-      left: 50%;
-      transform: translateX(-50%);
+      position: relative;
+      top: auto;
+      left: auto;
+      transform: none;
+      margin-top: 16px;
       display: grid;
       grid-template-columns: repeat(2, 180px);
       gap: 16px 30px;
@@ -381,8 +386,9 @@
 
     /* ─── Footer Notes ─────────────────────────────────── */
     .footer-notes {
-      position: absolute;
-      bottom: 12px;
+      position: relative;
+      margin-top: auto;
+      padding: 10px 12px 14px;
       left: 0;
       right: 0;
       display: flex;
@@ -419,9 +425,11 @@
         min-height: 0;
         height: auto;
         justify-content: flex-start;
+        align-items: center;
         gap: 10px;
-        padding: 8px 10px 72px;
-        overflow: hidden;
+        padding: 8px 10px 80px;
+        overflow-y: auto;
+        overflow-x: hidden;
       }
 
       .sidebar::before {
@@ -450,6 +458,8 @@
         top: auto;
         font-size: 1rem;
         margin: 22px 0 0;
+        text-align: center;
+        width: 100%;
       }
 
       .main-button {
@@ -466,6 +476,8 @@
         top: auto;
         font-size: 1rem;
         margin: 8px 0 0;
+        text-align: center;
+        width: 100%;
       }
 
       .button-grid {
@@ -475,6 +487,10 @@
         transform: none;
         grid-template-columns: repeat(2, 150px);
         gap: 10px 12px;
+        justify-content: center;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
       }
 
       .mini-button {
@@ -485,16 +501,17 @@
 
       .footer-notes {
         position: fixed;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
         left: 0;
         right: 0;
         margin-top: 0;
-        padding: 0 12px;
+        padding: 6px 12px 4px;
         gap: 2px;
         font-size: 0.76rem;
         line-height: 1.2;
         text-align: center;
         pointer-events: auto;
+        background: linear-gradient(to top, rgba(250,250,250,0.98) 80%, transparent);
       }
 
       .footer-notes p {
