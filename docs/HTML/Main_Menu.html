@@ -5,22 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bus Tracking System</title>
 
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-  <!-- Google Fonts: Poppins (correct spelling) -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PXLX7BYBKZ"></script>
@@ -32,30 +18,28 @@
   </script>
 
   <style>
-    /* ─── Reset & Base ─────────────────────────────────── */
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     html, body {
-      height: 100%;
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(145deg, #fafafa, #f0f0f0);
+      background: #f4f0f5;
+      height: 100%;
+      overflow: hidden;
     }
 
-    /* ─── Page Wrapper ─────────────────────────────────── */
+    /* ── Page wrapper: navbar + content stacked ── */
     .page-wrapper {
       height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
-    /* ─── Navbar ───────────────────────────────────────── */
+    /* ════════════════════════════════════════════
+       NAVBAR
+    ════════════════════════════════════════════ */
     .navbar-bar {
-      height: 5vh;
-      min-height: 36px;
+      height: 48px;
       background-color: #89288f;
       color: white;
       display: flex;
@@ -64,475 +48,343 @@
       font-size: 1rem;
       font-weight: 600;
       position: relative;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
       flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
 
-    /* IIT logo top-right */
+    /* Top-right IIT intranet logo in navbar */
     .navbar-logo-link {
       position: absolute;
       right: 10px;
       top: 50%;
       transform: translateY(-50%);
-      display: flex;
-      align-items: center;
     }
+    .navbar-logo-link img { height: 28px; width: auto; }
 
-    .navbar-logo-link img {
-      height: 28px;
-      width: auto;
-    }
-
-    /* ─── Hamburger Toggle ─────────────────────────────── */
-    .hamburger-input {
-      display: none;
-      visibility: hidden;
-    }
+    /* ── Hamburger ── */
+    .hamburger-input { display: none; }
 
     .toggle {
       position: absolute;
-      left: 7px;
+      left: 10px;
       top: 50%;
       transform: translateY(-50%);
       height: 30px;
       width: 30px;
       cursor: pointer;
       border-radius: 2px;
-      background-color: #89288f;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+      background: #89288f;
       z-index: 1003;
     }
-
     .toggle .common {
       position: absolute;
-      height: 2px;
-      width: 20px;
-      background-color: white;
+      height: 2px; width: 20px;
+      background: white;
       border-radius: 50px;
-      transition: 0.5s ease;
+      transition: 0.4s ease;
     }
+    .toggle .top_line    { top: 30%; left: 50%; transform: translate(-50%,-50%); }
+    .toggle .middle_line { top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    .toggle .bottom_line { top: 70%; left: 50%; transform: translate(-50%,-50%); }
 
-    .toggle .top_line    { top: 30%; left: 50%; transform: translate(-50%, -50%); }
-    .toggle .middle_line { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-    .toggle .bottom_line { top: 70%; left: 50%; transform: translate(-50%, -50%); }
+    .hamburger-input:checked ~ .toggle .top_line    { left:2px; top:14px; width:25px; transform:rotate(45deg); }
+    .hamburger-input:checked ~ .toggle .bottom_line { left:2px; top:14px; width:25px; transform:rotate(-45deg); }
+    .hamburger-input:checked ~ .toggle .middle_line { opacity:0; transform:translateX(20px); }
+    .hamburger-input:checked ~ .slide               { transform:translateX(0); }
 
-    .hamburger-input:checked ~ .toggle .top_line    { left: 2px; top: 14px; width: 25px; transform: rotate(45deg); }
-    .hamburger-input:checked ~ .toggle .bottom_line { left: 2px; top: 14px; width: 25px; transform: rotate(-45deg); }
-    .hamburger-input:checked ~ .toggle .middle_line { opacity: 0; transform: translateX(20px); }
-    .hamburger-input:checked ~ .slide               { transform: translateX(0); }
-
-    /* ─── Slide-out Menu ───────────────────────────────── */
+    /* ── Slide-out drawer ── */
     .slide {
-      height: 100%;
-      width: 200px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background-color: #89288f;
-      transition: transform 0.5s ease;
-      transform: translateX(-200px);
+      width: 210px; height: 100%;
+      position: fixed; top: 0; left: 0;
+      background: #89288f;
+      transform: translateX(-210px);
+      transition: transform 0.4s ease;
       z-index: 1002;
-      box-shadow: 1px 0 10px rgba(0,0,0,0.2);
       overflow-y: auto;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.25);
     }
-
     .slide h1 {
-      color: #ffffffe2;
-      font-weight: bold;
+      color: #ffffffe2; font-weight: 700;
       text-align: right;
-      padding: 20px 50px 10px 0;
-      pointer-events: none;
-      font-size: 1.3rem;
+      padding: 18px 16px 10px 0;
+      font-size: 1.2rem;
     }
-
-    .slide ul {
-      padding: 0 0 20px 0;
-    }
-
-    .slide ul li {
-      list-style: none;
-    }
-
+    .slide ul { padding-bottom: 24px; }
+    .slide ul li { list-style: none; }
     .slide ul li.section-label {
-      margin-top: 1rem;
+      margin-top: 12px;
       color: #eaeaead9;
-      font-weight: 300;
-      font-size: 0.8rem;
-      padding: 0 10px;
+      font-weight: 300; font-size: 0.75rem;
+      padding: 0 12px;
     }
-
     .slide ul li a {
-      color: #ffffffe2;
-      font-weight: 500;
-      padding: 6px 10px;
+      color: #ffffffe2; font-weight: 500;
+      padding: 6px 12px;
       display: block;
-      text-transform: capitalize;
       text-decoration: none;
-      transition: 0.2s ease-out;
+      transition: 0.2s;
     }
+    .slide ul li a i { width: 26px; text-align: center; }
+    .slide ul li:not(.section-label):hover a { color: #89288f; background: white; }
+    .slide ul li:not(.section-label):hover a i { color: #89288f; }
 
-    .slide ul li a i {
-      width: 30px;
-      text-align: center;
-      color: #ffffffe2;
-    }
-
-    .slide ul li:not(.section-label):hover a {
-      color: #89288f;
-      background-color: white;
-    }
-
-    .slide ul li:not(.section-label):hover a i {
-      color: #89288f;
-    }
-
-    /* ─── Main Content (Sidebar) ───────────────────────── */
+    /* ════════════════════════════════════════════
+       MAIN CONTENT AREA
+    ════════════════════════════════════════════ */
     .sidebar {
       flex: 1;
-      position: relative;
-      overflow-y: auto;
-      overflow-x: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      background: linear-gradient(145deg, #fafafa, #f0f0f0);
+      padding: 0 16px 10px;
+      position: relative;
+      overflow: hidden;
+      justify-content: space-evenly;
     }
 
-    /* Watermark logo */
+    /* Watermark — position:fixed so it never affects sidebar overflow */
     .sidebar::before {
       content: "";
-      position: absolute;
-      inset: 0;
-      background-image: url('../Pics/IITDH_logo.png');
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 50%;
-      opacity: 0.16;
+      position: fixed;
+      top: 48px; left: 0; right: 0; bottom: 0;
+      background: url('../Pics/IITDH_logo.png') no-repeat center / 45%;
+      opacity: 0.13;
+      pointer-events: none;
       z-index: 0;
     }
 
-    /* ─── Logo Container (top-left) ────────────────────── */
-    .logo-container {
-      position: absolute;
-      top: 15px;
-      left: 10px;
+    /* Everything inside above watermark */
+    .sidebar > * { position: relative; z-index: 1; }
+
+    /* ── Top logos row ── */
+    .logos-row {
+      width: 100%;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 6px;
-      z-index: 1;
+      justify-content: space-between;
+      padding: 0;
     }
 
-    .iit-logo {
-      width: 70px;
+    .logos-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .iit-logo       { width: 62px;  height: auto; }
+    .electronics-logo { width: 58px; height: auto; }
+
+    /* Electronics club on extreme right */
+    .logos-right img {
+      width: 58px;
       height: auto;
     }
 
-    .electronics-logo {
-      width: 70px;
-      height: auto;
-    }
-
-    /* ─── Heading ──────────────────────────────────────── */
+    /* ── Page heading ── */
     .headingmain {
-      position: relative;
-      top: auto;
-      left: auto;
-      transform: none;
-      margin-top: 16px;
-      font-size: 2.4rem;
-      font-family: 'Poppins', sans-serif;
-      color: #89288f;
+      width: 100%;
+      margin: 0;
+      font-size: 2rem;
       font-weight: 700;
+      color: #89288f;
       text-align: center;
       white-space: nowrap;
-      z-index: 1;
     }
 
-    /* ─── Live Track Button ────────────────────────────── */
+    /* ── Subtext ── */
     .sidetext {
-      position: relative;
-      top: auto;
-      margin-top: 28px;
+      margin: 0;
       font-weight: 600;
-      font-size: 1.2rem;
-      text-align: center;
-      z-index: 1;
+      font-size: 1rem;
       color: #333;
+      text-align: center;
     }
 
+    /* ── Live Track button ── */
     .main-button {
-      position: relative;
-      top: auto;
-      left: auto;
-      transform: none;
-      margin-top: 16px;
+      margin: 0;
       display: inline-flex;
-      height: 70px;
-      width: 280px;
-      background-color: #89288f;
-      border: 2.35px solid #89288f;
-      color: #f0f0f0;
-      text-transform: uppercase;
-      font-size: 1em;
-      font-weight: 600;
-      letter-spacing: 1px;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-      cursor: pointer;
-      box-shadow: 1px 0 10px rgba(0,0,0,0.4);
-      z-index: 1;
+      height: 52px;
+      width: 240px;
+      background: #89288f;
+      border: 2px solid #89288f;
+      color: #f0f0f0;
       text-decoration: none;
+      text-transform: uppercase;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
     }
-
     .main-button .slide-bg {
       position: absolute;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background: #f0f0f0;
-      top: 0;
-      left: -100%;
-      transition: left 0.35s ease;
+      transform: translateX(-100%);
+      transition: transform 0.35s ease;
       z-index: 1;
     }
-
     .main-button span {
+      position: relative; z-index: 2;
       color: #f0f0f0;
-      font-size: 1.1rem;
-      position: relative;
-      z-index: 2;
-      text-decoration: none;
+      font-family: 'Franklin Gothic Medium', Arial Narrow, Arial, sans-serif;
       transition: color 0.35s ease;
-      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     }
+    .main-button:hover .slide-bg { transform: translateX(0); }
+    .main-button:hover span      { color: #89288f; }
 
-    .main-button:hover .slide-bg { left: 0; }
-    .main-button:hover span       { color: #89288f; }
-
-    /* ─── Mini Buttons Grid ────────────────────────────── */
+    /* ── Stop grid ── */
     .sidetext2 {
-      position: relative;
-      top: auto;
-      margin-top: 24px;
+      margin: 0;
       font-weight: 600;
-      font-size: 1.2rem;
-      text-align: center;
-      z-index: 1;
+      font-size: 1rem;
       color: #333;
+      text-align: center;
     }
 
     .button-grid {
-      position: relative;
-      top: auto;
-      left: auto;
-      transform: none;
-      margin-top: 16px;
+      margin: 0;
       display: grid;
-      grid-template-columns: repeat(2, 180px);
-      gap: 16px 30px;
+      grid-template-columns: repeat(2, 170px);
+      gap: 10px 20px;
       justify-content: center;
-      z-index: 1;
     }
 
     .mini-button {
-      height: 55px;
-      width: 180px;
-      background-color: #89288f;
+      height: 48px;
+      width: 170px;
+      background: #89288f;
       border: 2px solid #89288f;
       color: #f0f0f0;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      cursor: pointer;
-      box-shadow: 1px 0 8px rgba(0,0,0,0.3);
+      text-decoration: none;
       text-transform: uppercase;
       font-weight: 600;
-      font-size: 0.85em;
-      letter-spacing: 1px;
+      font-size: 0.8rem;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      position: relative;
       overflow: hidden;
-      text-decoration: none;
     }
-
     .mini-button .slide-bg {
       position: absolute;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background: #f0f0f0;
-      top: 0;
-      left: -100%;
-      transition: left 0.35s ease;
+      transform: translateX(-100%);
+      transition: transform 0.35s ease;
       z-index: 1;
     }
-
     .mini-button span {
+      position: relative; z-index: 2;
       color: #f0f0f0;
-      font-size: 0.9rem;
-      position: relative;
-      z-index: 2;
-      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+      font-family: 'Franklin Gothic Medium', Arial Narrow, Arial, sans-serif;
       transition: color 0.35s ease;
     }
+    .mini-button:hover .slide-bg { transform: translateX(0); }
+    .mini-button:hover span      { color: #89288f; }
 
-    .mini-button:hover .slide-bg { left: 0; }
-    .mini-button:hover span       { color: #89288f; }
+    /* 8 buttons = 4 rows of 2, perfectly symmetric — no special last-child needed */
 
-    .button-grid .mini-button:last-child {
-      grid-column: 1 / -1;
-      justify-self: center;
-    }
-
-    /* ─── Footer Notes ─────────────────────────────────── */
+    /* ── Footer ── */
     .footer-notes {
-      position: relative;
-      margin-top: auto;
-      padding: 10px 12px 14px;
-      left: 0;
-      right: 0;
+      margin: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
-      z-index: 1;
-      font-size: 0.85rem;
+      gap: 2px;
+      font-size: 0.8rem;
+      text-align: center;
     }
-
     .footer-notes p { margin: 0; }
-
-    .footer-notes a {
-      color: #89288f;
-      text-decoration: none;
-    }
-
+    .footer-notes a { color: #89288f; text-decoration: none; }
     .footer-notes a:hover { text-decoration: underline; }
 
-    /* ─── MOBILE ───────────────────────────────────────── */
+    /* ════════════════════════════════════════════
+       MOBILE  ≤ 600px
+    ════════════════════════════════════════════ */
     @media (max-width: 600px) {
       html, body {
-        height: 100dvh;
-        overflow: hidden;
+        height: auto;
+        overflow: auto;
       }
 
       .page-wrapper {
-        height: 100dvh;
+        height: auto;
         min-height: 100dvh;
+        overflow: visible;
       }
 
       .sidebar {
-        flex: 1;
-        min-height: 0;
-        height: auto;
+        padding: 0 12px 20px;
+        overflow: visible;
         justify-content: flex-start;
-        align-items: center;
-        gap: 10px;
-        padding: 8px 10px 80px;
-        overflow-y: auto;
-        overflow-x: hidden;
       }
 
-      .sidebar::before {
-        background-image: url('../Pics/IITDH_logo2.jpg');
-        background-size: 70%;
-      }
+      .logos-row { padding-top: 10px; }
+
+      .iit-logo         { width: 50px; }
+      .electronics-logo { width: 46px; }
+      .logos-right img  { width: 46px; }
 
       .headingmain {
-        position: relative;
-        top: auto;
-        left: auto;
-        transform: none;
-        width: 100%;
-        padding-left: 72px;
-        padding-right: 8px;
-        font-size: 1.2rem;
-        line-height: 1.15;
+        font-size: 1.3rem;
         white-space: normal;
+        margin-top: 8px;
+        line-height: 1.2;
       }
 
-      .iit-logo      { width: 55px; }
-      .electronics-logo { width: 42px; }
-
-      .sidetext {
-        position: relative;
-        top: auto;
-        font-size: 1rem;
-        margin: 22px 0 0;
-        text-align: center;
-        width: 100%;
+      .sidetext, .sidetext2 {
+        font-size: 0.92rem;
+        margin-top: 14px;
       }
 
       .main-button {
-        position: relative;
-        top: auto;
-        left: auto;
-        transform: none;
-        width: 240px;
-        height: 54px;
-      }
-
-      .sidetext2 {
-        position: relative;
-        top: auto;
-        font-size: 1rem;
-        margin: 8px 0 0;
-        text-align: center;
-        width: 100%;
+        width: min(260px, 80vw);
+        height: 52px;
+        font-size: 0.9rem;
+        margin-top: 10px;
       }
 
       .button-grid {
-        position: relative;
-        top: auto;
-        left: auto;
-        transform: none;
-        grid-template-columns: repeat(2, 150px);
-        gap: 10px 12px;
-        justify-content: center;
-        width: 100%;
-        margin-left: auto;
-        margin-right: auto;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: min(340px, 92vw);
+        gap: 10px 10px;
+        margin-top: 10px;
       }
 
       .mini-button {
-        width: 150px;
-        height: 44px;
-        font-size: 0.75em;
+        width: 100%;
+        height: 46px;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
       }
 
       .footer-notes {
-        position: fixed;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
-        left: 0;
-        right: 0;
-        margin-top: 0;
-        padding: 6px 12px 4px;
-        gap: 2px;
         font-size: 0.76rem;
-        line-height: 1.2;
-        text-align: center;
-        pointer-events: auto;
-        background: linear-gradient(to top, rgba(250,250,250,0.98) 80%, transparent);
-      }
-
-      .footer-notes p {
-        max-width: 100%;
-        overflow-wrap: anywhere;
+        margin-top: 16px;
+        gap: 3px;
       }
     }
 
-    /* ─── TABLET ───────────────────────────────────────── */
+    /* ════════════════════════════════════════════
+       TABLET  601–900px
+    ════════════════════════════════════════════ */
     @media (min-width: 601px) and (max-width: 900px) {
-      .headingmain { font-size: 1.8rem; }
+      .headingmain { font-size: 1.7rem; }
 
       .button-grid {
-        grid-template-columns: repeat(2, 160px);
-        gap: 18px 22px;
+        grid-template-columns: repeat(2, 150px);
+        gap: 10px 18px;
       }
-
-      .mini-button {
-        width: 160px;
-        height: 52px;
-      }
+      .mini-button { width: 150px; height: 46px; }
     }
   </style>
 </head>
@@ -541,7 +393,6 @@
 
     <!-- ── Navbar ── -->
     <nav class="navbar-bar">
-      <!-- Hamburger (label wraps input + toggle + slide) -->
       <label>
         <input type="checkbox" class="hamburger-input">
         <div class="toggle">
@@ -564,6 +415,7 @@
             <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
             <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
             <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
+            <li><a href="Jubilee_Circle.html"><i class="fas fa-tv"></i> Jubilee Circle</a></li>
             <li class="section-label">More Information</li>
             <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
           </ul>
@@ -572,54 +424,59 @@
 
       Main Menu
 
-      <!-- Top-right logo -->
+      <!-- Top-right intranet logo -->
       <a href="https://www.iitdh.ac.in/hi" target="_blank" class="navbar-logo-link">
-        <img src="../Pics/logo-intranet-white.png" alt="IIT DH Logo">
+        <img src="../Pics/logo-intranet-white.png" alt="IIT DH">
       </a>
     </nav>
 
-    <!-- ── Sidebar / Main Content ── -->
+    <!-- ── Main content ── -->
     <div class="sidebar">
 
-      <!-- Logos top-left -->
-      <div class="logo-container">
-        <img src="../Pics/only_logo.png"         alt="IITDH Logo"      class="iit-logo">
-        <img src="../Pics/electronics_club_logo.png" alt="Electronics Logo" class="electronics-logo">
+      <!-- Logos: IIT left, Electronics right -->
+      <div class="logos-row">
+        <div class="logos-left">
+          <img src="../Pics/only_logo.png" alt="IITDH Logo" class="iit-logo">
+          <img src="../Pics/only_logo2.png" alt="IITDH Logo 2" class="iit-logo" style="display:none">
+        </div>
+        <div class="logos-right">
+          <img src="../Pics/electronics_club_logo.png" alt="Electronics Club">
+        </div>
       </div>
 
-      <!-- Page title -->
+      <!-- Heading -->
       <div class="headingmain">Bus Tracking System</div>
 
-      <!-- Live track prompt + button -->
+      <!-- Live track -->
       <p class="sidetext">Click below for live bus tracking.</p>
-
       <a href="Bus_Tracking.html" class="main-button">
         <div class="slide-bg"></div>
         <span>Live Track Bus</span>
       </a>
 
-      <!-- Stop monitoring prompt + grid -->
+      <!-- Stop buttons -->
       <p class="sidetext2">Click below to monitor stops.</p>
-
       <div class="button-grid">
-        <a href="Main_Gate.html" class="mini-button"><div class="slide-bg"></div><span>Main Gate</span></a>
-        <a href="A1.html"       class="mini-button"><div class="slide-bg"></div><span>A1</span></a>
-        <a href="A2.html"       class="mini-button"><div class="slide-bg"></div><span>A2</span></a>
-        <a href="Hostel.html"  class="mini-button"><div class="slide-bg"></div><span>Hostel</span></a>
-        <a href="NFSU.html"     class="mini-button"><div class="slide-bg"></div><span>NFSU</span></a>
-        <a href="CLT.html"      class="mini-button"><div class="slide-bg"></div><span>CLT</span></a>
-        <a href="Bus_Stand.html" class="mini-button"><div class="slide-bg"></div><span>New Bus Stand</span></a>
+        <a href="Main_Gate.html"      class="mini-button"><div class="slide-bg"></div><span>Main Gate</span></a>
+        <a href="A1.html"             class="mini-button"><div class="slide-bg"></div><span>A1</span></a>
+        <a href="A2.html"             class="mini-button"><div class="slide-bg"></div><span>A2</span></a>
+        <a href="Hostel.html"         class="mini-button"><div class="slide-bg"></div><span>Hostel</span></a>
+        <a href="NFSU.html"           class="mini-button"><div class="slide-bg"></div><span>NFSU</span></a>
+        <a href="CLT.html"            class="mini-button"><div class="slide-bg"></div><span>CLT</span></a>
+        <a href="Bus_Stand.html"      class="mini-button"><div class="slide-bg"></div><span>New Bus Stand</span></a>
+        <a href="Jubilee_Circle.html" class="mini-button"><div class="slide-bg"></div><span>Jubilee Circle</span></a>
       </div>
 
-      <!-- Footer notes -->
+      <!-- Footer -->
       <div class="footer-notes">
-            <p style="color: red;">For any issues, contact: <a href="mailto:ee23bt041@iitdh.ac.in" style="color:red;">ee23bt041@iitdh.ac.in</a></p>
+        <p style="color:red;">For any issues, contact:
+          <a href="mailto:ee23bt041@iitdh.ac.in" style="color:red;">ee23bt041@iitdh.ac.in</a>
+        </p>
         <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog">Feedback!</a></p>
         <p>For more information, <a href="About.html">click here</a>.</p>
       </div>
 
     </div><!-- /.sidebar -->
-
   </div><!-- /.page-wrapper -->
 </body>
 </html>

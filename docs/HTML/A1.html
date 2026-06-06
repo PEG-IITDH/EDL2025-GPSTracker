@@ -6,846 +6,293 @@
 
   <title>A1</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <!-- Leaflet CSS and JS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    
+  <!-- Shared timetable, helpers, and holiday list -->
+  <script src="schedule.js"></script>
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PXLX7BYBKZ"></script>
   <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-PXLX7BYBKZ');
   </script>
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;700&family=Roboto:wght@400;500&display=swap');
+html, body { height:100%; margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(145deg,#fafafa,#f0f0f0); }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+body { display:flex; flex-direction:column; }
+.map-container { background:#fff; box-shadow:2px 2px 5px rgba(0,0,0,.1); width:60%; height:100%; position:relative; z-index:1; }
+#map { width:100%; height:100%; }
+.sidebar { flex:1; padding:20px; background:linear-gradient(145deg,#fafafa,#f0f0f0); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:0; position:relative; width:40%; height:100%; box-shadow:-2px 0 10px rgba(0,0,0,.2); overflow:hidden; }
+.sidebar::before { content:""; position:absolute; top:0; left:0; right:0; bottom:0; background-image:url('../Pics/IITDH_logo2.jpg'); background-repeat:no-repeat; background-position:center; background-size:95%; opacity:.16; z-index:-1; }
+.sidebar h2 { font-size:24px; color:#d42e2e; font-weight:bold; text-align:center; }
+.sidebar h3 { font-size:28px; color:#802485; text-align:center; font-family:Arial,Helvetica,sans-serif; font-weight:bold; }
+.sidebar p { font-size:18px; color:#555; text-align:center; margin:10px 0; }
+.sidebar .updated-time { font-size:20px; color:#802485; font-family:'Roboto',sans-serif; font-weight:500; letter-spacing:.5px; }
+.sidebar .updated-time-not-live { font-size:20px; color:#c47a00; font-family:'Roboto',sans-serif; font-weight:500; letter-spacing:.5px; }
+.yes { display:none; }
+.slide { height:100%; width:200px; position:fixed; top:0; left:0; background-color:#89288f; transition:.5s ease; transform:translateX(-200px); z-index:1002; box-shadow:1px 0 10px rgba(0,0,0,.2); }
+.leaflet-control-zoom { position:fixed !important; top:40px; left:2px; z-index:1000; }
+h1 { color:#ffffffe2; font-weight:bold; text-align:right; padding:10px 0; padding-top:20px; padding-right:50px; pointer-events:none; }
+ul li { list-style:none; }
+ul li a { color:#ffffffe2; font-weight:500; padding:5px 0; display:block; text-transform:capitalize; text-decoration:none; transition:.2s ease-out; }
+ul li:hover a { color:#89288f; background-color:white; }
+ul li a i { width:30px; text-align:center; color:#ffffffe2; }
+input { display:none; visibility:hidden; -webkit-appearance:none; }
+.toggle { position:fixed; height:30px; width:30px; top:2.75px; left:7px; z-index:1003; cursor:pointer; border-radius:2px; background-color:#89288f; box-shadow:2px 0 10px rgba(0,0,0,.2); }
+.toggle .common { position:absolute; height:2px; width:20px; background-color:white; border-radius:50px; transition:.5s ease; }
+.toggle .top_line { top:30%; left:50%; transform:translate(-50%,-50%); }
+.toggle .middle_line { top:50%; left:50%; transform:translate(-50%,-50%); }
+.toggle .bottom_line { top:70%; left:50%; transform:translate(-50%,-50%); }
+input:checked ~ .toggle .top_line { left:2px; top:14px; width:25px; transform:rotate(45deg); }
+input:checked ~ .toggle .bottom_line { left:2px; top:14px; width:25px; transform:rotate(-45deg); }
+input:checked ~ .toggle .middle_line { opacity:0; transform:translateX(20px); }
+input:checked ~ .slide { transform:translateX(0); }
 
-    html, body {
-  height: 100%;
-  margin: 0;
-  font-family: 'Raleway', sans-serif;
-  background: linear-gradient(145deg, #fafafa, #f0f0f0);;
+@media (max-width:768px) {
+  .maincontent { display:flex; flex-direction:column; height:95dvh !important; min-height:0; overflow:hidden; }
+  .map-container { width:100%; height:47dvh; min-height:0; }
+  .sidebar { width:100%; height:48dvh; min-height:0; padding:10px 12px; justify-content:center; overflow:hidden; }
+  .sidebar p { font-size:14px; line-height:1.3; margin:3px 0; }
+  .sidebar .updated-time, .sidebar .updated-time-not-live { font-size:15px; line-height:1.3; }
+  .inner { height:auto !important; width:100%; display:flex; flex-direction:column; justify-content:center; }
+  #heading { margin-top:4px; }
+  .hello { z-index:1001; top:6px; position:fixed; height:30px; left:auto; right:8px; width:30px; }
 }
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+@media (min-width:768px) {
+  .maincontent { display:flex; flex-direction:row; }
+  .map-container { width:60%; }
+  .sidebar { width:40%; }
+  .inner { display:grid; place-content:center; }
+  .hello { z-index:1001; top:1.5px; position:fixed; height:35px; left:96%; width:35px; }
 }
-
-body {
-  /* background-color: #89288f; */
-  display: flex;
-  flex-direction: column;
-}
-
-/* Top navigation bar (5% height) */
-.navbar {
-  height: 5vh;
-  background-color: #89288f;
-  color: white;
-  display: flex;
-  align-items: center;
-  padding-left: 20px;
-  font-weight: bold;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-}
-
-/* Main layout container (95% height) */
-.main-container {
-  height: 95vh;
-  display: flex;
-  flex-direction: row;
-}
-
-/* Map and sidebar */
-.map-container {
-  background: #fff;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-  width: 60%;
-  height: 100%;
-  position: relative;
-  z-index: 1;
-}
-
-#map {
-  width: 100%;
-  height: 100%;
-}
-
-.sidebar {
-  flex: 1;
-  padding: 20px;
-  background: linear-gradient(145deg, #fafafa, #f0f0f0);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 0;
-  position: relative;
-  width: 40%;
-  height: 100%;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-  overflow: hidden; /* Prevent background from spilling out */
-}
-
-/* Add a pseudo-element for the background image */
-.sidebar::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image: url('../Pics/IITDH_logo2.jpg');
-  /* background-image: url('../Pics/IITDH_logo.png'); */
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 95%;
-  opacity: 0.16;
-  z-index: -1; /* This ensures the image stays behind all content */
-}
-
-
-
-.sidebar h2 {
-  font-size: 24px;
-  color: #d42e2e;
-  font-weight: bold;
-  text-align: center;
-}
-
-.sidebar h3 {
-  font-size: 28px;
-  color: #802485;
-  text-align: center;
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: bold;
-}
-
-.sidebar p {
-  font-size: 18px;
-  color: #555;
-  text-align: center;
-  margin: 10px 0;
-}
-
-.sidebar .updated-time {
-  font-size: 20px;
-  color: #802485;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-}
-
-.sidebar .updated-time-not-live {
-  font-size: 20px;
-  color: #c47a00;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-}
-
-.yes {
-  display: none;
-}
-
-/* Sidebar Slide Menu */
-.slide {
-  height: 100%;
-  width: 200px;
-  position: fixed;
-  top: 0; /* below navbar */
-  left: 0;
-  background-color: #89288f;
-  transition: 0.5s ease;
-  transform: translateX(-200px);
-  z-index: 1002;
-  box-shadow: 1px 0 10px rgba(0, 0, 0, 0.2);
-}
-
-.leaflet-control-zoom {
-  position: fixed !important;
-  top: 40px; /* Just below toggle (65px + 5vh navbar) */
-  left: 2px;
-  z-index: 1000;
-}
-
-h1 {
-  color: #ffffffe2;
-  font-weight: bold;
-  text-align: right;
-  padding: 10px 0;
-  padding-top: 20px;
-  padding-right: 50px;
-  pointer-events: none;
-}
-
-ul li {
-  list-style: none;
-}
-
-ul li a {
-  color: #ffffffe2;
-  font-weight: 500;
-  padding: 5px 0;
-  display: block;
-  text-transform: capitalize;
-  text-decoration: none;
-  transition: 0.2s ease-out;
-}
-
-ul li:hover a {
-  color: #89288f;
-  background-color: white;
-}
-
-ul li a i {
-  width: 30px;
-  text-align: center;
-  color: #ffffffe2;
-}
-
-input {
-  display: none;
-  visibility: hidden;
-  -webkit-appearance: none;
-}
-
-.toggle {
-  position: fixed;
-  height: 30px;
-  width: 30px;
-  top: 2.75px; /* aligned with navbar bottom */
-  left: 7px;
-  z-index: 1003;
-  cursor: pointer;
-  border-radius: 2px;
-  background-color: #89288f;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-  
-}
-
-.toggle .common {
-  position: absolute;
-  height: 2px;
-  width: 20px;
-  background-color: white;
-  border-radius: 50px;
-  transition: 0.5s ease;
-}
-
-.toggle .top_line {
-  top: 30%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.toggle .middle_line {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.toggle .bottom_line {
-  top: 70%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-input:checked ~ .toggle .top_line {
-  left: 2px;
-  top: 14px;
-  width: 25px;
-  transform: rotate(45deg);
-}
-
-input:checked ~ .toggle .bottom_line {
-  left: 2px;
-  top: 14px;
-  width: 25px;
-  transform: rotate(-45deg);
-}
-
-input:checked ~ .toggle .middle_line {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
-input:checked ~ .slide {
-  transform: translateX(0);
-}
-/* .hello{
-    z-index: 1001;
-    top: 1.5px;
-    position: absolute;
-    height: 35px;
-    left: 1490px;
-    width: 35px;
-} */
-
-/* Mobile Layout */
-@media (max-width: 768px) {
-.maincontent{
-    display: flex;
-    flex-direction: column;
-    height: 95dvh !important;
-    min-height: 0;
-    overflow: hidden;
-}
-  .map-container {
-    width: 100%;
-    height: 47dvh;
-    min-height: 0;
-  }
-
-  .sidebar {
-    width: 100%;
-    height: 48dvh;
-    min-height: 0;
-    padding: 10px 12px;
-    justify-content: center;
-    overflow: hidden;
-  }
-
-  .sidebar p {
-    font-size: 14px;
-    line-height: 1.3;
-    margin: 3px 0;
-  }
-
-  .sidebar .updated-time,
-  .sidebar .updated-time-not-live {
-    font-size: 15px;
-    line-height: 1.3;
-  }
-
-  .inner {
-    height: auto !important;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  #heading {
-    margin-top: 4px;
-  }
-
-  .btn {
-    padding: 5px 10px;
-    font-size: 14px;
-    margin: 3px 0;
-  }
-
-  .hello{
-    z-index: 1001;
-    top: 6px;
-    position: fixed;
-    height: 30px;
-    left: auto;
-    right: 8px;
-    width: 30px;
-    }
-}
-
-/* Desktop Layout */
-@media (min-width: 768px) {
-.maincontent{
-    display: flex;
-    flex-direction: row;
-}
-  .map-container {
-    width: 60%;
-  }
-
-  .sidebar {
-    width: 40%;
-  }
-
-  .inner {
-    display: grid;
-    place-content: center;
-  }
-  .hello{
-    z-index: 1001;
-    top: 1.5px;
-    position: fixed;
-    height: 35px;
-    left: 96%;
-    width: 35px;
-    }
-}
-
-
   </style>
 </head>
 <body>
-    <div style="height:100vh; display: flex; flex-direction: column;">
-      
-      <!-- Navigation Bar (5%) -->
-      <a href="https://www.iitdh.ac.in/hi" target="_blank">
-        <img src="../Pics/logo-intranet-white.png" class="hello" alt="Logo">
-      </a>      
-      <nav style="height:5%;background-color: #89288f; position:relative;">
-        <div style="color: #efeaeae2; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight:600;">
+  <div style="height:100vh; display:flex; flex-direction:column;">
+
+    <!-- Navigation Bar -->
+    <a href="https://www.iitdh.ac.in/hi" target="_blank">
+      <img src="../Pics/logo-intranet-white.png" class="hello" alt="Logo">
+    </a>
+    <nav style="height:5%;background-color:#89288f;position:relative;">
+      <div style="color:#f7efefe2;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:600;">
           A1
-        </div>          
-        <label>
-          <input type="checkbox">
-          <div class="toggle">
-            <span class="top_line common"></span>
-            <span class="middle_line common"></span>
-            <span class="bottom_line common"></span>
-          </div>
-          <div class="slide">
-            <h1>Menu</h1>
-            <ul>
-              <li style="margin-top: 1rem; color: #eaeaead9; font-weight: 300;">Main Menu</li>
-              <li><a href="Main_Menu.html"><i class="fas fa-home"></i> Home</a></li>
-              <li style="margin-top: 1rem; color: #eaeaead9; font-weight: 300;">Live Bus Tracking</li>
-              <li><a href="Bus_Tracking.html"><i class="fa-solid fa-location-dot"></i> Track Bus</a></li>
-              <li style="margin-top: 1rem; color: #eaeaead9; font-weight: 300;">Monitor Stops</li>
-              <li><a href="Main_Gate.html"><i class="fas fa-tv"></i> Main Gate</a></li>
-              <li><a href="A1.html"><i class="fas fa-tv"></i> A1</a></li>
-              <li><a href="A2.html"><i class="fas fa-tv"></i> A2</a></li>
-              <li><a href="Hostel.html"><i class="fas fa-tv"></i> Hostel</a></li>
-              <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
-              <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
-              <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
-              <li style="margin-top: 1rem; color: #eaeaead9; font-weight: 300;">More Information</li>
-              <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
-            </ul>
-          </div>
-        </label>
-      </nav>
-  
-      <!-- Main Content (95%) -->
-      <div style="height:95%" class="maincontent">
-        <div class="map-container">
-          <div id="map"></div>
+      </div>
+      <label>
+        <input type="checkbox">
+        <div class="toggle">
+          <span class="top_line common"></span>
+          <span class="middle_line common"></span>
+          <span class="bottom_line common"></span>
         </div>
-        <div class="sidebar">
-          <div class="inner" style="height:90%">
-            <!-- <h2>Live Bus Tracking</h2> -->
-            <!-- <h3 style="font-size: 25px; font-weight: 600;text-align: center;color: #802485de;">Beta Testing</h3> -->
-            <p>Status: <span class="updated-time" id="Status">Loading...</span></p>
-            <p>Last Updated: <span class="updated-time" id="lastUpdate">Loading...</span></p>
-            <p>Current Speed: <span class="updated-time" id="Speed">Calculating...</span></p>
-            <p id="heading">Upcoming buses in:</p>
-            <p class="updated-time" id="Nextstop">...</p>
-            <p class="updated-time" id="next1stop">...</p>
-            <p class="updated-time" id="next2stops">...</p>
-            <p style="color: red;">For any issues, contact: <a href="mailto:ee23bt041@iitdh.ac.in" style="color:red;">ee23bt041@iitdh.ac.in</a></p>
-            <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog" style="color:#89288f">Feedback!</a></p>
+        <div class="slide">
+          <h1>Menu</h1>
+          <ul>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">Main Menu</li>
+            <li><a href="Main_Menu.html"><i class="fas fa-home"></i> Home</a></li>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">Live Bus Tracking</li>
+            <li><a href="Bus_Tracking.html"><i class="fa-solid fa-location-dot"></i> Track Bus</a></li>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">Monitor Stops</li>
+            <li><a href="Main_Gate.html"><i class="fas fa-tv"></i> Main Gate</a></li>
+            <li><a href="A1.html"><i class="fas fa-tv"></i> A1</a></li>
+            <li><a href="A2.html"><i class="fas fa-tv"></i> A2</a></li>
+            <li><a href="Hostel.html"><i class="fas fa-tv"></i> Hostel</a></li>
+            <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
+            <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
+            <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">More Information</li>
+            <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
+          </ul>
+        </div>
+      </label>
+    </nav>
 
-          </div>
+    <!-- Main Content -->
+    <div style="height:95%" class="maincontent">
+      <div class="map-container">
+        <div id="map"></div>
+      </div>
+      <div class="sidebar">
+        <div class="inner" style="height:90%">
+          <p>Status: <span class="updated-time" id="Status">Loading...</span></p>
+          <p>Last Updated: <span class="updated-time" id="lastUpdate">Loading...</span></p>
+          <p>Current Speed: <span class="updated-time" id="Speed">Calculating...</span></p>
+          <p id="heading">Upcoming buses in:</p>
+          <p class="updated-time" id="Nextstop">...</p>
+          <p class="updated-time" id="next1stop">...</p>
+          <p class="updated-time" id="next2stops">...</p>
+          <p style="color:red;">For any issues, contact: <a href="mailto:ee23bt041@iitdh.ac.in" style="color:red;">ee23bt041@iitdh.ac.in</a></p>
+          <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog" style="color:#89288f">feedback!</a></p>
         </div>
+      </div>
     </div>
-  
-    </div>
-  
-    <script>
-      // Initialize the Leaflet map
-      var map = L.map('map').setView([15.484624, 74.936509], 15);
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
-      let tailMarkerGroup = L.layerGroup().addTo(map);
-      var marker;
-      let tail0=null;
-      let tail1=null;
-      let tail2=null;
-      let tail3=null;
-  
-      // Coordinates of the static bus stop
-      var latitude_stop = 15.484624;
-      var longitude_stop = 74.936509;
-  
-       // Add a marker and label for this stop
-      var stopMarker = L.marker([latitude_stop, longitude_stop]).addTo(map);
-      stopMarker.bindPopup("<b>A1</b>").openPopup();
-      
-      // Initialization of the stops and time according to it
-      const stop1 = [
-      { name: "Hostel PC", time: "08:00:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Main Gate", time: "08:05:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "NFSU", time: "08:25:00", latitude: 15.516959, longitude: 74.926994 },
-      { name: "Jubilee Circle", time: "08:40:00", latitude: 15.455610, longitude: 74.989400 },
-      { name: "New Bus Stand Dharwad", time: "08:50:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "Main Gate", time: "09:10:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "Hostel PC", time: "09:20:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Hostel PC", time: "12:10:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Main Gate", time: "12:15:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "High-court Main-Gate", time: "12:30:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "12:45:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "12:50:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "NFSU", time: "13:15:00", latitude: 15.516959, longitude: 74.926994 },
-      { name: "Main Gate", time: "13:25:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "Hostel PC", time: "13:30:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Hostel PC", time: "13:35:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "A1", time: "13:38:00", latitude: 15.484624, longitude: 74.936509 },
-      { name: "CLT Stop", time: "13:40:00", latitude: 15.484073, longitude: 74.934991 },
-      { name: "A2/Admin", time: "13:45:00", latitude: 15.487266, longitude: 74.935205 },
-      { name: "A1", time: "13:47:00", latitude: 15.484624, longitude: 74.936509 },
-      { name: "Hostel PC", time: "13:50:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Hostel PC", time: "13:55:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "A1", time: "13:58:00", latitude: 15.484624, longitude: 74.936509 },
-      { name: "CLT Stop", time: "14:00:00", latitude: 15.484073, longitude: 74.934991 },
-      { name: "A2/Admin", time: "14:05:00", latitude: 15.487266, longitude: 74.935205 },
-      { name: "A1", time: "14:07:00", latitude: 15.484624, longitude: 74.936509 },
-      { name: "Hostel PC", time: "14:10:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Hostel PC", time: "14:15:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "A1", time: "14:18:00", latitude: 15.484624, longitude: 74.936509 },
-      { name: "CLT Stop", time: "14:20:00", latitude: 15.484073, longitude: 74.934991 },
-      { name: "A2/Admin", time: "14:25:00", latitude: 15.487266, longitude: 74.935205 },
-      { name: "A1", time: "14:27:00", latitude: 15.484624, longitude: 74.936509 },
-      { name: "Hostel PC", time: "14:30:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Hostel PC", time: "14:50:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Main Gate", time: "14:55:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "High-court Main-Gate", time: "15:10:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "15:25:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "15:30:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "NFSU", time: "15:55:00", latitude: 15.516959, longitude: 74.926994 },
-      { name: "Main Gate", time: "16:05:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "Hostel PC", time: "16:10:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Hostel PC", time: "18:25:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Main Gate", time: "18:30:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "High-court Main-Gate", time: "18:45:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "19:00:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "19:05:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "NFSU", time: "19:30:00", latitude: 15.516959, longitude: 74.926994 },
-      { name: "Main Gate", time: "19:40:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "Hostel PC", time: "19:45:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Hostel PC", time: "19:50:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Main Gate", time: "19:55:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "High-court Main-Gate", time: "20:10:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "20:25:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "20:30:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "NFSU", time: "20:55:00", latitude: 15.516959, longitude: 74.926994 },
-      { name: "Main Gate", time: "21:05:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "Hostel PC", time: "21:10:00", latitude: 15.483020, longitude: 74.938931 }
-      ];
-      const stop2 = [
-      { name: "Hostel PC", time: "10:00:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Main Gate", time: "10:05:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "NFSU", time: "10:20:00", latitude: 15.516959, longitude: 74.926994 },
-      { name: "New Bus Stand Dharwad", time: "10:40:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "10:50:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "High-court Main-Gate", time: "11:15:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "Main Gate", time: "11:25:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "Hostel PC", time: "11:30:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Hostel PC", time: "12:30:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Main Gate", time: "12:35:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "High-court Main-Gate", time: "12:50:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "13:05:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "13:15:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "NFSU", time: "13:35:00", latitude: 15.516959, longitude: 74.926994 },
-      { name: "Main Gate", time: "13:50:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "Hostel PC", time: "13:55:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Hostel PC", time: "17:30:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Main Gate", time: "17:35:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "High-court Main-Gate", time: "17:50:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "18:05:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "18:10:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "NFSU", time: "18:30:00", latitude: 15.516959, longitude: 74.926994 },
-      { name: "Main Gate", time: "18:40:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "Hostel PC", time: "18:45:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Hostel PC", time: "19:35:00", latitude: 15.483020, longitude: 74.938931 },
-      { name: "Main Gate", time: "19:40:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "High-court Main-Gate", time: "19:55:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "20:10:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "New Bus Stand Dharwad", time: "20:15:00", latitude: 15.469461, longitude: 74.992749 },
-      { name: "NFSU", time: "20:35:00", latitude: 15.516959, longitude: 74.926994 },
-      { name: "Main Gate", time: "20:45:00", latitude: 15.487870, longitude: 74.933658 },
-      { name: "Hostel PC", time: "20:50:00", latitude: 15.483020, longitude: 74.938931 }
-      ];
-    // Using Haversine formula to calculate distance
+  </div>
+
+  <script>
+    const STOP_NAME = "A1";
+    const STOP_LAT  = 15.484624;
+    const STOP_LNG  = 74.936509;
+    const STOP_ZOOM = 16;
+
+    // ── Map ─────────────────────────────────────────────────
+    var map = L.map('map').setView([STOP_LAT, STOP_LNG], STOP_ZOOM);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    let tailMarkerGroup = L.layerGroup().addTo(map);
+    var busMarker = null;
+
+    // Static stop marker for this stop
+    var stopMarker = L.marker([STOP_LAT, STOP_LNG]).addTo(map);
+    stopMarker.bindPopup("<b>" + STOP_NAME + "</b>").openPopup();
+
+    // ── Zoom helpers ─────────────────────────────────────────
     function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // Earth's radius in km
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat / 2) ** 2 +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon / 2) ** 2;
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+    function getZoomLevel(dist) {
+      if (dist <= 0.37) return 17; if (dist <= 0.75) return 16;
+      if (dist <= 1.50) return 15; if (dist <= 3.00) return 14;
+      if (dist <= 6.00) return 13; if (dist <= 12.0) return 12; return 11;
     }
 
-    //function to calculate zoom
-    function getZoomlevel(dist)
-    {
-      if(dist<=0.37)return 17;
-      else if(dist<=0.75 && dist>0.37)return 16;
-      else if(dist<=1.5 && dist>0.75)return 15;
-      else if(dist<=3 && dist>1.5)return 14;
-      else if(dist<=6 && dist>3)return 13;
-      else if(dist<=12 && dist>6)return 12;
-      else return 11;
-    }
-      // Function to convert UTC to IST string
-      function convertUTCtoIST(utcDateString) {
-        const utcDate = new Date(utcDateString);
-        const istOptions = { 
-          timeZone: 'Asia/Kolkata',
-          hour12: false,
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric',
-          second: 'numeric'
-        };
-        return utcDate.toLocaleString('en-IN', istOptions);
-      }
-  
-      // Function to convert HH:MM:SS to total seconds
-      function timeToSeconds(time) {
-        const [hours, minutes, seconds] = time.split(":").map(Number);
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-  
-      //Function to update marker 
-      function updateTailMarker(newLat, newLng,lastTailMarker) {
-        var sign = L.divIcon({
-          html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🔹</div>',
-          className: 'emoji-marker',
-          iconSize: [30, 30],
-          iconAnchor: [15, 15] // Centers the icon on the location
-        });
-        // Remove the previous marker if it exists
-        L.marker([newLat, newLng],{ icon: sign }).addTo(tailMarkerGroup); // Add new marker
-      }
-  
-      // Function to update map data and determine arrival time for next bus
-      function updateMapData() {
-          fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
-        .then(response => response.json())
+    // ── Main update ──────────────────────────────────────────
+    function updateMapData() {
+      fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
+        .then(r => r.json())
         .then(data => {
-          let lastFiveEntries = [];
-          
-          // Iterate over the last 5 entries and store them in an array
-          data.feeds.slice(-5).forEach(feed => {
-            let entry = {
-              latitude: parseFloat(feed.field1),
-              longitude: parseFloat(feed.field2),
-              speed: parseInt(feed.field3),
-              timestamp: feed.created_at
-            };
-            lastFiveEntries.push(entry);
+          const feeds = data.feeds.slice(-5).map(f => ({
+            latitude:  parseFloat(f.field1),
+            longitude: parseFloat(f.field2),
+            speed:     parseInt(f.field3),
+            timestamp: f.created_at
+          }));
+
+          // Fading trail (oldest = most transparent)
+          tailMarkerGroup.clearLayers();
+          feeds.slice(0,4).forEach((entry, i) => {
+            const icon = L.divIcon({
+              html: `<div style="font-size:18px;opacity:${TRAIL_OPACITIES[i]}">🔹</div>`,
+              iconSize: [24,24], iconAnchor: [12,12]
+            });
+            L.marker([entry.latitude, entry.longitude], { icon }).addTo(tailMarkerGroup);
           });
-          
-  
-         // Plot the first 3 points
-         tailMarkerGroup.clearLayers(); // Remove all previous markers in the group
-          let lat0 = lastFiveEntries[0].latitude;
-          let lon0 = lastFiveEntries[0].longitude;
-          let lat1 = lastFiveEntries[1].latitude;
-          let lon1 = lastFiveEntries[1].longitude;
-          let lat2 = lastFiveEntries[2].latitude;
-          let lon2 = lastFiveEntries[2].longitude;
-          let lat3 = lastFiveEntries[3].latitude;
-          let lon3 = lastFiveEntries[3].longitude;
-          updateTailMarker(lat0,lon0,tail0);
-          updateTailMarker(lat1,lon1,tail1);
-          updateTailMarker(lat2,lon2,tail2);
-          updateTailMarker(lat3,lon3,tail3);
-  
-          // Get real-time IST
-          var dateObj = new Date();
-            var istTime = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-            var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            var currentDay = days[istTime.getDay()];
-            var hours = istTime.getHours().toString().padStart(2, '0');
-            var minutes = istTime.getMinutes().toString().padStart(2, '0');
-            var seconds = istTime.getSeconds().toString().padStart(2, '0');
-            var currentISTTime = hours + ":" + minutes + ":" + seconds;
-          var stops;
-          if(currentDay=="Saturday" || currentDay == "Sunday")
-          {
-              stops = stop2;
-          }
-          else{
-              stops = stop1;
-          }
-          console.log(currentDay);
-          var latestFeed = lastFiveEntries[lastFiveEntries.length - 1];
-          var lat = parseFloat(latestFeed.latitude);
-          var lon = parseFloat(latestFeed.longitude);
-          var spd = parseInt(latestFeed.speed);
-          var lastUpdatedUTC = latestFeed.timestamp;
-          var lastUpdatedIST = convertUTCtoIST(lastUpdatedUTC);
-          const stop_name = "A1"; 
-          var time_in_next_bus = -1;
-          var dir = stops[0].name;
-  
-          var [date, currtime] = lastUpdatedIST.split(",");
-          currtime = currtime.trim();
-          let trip1="";
-          let trip2="";
-          let trip3="";
-  
-        // Filter timetable for upcoming departures from "Hostel PC"
-        let upcomingDepartures = [];
-        for (let i = 0; i < stops.length - 1; i++) {
-          if (timeToSeconds(currtime) < timeToSeconds(stops[i].time) && stops[i].name == stop_name) {
-            time_in_next_bus = timeToSeconds(stops[i].time) - timeToSeconds(currtime);
-            time_in_next_bus = parseInt(time_in_next_bus / 60);
-            var hours = parseInt(time_in_next_bus/60);
-            var min = parseInt(time_in_next_bus%60);
-            time_in_next_bus = `${hours} hours ${min} minutes`;
-            if(hours==0)
-            {
-              time_in_next_bus = `${min} minutes`;
-            }
-            if(stops[i].name == stops[i+1].name)
-            {
-              dir = stops[i+2].name;
-            }
-            else
-            {
-              dir = stops[i+1].name;
-            }
-            upcomingDepartures.push({
-              departureTime: time_in_next_bus,
-              destination: dir
-            });
 
-          }
-        }
-          console.log(upcomingDepartures);
-        //checking whether bus is there or not 
-        if (upcomingDepartures.length == 0) {
-          trip1 = "No Buses Today";
-        } else {
-          if (upcomingDepartures.length > 0)
-            trip1 = `${upcomingDepartures[0].departureTime} to ${upcomingDepartures[0].destination}`;
-          if (upcomingDepartures.length > 1)
-            trip2 = `${upcomingDepartures[1].departureTime} to ${upcomingDepartures[1].destination}`;
-          if (upcomingDepartures.length > 2)
-            trip3 = `${upcomingDepartures[2].departureTime} to ${upcomingDepartures[2].destination}`;
-        }
+          const latest = feeds[feeds.length - 1];
+          const lat = latest.latitude, lon = latest.longitude, spd = latest.speed;
+          const lastUpdatedIST = utcToISTString(latest.timestamp);
 
-        let flag = 0;
-        if(currentDay=="Friday" || currentDay=="Saturday")
-        {
-          if (!stops[stops.length - 1].time || timeToSeconds(currtime) > timeToSeconds(stops[stops.length - 1].time) || timeToSeconds(currtime)<timeToSeconds(stops[0].time)) {
-          trip1 = "Shuttle service is closed. The next bus will start from 8:00 AM";
-          trip2 = "";
-          trip3 = "";
-          flag = 1;
-          }
-        }
-        else{
-          if (!stops[stops.length - 1].time || timeToSeconds(currtime) > timeToSeconds(stops[stops.length - 1].time) || timeToSeconds(currtime)<timeToSeconds(stops[0].time)) {
-            trip1 = "Shuttle service is closed. The next bus will start from 8:00 AM";
-            trip2 = "";
-            trip3 = "";
+          // FIX: real wall-clock IST — not GPS timestamp
+          const { timeStr: currentISTTime, dayName, dateKey } = getCurrentIST();
+          const nowSec = timeToSeconds(currentISTTime);
+
+          // FIX: pick schedule accounting for institute holidays too
+          const schedule = getTodaySchedule();
+          const isWeekendOrHoliday = (dayName === "Saturday" || dayName === "Sunday"
+                                      || INSTITUTE_HOLIDAYS_2026.has(dateKey));
+
+          // FIX: getUpcomingBuses uses currentISTTime (wall clock) inside schedule.js
+          const upcoming = getUpcomingBuses(schedule, STOP_NAME);
+
+          let trip1 = "", trip2 = "", trip3 = "", flag = 0;
+          const firstSec = timeToSeconds(scheduleFirstTime(schedule));
+          const lastSec  = timeToSeconds(scheduleLastTime(schedule));
+
+          // FIX: closed check uses stop_thatday (schedule), not hardcoded weekday array
+          // FIX: closed message matches the real next-start time for the schedule type
+          if (nowSec < firstSec || nowSec > lastSec) {
+            const nextStart = isWeekendOrHoliday ? "10:00 AM" : "08:00 AM";
+            trip1 = `Shuttle service is closed. The next bus will start from ${nextStart}`;
             flag = 1;
+          } else if (upcoming.length === 0) {
+            trip1 = "No more buses today";
+            flag = 1;
+          } else {
+            if (upcoming.length > 0) trip1 = `${upcoming[0].timeLabel} → ${upcoming[0].dest}`;
+            if (upcoming.length > 1) trip2 = `${upcoming[1].timeLabel} → ${upcoming[1].dest}`;
+            if (upcoming.length > 2) trip3 = `${upcoming[2].timeLabel} → ${upcoming[2].dest}`;
           }
-        }
-        console.log("time in next bus:", time_in_next_bus);
-  
-        // Update marker on the map and implementing the dynamic zoom
-        if (marker) {
-          map.removeLayer(marker);
-        }
-        var emojiIcon = L.divIcon({
-          html: '<div style="font-size: 24px; line-height: 30px; text-align: center;">🚍</div>',
-          className: 'emoji-marker',
-          iconSize: [60, 60],
-          iconAnchor: [15, 15] // Centers the icon on the location
-        });
-        let dist_1=calculateDistance(lat,lon,latitude_stop,longitude_stop);
-        var zoom = getZoomlevel(dist_1);
-        console.log("distance from the stop :",dist_1,"and zoom :",zoom);
-  
-        marker = L.marker([lat, lon], { icon: emojiIcon }).addTo(map);
-        map.setView([lat, lon], zoom);
-        
-        //implementing live status
-        // Displaying the Status of the Bus 
-        var statu;
-          var repMsg="";
+
+          // Bus marker + zoom
+          if (busMarker) map.removeLayer(busMarker);
+          const busIcon = L.divIcon({
+            html: '<div style="font-size:24px;line-height:30px;text-align:center;">🚍</div>',
+            className: 'emoji-marker', iconSize: [60,60], iconAnchor: [15,15]
+          });
+          busMarker = L.marker([lat, lon], { icon: busIcon }).addTo(map);
+          const dist = calculateDistance(lat, lon, STOP_LAT, STOP_LNG);
+          map.setView([lat, lon], getZoomLevel(dist));
+
+          // FIX: repair-message fetch async-correct — status set INSIDE .then()
           fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data1 => {
-              if(data1.feeds && data1.feeds.length > 0) {
-                repMsg = data1.feeds[0].field1;
-              } 
+              // FIX: midnight-safe stale check via raw ms
+              const stale = isGPSStale(latest.timestamp, 300);
+              let statu = stale ? "Parked" : "Live";
+              const repMsg = (data1.feeds && data1.feeds.length > 0) ? (data1.feeds[0].field1 || "") : "";
+              if (repMsg !== "" && repMsg.toUpperCase() !== "OK") statu = repMsg;
+
+              const statusEl = document.getElementById("Status");
+              statusEl.innerText = statu;
+              if (statu === "Live") {
+                statusEl.classList.remove("updated-time-not-live");
+                statusEl.classList.add("updated-time");
+                statusEl.style.color = "#188038";
+              } else {
+                statusEl.classList.remove("updated-time");
+                statusEl.classList.add("updated-time-not-live");
+                statusEl.style.color = "#c47a00";
+              }
             })
-            .catch(error => {
-              console.error('Fetch Error (Repair Message):', error);
-            //   document.getElementById("repMsg").style.display = "none";
+            .catch(() => {
+              const stale = isGPSStale(latest.timestamp, 300);
+              const statu = stale ? "Parked" : "Live";
+              const statusEl = document.getElementById("Status");
+              statusEl.innerText = statu;
+              statusEl.style.color = statu === "Live" ? "#188038" : "#c47a00";
             });
-          if(Math.abs(timeToSeconds(currentISTTime)-timeToSeconds(currtime))<300)
-          {
-            statu = "Live";
+
+          // Update DOM
+          document.getElementById("lastUpdate").innerText = lastUpdatedIST;
+          document.getElementById("Speed").innerText = spd + " km/h";
+
+          const ns = document.getElementById("Nextstop");
+          ns.innerText = trip1;
+          document.getElementById("next1stop").innerText  = trip2;
+          document.getElementById("next2stops").innerText = trip3;
+
+          const hd = document.getElementById("heading");
+          if (flag) {
+            hd.classList.add("yes");
+            ns.style.color = "#802485";
+          } else {
+            hd.classList.remove("yes");
+            ns.style.color = "";
           }
-          else{
-            statu = "Parked";
-          }
-          console.log(statu);
-          if(repMsg === "" || repMsg.toUpperCase() === "OK")
-          {
-            console.log("NO repair message")
-          }
-          else{
-            statu=repMsg;
-          }
-          if(statu==="Live")
-          {
-            let a=document.getElementById("Status")
-            a.classList.remove("updated-time-not-live");
-            a.classList.add("updated-time");
-            a.style.color = "#188038";
-            
-          }
-          else
-          {
-            let a=document.getElementById("Status")
-            a.classList.remove("updated-time");
-            a.classList.add("updated-time-not-live");
-            a.style.color = "#c47a00";
-          }
-        // Update the "Last Updated" text
-        document.getElementById("lastUpdate").innerText = lastUpdatedIST;
-        document.getElementById("Status").innerText = statu;
-        document.getElementById("Speed").innerText = spd + " km/h";
-  
-        let ns = document.getElementById("Nextstop"); // FIXED ID REFERENCE
-        ns.innerText = trip1;
-        document.getElementById("next2stops").innerText = trip3;
-        document.getElementById("next1stop").innerText = trip2;
-        let hd = document.getElementById("heading");
-        if (flag) {
-          console.log(flag);
-          hd.classList.add("yes");
-          ns.style.color = "#89288f";
-        }
-      })
-      .catch(error => {
-        console.error('Fetch Error:', error);
-        document.getElementById("lastUpdate").innerText = "Error loading update.";
-        document.getElementById("Status").innerText = "Error loading update.";
-        document.getElementById("Speed").innerText = "Error calculating distance.";
-        document.getElementById("Nextstop").innerText = "Error retrieving next bus.";
-      });
-  }
-  
-  
-      // Initial fetch on page load and update every minute
-      updateMapData();
-      setInterval(updateMapData, 20000);
-    </script>
-  </body>
-  </html>
-  
+        })
+        .catch(err => {
+          console.error('Fetch Error:', err);
+          document.getElementById("lastUpdate").innerText = "Error loading update.";
+          document.getElementById("Status").innerText = "Error loading update.";
+          document.getElementById("Speed").innerText = "Error fetching speed.";
+          document.getElementById("Nextstop").innerText = "Error retrieving next bus.";
+        });
+    }
+
+    updateMapData();
+    setInterval(updateMapData, 20000);
+  </script>
+</body>
+</html>
