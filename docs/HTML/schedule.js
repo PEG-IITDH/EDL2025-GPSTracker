@@ -58,11 +58,11 @@ const WEEKDAY_SCHEDULE = [
   _s("Main Gate",     "08:05:00"),
   _s("NFSU",          "08:25:00"),
   _s("New Bus Stand", "08:40:00"),
-  // Trip 2: New Bus Stand → New Bus Stand → Main Gate → Hostel  (8:50–9:20)
-  _s("New Bus Stand", "08:50:00"),
-  _s("New Bus Stand", "09:05:00"),  // layover / Jubilee Circle stop
-  _s("Main Gate",     "09:10:00"),
-  _s("Hostel",        "09:20:00"),
+  // Trip 2: New Bus Stand → Jubilee Circle → Main Gate → Hostel  (8:50–9:20)
+  _s("New Bus Stand",  "08:50:00"),
+  _s("Jubilee Circle", "09:05:00"),
+  _s("Main Gate",      "09:10:00"),
+  _s("Hostel",         "09:20:00"),
 
   // Trip 3: Hostel → Main Gate → NFSU → New Bus Stand  (12:10–12:45)
   _s("Hostel",        "12:10:00"),
@@ -263,18 +263,43 @@ function utcToISTString(utcStr) {
   });
 }
 
-// ── Helper: extract HH:MM:SS from IST display string ─────
-function extractTimeFromISTString(istStr) {
-  // Format: "7 Jun 2026, 14:32:05"
-  const parts = istStr.split(",");
-  return parts.length > 1 ? parts[1].trim() : "00:00:00";
-}
-
 // ── Helper: is GPS data stale? (uses raw ms, no midnight bug) ──
 function isGPSStale(gpsUTCTimestamp, thresholdSeconds = 300) {
   const gpsMs  = new Date(gpsUTCTimestamp).getTime();
   const nowMs  = Date.now();
   return (nowMs - gpsMs) > (thresholdSeconds * 1000);
+}
+
+// ── Fix 2: return the correct start time string for TOMORROW's schedule ──
+// Used in "service closed" messages so Friday night shows "10:00 AM" (Saturday),
+// not "08:00 AM" (a weekday start that doesn't apply until Monday).
+function getTomorrowStartTime() {
+  const now  = new Date();
+  const istNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  const tomorrow = new Date(istNow);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const dayName = days[tomorrow.getDay()];
+  const mo = (tomorrow.getMonth()+1).toString().padStart(2,'0');
+  const dd = tomorrow.getDate().toString().padStart(2,'0');
+  const dateKey = `${mo}-${dd}`;
+  const isWeekend = dayName === "Saturday" || dayName === "Sunday";
+  const isHoliday = INSTITUTE_HOLIDAYS_2026.has(dateKey);
+  return (isWeekend || isHoliday) ? "10:00 AM" : "08:00 AM";
+}
+
+// ── Fix 9: shared zoom helpers (moved from per-page duplication) ──────────
+// Stop pages use slightly wider thresholds (0.37/0.75…) vs Bus_Tracking
+// (0.35/0.70…); a single unified table satisfies both cases adequately.
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function getZoomLevel(dist) {
+  if (dist <= 0.37) return 17; if (dist <= 0.75) return 16;
+  if (dist <= 1.50) return 15; if (dist <= 3.00) return 14;
+  if (dist <= 6.00) return 13; if (dist <= 12.0) return 12; return 11;
 }
 
 // ── Fading trail opacities (oldest → newest) ─────────────

@@ -126,6 +126,7 @@ input:checked ~ .slide { transform: translateX(0); }
             <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
             <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
             <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
+            <li><a href="Jubilee_Circle.html"><i class="fas fa-tv"></i> Jubilee Circle</a></li>
             <li style="margin-top: 1rem; color: #eaeaead9; font-weight: 300;">More Information</li>
             <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
           </ul>
@@ -154,8 +155,8 @@ input:checked ~ .slide { transform: translateX(0); }
               <i class="fa-solid fa-bell me-2"></i>Create Alert
             </button>
           </center>
-          <p style="color:#666;">Report bugs or issues — <a href="mailto:ee23bt041@iitdh.ac.in" style="color:#802485;">ee23bt041@iitdh.ac.in</a></p>
-          <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog" style="color:#89288f">feedback!</a></p>
+          <p style="color:#666;">Report bugs or issues — <a href="mailto:ee23bt041@iitdh.ac.in" style="color:#802485;text-decoration:underline;">ee23bt041@iitdh.ac.in</a></p>
+          <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog" style="color:#89288f;text-decoration:underline;">feedback!</a></p>
         </div>
       </div>
 
@@ -248,10 +249,18 @@ input:checked ~ .slide { transform: translateX(0); }
     const alertModal   = document.getElementById('alertModal');
     const alertMessage = document.getElementById('alertMessage');
     document.getElementById('closeAlert').addEventListener('click', () => { alertModal.style.display = 'none'; });
+    // Fix 10: click outside the modal box to dismiss
+    alertModal.addEventListener('click', (e) => { if (e.target === alertModal) alertModal.style.display = 'none'; });
 
     document.getElementById('savePreferences').addEventListener('click', () => {
       userPreferences.fromLocation = document.getElementById('fromLocation').value;
       userPreferences.toLocation   = document.getElementById('toLocation').value;
+      // Fix 6: reject same-stop selection before saving
+      if (userPreferences.fromLocation && userPreferences.toLocation &&
+          userPreferences.fromLocation === userPreferences.toLocation) {
+        alert('"From" and "To" locations must be different.');
+        return;
+      }
       userPreferences.alertShown   = false;
       localStorage.setItem('fromLocation', userPreferences.fromLocation);
       localStorage.setItem('toLocation',   userPreferences.toLocation);
@@ -267,7 +276,7 @@ input:checked ~ .slide { transform: translateX(0); }
         alertMessage.textContent = message;
         alertModal.style.display = 'block';
         userPreferences.alertShown = true;
-        setTimeout(() => { userPreferences.alertShown = false; }, 60000);
+        setTimeout(() => { userPreferences.alertShown = false; }, 300000);
       }
     }
 
@@ -297,18 +306,6 @@ input:checked ~ .slide { transform: translateX(0); }
       }
     }
 
-    // ── Zoom helper ──────────────────────────────────────────
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
-      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-    function getZoomLevel(dist) {
-      if (dist <= 0.35) return 17; if (dist <= 0.70) return 16;
-      if (dist <= 1.40) return 15; if (dist <= 2.80) return 14;
-      if (dist <= 5.60) return 13; if (dist <= 11.2) return 12; return 11;
-    }
-
     // ── Main update loop ─────────────────────────────────────
     function updateMapData() {
       fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
@@ -317,13 +314,23 @@ input:checked ~ .slide { transform: translateX(0); }
           const feeds = data.feeds.slice(-5).map(f => ({
             latitude:  parseFloat(f.field1),
             longitude: parseFloat(f.field2),
-            speed:     parseInt(f.field3),
+            speed:     parseInt(f.field3, 10),  // Fix 7: explicit radix
             timestamp: f.created_at
           }));
+
+          const latest = feeds[feeds.length - 1];
+
+          // Fix 3: guard against null/missing GPS fields (device offline or bad upload)
+          if (!isFinite(latest.latitude) || !isFinite(latest.longitude)) {
+            document.getElementById("lastUpdate").innerText = "GPS signal lost — retrying…";
+            document.getElementById("Status").innerText = "No Signal";
+            return;
+          }
 
           // ── Draw fading trail (FIX: opacity gradient old→new) ──
           tailMarkerGroup.clearLayers();
           feeds.slice(0, 4).forEach((entry, i) => {
+            if (!isFinite(entry.latitude) || !isFinite(entry.longitude)) return;
             const icon = L.divIcon({
               html: `<div style="font-size:18px;opacity:${TRAIL_OPACITIES[i]}">🔹</div>`,
               iconSize: [24,24], iconAnchor: [12,12]
@@ -331,9 +338,9 @@ input:checked ~ .slide { transform: translateX(0); }
             L.marker([entry.latitude, entry.longitude], { icon }).addTo(tailMarkerGroup);
           });
 
-          const latest = feeds[feeds.length - 1];
           const lat = latest.latitude, lon = latest.longitude;
           const spd = latest.speed;
+          const speedStr = isFinite(spd) ? spd + " km/h" : "—";
           const lastUpdatedIST = utcToISTString(latest.timestamp);
 
           // ── Real wall-clock IST time ─────────────────────────
@@ -357,8 +364,8 @@ input:checked ~ .slide { transform: translateX(0); }
           let flag = 0;
 
           if (nowSec < firstSec || nowSec > lastSec) {
-            // FIX: closed message matches actual next-day start time correctly
-            const nextStart = isWeekendOrHoliday ? "10:00 AM" : "08:00 AM";
+            // Fix 2: use tomorrow's schedule type, not today's
+            const nextStart = getTomorrowStartTime();
             next_stop = `Shuttle service is closed. The next bus will start from ${nextStart}`;
             flag = 1;
           } else {
@@ -391,10 +398,10 @@ input:checked ~ .slide { transform: translateX(0); }
           });
           busMarker = L.marker([lat, lon], { icon: busIcon }).addTo(map);
 
-          // ── Dynamic zoom ─────────────────────────────────────
+          // ── Dynamic zoom — Fix 8: skip re-center if user is panning ──
           const dists = Object.values(STOP_COORDS).map(c => calculateDistance(lat, lon, c.lat, c.lng));
           const zoom = getZoomLevel(Math.min(...dists));
-          map.setView([lat, lon], zoom);
+          if (!userPanning) map.setView([lat, lon], zoom);
 
           // FIX: async repair message — check INSIDE the .then() so repMsg is populated
           fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
@@ -442,7 +449,7 @@ input:checked ~ .slide { transform: translateX(0); }
 
           // ── Update DOM ───────────────────────────────────────
           document.getElementById("lastUpdate").innerText = lastUpdatedIST;
-          document.getElementById("Speed").innerText = spd + " km/h";
+          document.getElementById("Speed").innerText = speedStr;
 
           const ns = document.getElementById("Nextstop");
           ns.innerText = next_stop;
@@ -464,6 +471,10 @@ input:checked ~ .slide { transform: translateX(0); }
           document.getElementById("Speed").innerText = "Error fetching speed.";
         });
     }
+
+    // Fix 8: track user map interaction so auto-pan doesn't interrupt manual browsing
+    let userPanning = false;
+    map.on('dragstart zoomstart', () => { userPanning = true; });
 
     updateMapData();
     setInterval(updateMapData, 60000);
