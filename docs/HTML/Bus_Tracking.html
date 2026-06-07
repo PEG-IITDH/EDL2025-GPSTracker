@@ -179,6 +179,7 @@ input:checked ~ .slide { transform: translateX(0); }
                   <option value="A1">A1</option>
                   <option value="A2">A2</option>
                   <option value="CLT">CLT</option>
+                  <option value="Jubilee Circle">Jubilee Circle</option>
                 </select>
               </div>
               <div class="form-group">
@@ -192,6 +193,7 @@ input:checked ~ .slide { transform: translateX(0); }
                   <option value="A1">A1</option>
                   <option value="A2">A2</option>
                   <option value="CLT">CLT</option>
+                  <option value="Jubilee Circle">Jubilee Circle</option>
                 </select>
               </div>
               <div class="modal-footer">
@@ -311,12 +313,15 @@ input:checked ~ .slide { transform: translateX(0); }
       fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
         .then(r => r.json())
         .then(data => {
-          const feeds = data.feeds.slice(-5).map(f => ({
-            latitude:  parseFloat(f.field1),
-            longitude: parseFloat(f.field2),
-            speed:     parseInt(f.field3, 10),  // Fix 7: explicit radix
-            timestamp: f.created_at
-          }));
+          const feeds = data.feeds
+            .slice(-5)
+            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            .map(f => ({
+              latitude:  parseFloat(f.field1),
+              longitude: parseFloat(f.field2),
+              speed:     parseInt(f.field3, 10),
+              timestamp: f.created_at
+            }));
 
           const latest = feeds[feeds.length - 1];
 
@@ -409,7 +414,7 @@ input:checked ~ .slide { transform: translateX(0); }
             .then(data1 => {
               let statu;
               // FIX: midnight-safe stale check using raw ms, not HH:MM:SS string subtraction
-              const stale = isGPSStale(latest.timestamp, 300);
+              const stale = isGPSStale(latest.timestamp, 60);
               statu = stale ? "Parked" : "Live";
 
               // FIX: repMsg checked HERE, inside the .then(), so it's actually populated
@@ -432,7 +437,7 @@ input:checked ~ .slide { transform: translateX(0); }
             })
             .catch(() => {
               // Repair channel unreachable: still show live/parked from GPS staleness
-              const stale = isGPSStale(latest.timestamp, 300);
+              const stale = isGPSStale(latest.timestamp, 60);
               const statu = stale ? "Parked" : "Live";
               const statusEl = document.getElementById("Status");
               statusEl.innerText = statu;
@@ -475,9 +480,10 @@ input:checked ~ .slide { transform: translateX(0); }
     // Fix 8: track user map interaction so auto-pan doesn't interrupt manual browsing
     let userPanning = false;
     map.on('dragstart zoomstart', () => { userPanning = true; });
+    map.on('dragend zoomend', () => { setTimeout(() => { userPanning = false; }, 5000); });;
 
     updateMapData();
-    setInterval(updateMapData, 60000);
+    setInterval(updateMapData, 20000);
   </script>
 </body>
 </html>

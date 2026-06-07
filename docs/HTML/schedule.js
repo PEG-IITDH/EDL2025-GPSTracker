@@ -5,14 +5,14 @@
 
 // ── Stop coordinates ──────────────────────────────────────
 const STOP_COORDS = {
-  "Hostel":       { lat: 15.483020, lng: 74.938931 },
-  "Main Gate":    { lat: 15.487870, lng: 74.933658 },
-  "NFSU":         { lat: 15.516959, lng: 74.926994 },
-  "New Bus Stand":{ lat: 15.469461, lng: 74.992749 },
+  "Hostel":        { lat: 15.483020, lng: 74.938931 },
+  "Main Gate":     { lat: 15.487870, lng: 74.933658 },
+  "NFSU":          { lat: 15.516959, lng: 74.926994 },
+  "New Bus Stand": { lat: 15.469461, lng: 74.992749 },
   "Jubilee Circle":{ lat: 15.459100, lng: 75.007806 },
-  "A1":           { lat: 15.484624, lng: 74.936509 },
-  "A2":           { lat: 15.487266, lng: 74.935205 },
-  "CLT":          { lat: 15.484073, lng: 74.934991 },
+  "A1":            { lat: 15.484624, lng: 74.936509 },
+  "A2":            { lat: 15.487266, lng: 74.935205 },
+  "CLT":           { lat: 15.484073, lng: 74.934991 },
 };
 
 // ── 2026 Institute Holidays (from official list) ──────────
@@ -53,14 +53,14 @@ function _s(name, time) {
 }
 
 const WEEKDAY_SCHEDULE = [
-  // Trip 1: Hostel → Main Gate → NFSU → New Bus Stand  (8:00–8:40)
-  _s("Hostel",        "08:00:00"),
-  _s("Main Gate",     "08:05:00"),
-  _s("NFSU",          "08:25:00"),
-  _s("New Bus Stand", "08:40:00"),
-  // Trip 2: New Bus Stand → Jubilee Circle → Main Gate → Hostel  (8:50–9:20)
+  // Trip 1: Hostel → Main Gate → NFSU → Jubilee Circle  (8:00–8:40)
+  _s("Hostel",         "08:00:00"),
+  _s("Main Gate",      "08:05:00"),
+  _s("NFSU",           "08:25:00"),
+  _s("Jubilee Circle", "08:40:00"),
+  // Trip 2: Jubilee Circle → New Bus Stand → Main Gate → Hostel  (8:40–9:20)
+  _s("Jubilee Circle", "08:40:00"),
   _s("New Bus Stand",  "08:50:00"),
-  _s("Jubilee Circle", "09:05:00"),
   _s("Main Gate",      "09:10:00"),
   _s("Hostel",         "09:20:00"),
 
@@ -225,7 +225,9 @@ function scheduleLastTime(schedule) {
 
 // ── Helper: get up to 3 upcoming buses at a named stop ───
 // Uses real wall-clock IST time, not GPS timestamp.
-// Correctly handles consecutive same-name entries.
+// Trip-boundary safe: destination search stops before the next occurrence of
+// the same stop name at an EARLIER time (which marks a new trip, not the
+// same trip continuing), preventing cross-trip destination leakage.
 function getUpcomingBuses(schedule, stopName) {
   const { timeStr } = getCurrentIST();
   const nowSec = timeToSeconds(timeStr);
@@ -237,10 +239,18 @@ function getUpcomingBuses(schedule, stopName) {
 
     const minAway = Math.ceil((timeToSeconds(schedule[i].time) - nowSec) / 60);
 
-    // Find direction: skip consecutive entries with same stop name
+    // Find destination: advance past consecutive same-name entries,
+    // but stop at a trip boundary (next same-name entry has an earlier or
+    // equal time — meaning it belongs to a different trip).
     let j = i + 1;
-    while (j < schedule.length && schedule[j].name === stopName) j++;
-    const dest = j < schedule.length ? schedule[j].name : "End of route";
+    const iTimeSec = timeToSeconds(schedule[i].time);
+    while (j < schedule.length && schedule[j].name === stopName) {
+      if (timeToSeconds(schedule[j].time) <= iTimeSec) break; // trip boundary
+      j++;
+    }
+    const dest = (j < schedule.length && schedule[j].name !== stopName)
+      ? schedule[j].name
+      : "End of route";
 
     const hrs  = Math.floor(minAway / 60);
     const mins = minAway % 60;
