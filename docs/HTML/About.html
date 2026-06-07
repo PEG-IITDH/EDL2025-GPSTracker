@@ -175,7 +175,8 @@
       <div class="card">
         <div class="card-header"><i class="fas fa-satellite-dish"></i><h3>How It Works</h3></div>
         <div class="card-body">
-          <p>An onboard GPS + LTE module pushes live location data to the ThingSpeak IoT cloud. The web app fetches this every 20–60 seconds and overlays the bus position on an interactive map, combined with schedule data so every page stays accurate without a manual refresh.</p>
+          <p>An Arduino Mega on the bus pairs with a SIMCom A7672S LTE module and a GPS receiver. Every <strong>15 seconds</strong>, the firmware reads the GPS coordinates and speed, and sends them to the <strong>ThingSpeak IoT cloud</strong> over a cellular HTTP request — but only if the bus has moved more than 10 metres since the last upload, saving data quota when the bus is parked at a stop.</p>
+          <p>The web app polls ThingSpeak every <strong>20 seconds</strong> and overlays the live bus position on an interactive Leaflet.js map. A separate status channel carries maintenance messages that override the default Live / Parked indicator. The schedule engine in <code>schedule.js</code> auto-selects the correct timetable (weekday, weekend, or institute holiday) and computes upcoming stops using real IST wall-clock time — not the GPS timestamp — so the schedule display stays accurate even when the GPS has no fix.</p>
           <div class="tech-pills">
             <span class="tech-pill">Arduino Mega</span>
             <span class="tech-pill">SIMCom A7672S LTE</span>
@@ -185,7 +186,7 @@
             <span class="tech-pill">HTML / CSS / JS</span>
           </div>
           <div class="info-grid">
-            <div class="info-item"><i class="fas fa-clock"></i><span>GPS updates every <strong>60 s</strong> (tracking page) and <strong>20 s</strong> (stop pages)</span></div>
+            <div class="info-item"><i class="fas fa-clock"></i><span>GPS pushes every <strong>15 s</strong> (skipped if bus hasn't moved &gt;10 m); web app polls every <strong>20 s</strong></span></div>
             <div class="info-item"><i class="fas fa-calendar-check"></i><span>Timetable auto-switches between weekday and weekend / holiday schedules</span></div>
             <div class="info-item"><i class="fas fa-bell"></i><span>Proximity alerts notify you when the bus is ~10 min from your chosen stop</span></div>
             <div class="info-item"><i class="fas fa-wifi"></i><span>Status shows <strong style="color:#188038;">Live</strong> or <strong style="color:#c47a00;">Parked</strong> based on GPS staleness</span></div>
@@ -259,11 +260,9 @@
   </div>
 
   <div class="about-footer">
-    <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank">Official Schedule</a>
+    Official bus schedule: <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank">click here</a>
     &nbsp;·&nbsp;
-    We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog">feedback!</a>
-    &nbsp;·&nbsp;
-    Report bugs to <a href="mailto:ee23bt041@iitdh.ac.in">ee23bt041@iitdh.ac.in</a>
+    Report bugs/issues: <a href="mailto:ee23bt041@iitdh.ac.in">ee23bt041@iitdh.ac.in</a>
   </div>
 
 </div>
