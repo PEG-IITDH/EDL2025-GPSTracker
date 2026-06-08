@@ -91,6 +91,7 @@
       flex:1;
       display:flex;flex-direction:column;
       min-height:0;
+      overflow-y:auto;
     }
     .upcoming-title{font-size:.72rem;font-weight:600;color:#89288f;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
     .bus-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0e8f1;}
@@ -130,7 +131,7 @@
     @media(max-width:767px){
       .main-split{flex-direction:column;}
       .map-pane{width:100%;height:40dvh;flex-shrink:0;}
-      .info-pane{width:100%;flex:1;min-height:0;}
+      .info-pane{width:100%;flex:1;min-height:0;overflow:hidden;}
       .info-inner{padding:10px 12px;gap:6px;overflow-y:auto;justify-content:flex-start;}
       .status-bar{padding:8px 10px;gap:4px;}
       .status-label{font-size:.7rem;}
@@ -141,12 +142,10 @@
       .bus-row{padding:5px 0;gap:8px;}
       .info-footer p{font-size:.65rem;}
     }
-
-    /* ── Extra-compact: very short phones (iPhone SE, budget 5.5") ── */
+    /* Extra-compact: very short phones (iPhone SE, budget 5.5") */
     @media(max-width:767px) and (max-height:680px){
       .info-inner{gap:4px;padding:7px 10px;}
       .status-bar{padding:5px 9px;gap:3px;}
-      .status-row{gap:6px;}
       .status-label{font-size:.66rem;}
       .status-value{font-size:.72rem;}
       .upcoming-card{padding:6px 9px;}
@@ -339,25 +338,24 @@
         document.getElementById('Speed').innerText = speedStr;
         renderBusRows(upcoming, flag, trip1);
 
-        // Status fetch
+        // Set status immediately from GPS staleness — no flicker waiting for inner fetch
+        const staleImmediate = isGPSStale(latest.timestamp, 60);
+        const statuImmediate = staleImmediate ? 'Parked' : 'Live';
+        const statusEl = document.getElementById('Status');
+        statusEl.textContent = statuImmediate;
+        statusEl.className = 'status-value ' + (statuImmediate === 'Live' ? 'live' : 'parked');
+
+        // Status channel fetch — overrides only if maintenance message present
         fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
           .then(r => r.json())
           .then(data1 => {
-            const stale = isGPSStale(latest.timestamp, 300);
-            let statu = stale ? 'Parked' : 'Live';
             const repMsg = (data1.feeds && data1.feeds.length > 0) ? (data1.feeds[0].field1 || '') : '';
-            if (repMsg !== '' && repMsg.toUpperCase() !== 'OK') statu = repMsg;
-            const el = document.getElementById('Status');
-            el.textContent = statu;
-            el.className = 'status-value ' + (statu === 'Live' ? 'live' : 'parked');
+            if (repMsg !== '' && repMsg.toUpperCase() !== 'OK') {
+              statusEl.textContent = repMsg;
+              statusEl.className = 'status-value parked';
+            }
           })
-          .catch(() => {
-            const stale = isGPSStale(latest.timestamp, 300);
-            const statu = stale ? 'Parked' : 'Live';
-            const el = document.getElementById('Status');
-            el.textContent = statu;
-            el.className = 'status-value ' + (statu === 'Live' ? 'live' : 'parked');
-          });
+          .catch(() => { /* keep GPS-based status already shown */ });
       })
       .catch(err => {
         console.error('Fetch Error:', err);
@@ -369,6 +367,7 @@
 
   let userPanning = false;
   map.on('dragstart zoomstart', () => { userPanning = true; });
+  map.on('dragend zoomend', () => { setTimeout(() => { userPanning = false; }, 5000); });
 
   updateMapData();
   setInterval(updateMapData, 20000);
