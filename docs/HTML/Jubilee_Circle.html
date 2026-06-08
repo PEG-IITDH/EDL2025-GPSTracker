@@ -126,10 +126,11 @@ input:checked ~ .slide { transform:translateX(0); }
           <p>Status: <span class="updated-time" id="Status">Loading...</span></p>
           <p>Last Updated: <span class="updated-time" id="lastUpdate">Loading...</span></p>
           <p>Current Speed: <span class="updated-time" id="Speed">Calculating...</span></p>
-          <p id="heading">Upcoming buses in:</p>
+          <p id="heading">Next buses from this stop:</p>
           <p class="updated-time" id="Nextstop">...</p>
           <p class="updated-time" id="next1stop">...</p>
           <p class="updated-time" id="next2stops">...</p>
+          <p>Official bus schedule: <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank" style="color:#802485;text-decoration:underline;">click here</a></p>
           <p style="color:#666;">Report bugs or issues — <a href="mailto:ee23bt041@iitdh.ac.in" style="color:#802485;text-decoration:underline;">ee23bt041@iitdh.ac.in</a></p>
           <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog" style="color:#89288f;text-decoration:underline;">feedback!</a></p>
         </div>
@@ -227,9 +228,9 @@ input:checked ~ .slide { transform:translateX(0); }
               : "No more buses today";
             flag = 1;
           } else {
-            if (upcoming.length > 0) trip1 = `${upcoming[0].timeLabel} → ${upcoming[0].dest}`;
-            if (upcoming.length > 1) trip2 = `${upcoming[1].timeLabel} → ${upcoming[1].dest}`;
-            if (upcoming.length > 2) trip3 = `${upcoming[2].timeLabel} → ${upcoming[2].dest}`;
+            if (upcoming.length > 0) trip1 = `🚌 ${upcoming[0].timeLabel} → ${upcoming[0].dest}  (at ${upcoming[0].scheduledTime})`;
+            if (upcoming.length > 1) trip2 = `🚌 ${upcoming[1].timeLabel} → ${upcoming[1].dest}  (at ${upcoming[1].scheduledTime})`;
+            if (upcoming.length > 2) trip3 = `🚌 ${upcoming[2].timeLabel} → ${upcoming[2].dest}  (at ${upcoming[2].scheduledTime})`;
           }
 
           // Bus marker + zoom

@@ -254,7 +254,10 @@ function getUpcomingBuses(schedule, stopName) {
 
     const hrs  = Math.floor(minAway / 60);
     const mins = minAway % 60;
-    const timeLabel = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
+    const waitStr = hrs > 0
+      ? (mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`)
+      : `${mins} min`;
+    const timeLabel = `in ${waitStr}`;
 
     results.push({ timeLabel, dest, scheduledTime: schedule[i].time });
     if (results.length === 3) break;
