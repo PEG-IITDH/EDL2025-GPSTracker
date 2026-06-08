@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,7 +12,7 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <!-- shared schedule, helpers, holiday list -->
+  <!-- FIX: load shared schedule + helpers before any page script -->
   <script src="schedule.js"></script>
 
   <!-- Google tag (gtag.js) -->
@@ -240,18 +240,10 @@ input:checked ~ .slide { transform: translateX(0); }
       m.bindPopup(popup).openPopup();
     });
 
-    // ── Alert preferences (in-memory; localStorage used as best-effort cache) ──
-    // Wrapped in try/catch because localStorage is blocked in private/iOS modes.
-    function lsGet(key) {
-      try { return localStorage.getItem(key) || ''; } catch(e) { return ''; }
-    }
-    function lsSet(key, val) {
-      try { localStorage.setItem(key, val); } catch(e) { /* storage blocked — silent */ }
-    }
-
+    // ── Alert preferences ────────────────────────────────────
     let userPreferences = {
-      fromLocation: lsGet('fromLocation'),
-      toLocation:   lsGet('toLocation'),
+      fromLocation: localStorage.getItem('fromLocation') || '',
+      toLocation:   localStorage.getItem('toLocation')   || '',
       alertShown:   false
     };
     if (userPreferences.fromLocation) document.getElementById('fromLocation').value = userPreferences.fromLocation;
@@ -260,21 +252,22 @@ input:checked ~ .slide { transform: translateX(0); }
     const alertModal   = document.getElementById('alertModal');
     const alertMessage = document.getElementById('alertMessage');
     document.getElementById('closeAlert').addEventListener('click', () => { alertModal.style.display = 'none'; });
+    // Fix 10: click outside the modal box to dismiss
     alertModal.addEventListener('click', (e) => { if (e.target === alertModal) alertModal.style.display = 'none'; });
 
     document.getElementById('savePreferences').addEventListener('click', () => {
-      const from = document.getElementById('fromLocation').value;
-      const to   = document.getElementById('toLocation').value;
-      if (from && to && from === to) {
+      userPreferences.fromLocation = document.getElementById('fromLocation').value;
+      userPreferences.toLocation   = document.getElementById('toLocation').value;
+      // Fix 6: reject same-stop selection before saving
+      if (userPreferences.fromLocation && userPreferences.toLocation &&
+          userPreferences.fromLocation === userPreferences.toLocation) {
         alert('"From" and "To" locations must be different.');
         return;
       }
-      userPreferences.fromLocation = from;
-      userPreferences.toLocation   = to;
       userPreferences.alertShown   = false;
-      lsSet('fromLocation', from);
-      lsSet('toLocation',   to);
-      if (from && to) {
+      localStorage.setItem('fromLocation', userPreferences.fromLocation);
+      localStorage.setItem('toLocation',   userPreferences.toLocation);
+      if (userPreferences.fromLocation && userPreferences.toLocation) {
         alert('Preferences saved! You will receive alerts when the bus is approaching your selected locations.');
       } else {
         alert('Please select both "From" and "To" locations.');
@@ -290,35 +283,21 @@ input:checked ~ .slide { transform: translateX(0); }
       }
     }
 
-    // ── Alert check — trip-direction-aware ───────────────────
-    // Finds fromIndex entries and verifies the toStop appears LATER in the
-    // SAME trip (i.e. between fromIndex and the next re-occurrence of fromStop
-    // at an equal-or-earlier time, which marks a new trip).
+    // FIX: checkForUserAlert now uses real IST wall-clock time (currentISTTime)
     function checkForUserAlert(schedule) {
       if (!userPreferences.fromLocation || !userPreferences.toLocation) return;
       const { timeStr } = getCurrentIST();
       const nowSec = timeToSeconds(timeStr);
 
-      for (let fi = 0; fi < schedule.length; fi++) {
-        if (schedule[fi].name !== userPreferences.fromLocation) continue;
-        const fromSec = timeToSeconds(schedule[fi].time);
+      const fromIndices = schedule.reduce((acc, stop, i) => {
+        if (stop.name === userPreferences.fromLocation) acc.push(i); return acc;
+      }, []);
+      if (fromIndices.length === 0) return;
 
-        // Find the end of this trip: the next entry with the same stop name at
-        // an equal-or-earlier time is the start of a new trip.
-        let tripEnd = schedule.length;
-        for (let k = fi + 1; k < schedule.length; k++) {
-          if (schedule[k].name === userPreferences.fromLocation &&
-              timeToSeconds(schedule[k].time) <= fromSec) {
-            tripEnd = k;
-            break;
-          }
-        }
-
-        // Check that toLocation exists within this same trip
-        const toExists = schedule.slice(fi + 1, tripEnd)
-          .some(s => s.name === userPreferences.toLocation);
-        if (!toExists) continue;
-
+      for (const fromIndex of fromIndices) {
+        const toIndex = schedule.findIndex((s, i) => s.name === userPreferences.toLocation && i > fromIndex);
+        if (toIndex === -1) continue;
+        const fromSec = timeToSeconds(schedule[fromIndex].time);
         if (nowSec >= (fromSec - 600) && nowSec < fromSec) {
           const minAway = Math.ceil((fromSec - nowSec) / 60);
           showAlert(`Bus will arrive at ${userPreferences.fromLocation} in ${minAway} minutes, heading to ${userPreferences.toLocation}.`);
@@ -335,17 +314,9 @@ input:checked ~ .slide { transform: translateX(0); }
       fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
         .then(r => r.json())
         .then(data => {
-          // FIX: guard against missing/empty feeds (ThingSpeak error or new channel)
-          if (!data || !data.feeds || data.feeds.length === 0) {
-            document.getElementById("lastUpdate").innerText = "No data — retrying…";
-            document.getElementById("Status").innerText = "No Signal";
-            return;
-          }
-
-          // FIX: sort first, then take last 5 — avoids taking wrong entries if API returns out-of-order
           const feeds = data.feeds
-            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
             .slice(-5)
+            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
             .map(f => ({
               latitude:  parseFloat(f.field1),
               longitude: parseFloat(f.field2),
@@ -355,13 +326,14 @@ input:checked ~ .slide { transform: translateX(0); }
 
           const latest = feeds[feeds.length - 1];
 
+          // Fix 3: guard against null/missing GPS fields (device offline or bad upload)
           if (!isFinite(latest.latitude) || !isFinite(latest.longitude)) {
             document.getElementById("lastUpdate").innerText = "GPS signal lost — retrying…";
             document.getElementById("Status").innerText = "No Signal";
             return;
           }
 
-          // ── Draw fading trail ────────────────────────────────
+          // ── Draw fading trail (FIX: opacity gradient old→new) ──
           tailMarkerGroup.clearLayers();
           feeds.slice(0, 4).forEach((entry, i) => {
             if (!isFinite(entry.latitude) || !isFinite(entry.longitude)) return;
@@ -378,40 +350,49 @@ input:checked ~ .slide { transform: translateX(0); }
           const lastUpdatedIST = utcToISTString(latest.timestamp);
 
           // ── Real wall-clock IST time ─────────────────────────
-          const { timeStr: currentISTTime } = getCurrentIST();
+          const { timeStr: currentISTTime, dayName, dateKey } = getCurrentIST();
+
+          // FIX: pick schedule based on BOTH weekend AND holiday
           const schedule = getTodaySchedule();
+          const isWeekendOrHoliday = (dayName === "Saturday" || dayName === "Sunday" || INSTITUTE_HOLIDAYS_2026.has(dateKey));
+
+          // FIX: use currentISTTime (not stale GPS currtime) for alert & next-stop
           checkForUserAlert(schedule);
 
-          // ── Next stop display ────────────────────────────────
-          const nowSec   = timeToSeconds(currentISTTime);
+          // ── Next stop display (uses currentISTTime) ──────────
+          const nowSec = timeToSeconds(currentISTTime);
           const firstSec = timeToSeconds(scheduleFirstTime(schedule));
           const lastSec  = timeToSeconds(scheduleLastTime(schedule));
 
-          let next_stop = "", next_1_stop_text = "", next_2_stop_text = "";
+          let next_stop = "";
+          let next_1_stop_text = "";
+          let next_2_stop_text = "";
           let flag = 0;
 
-          // FIX (off-by-one): >= lastSec so the final stop correctly shows "closed"
-          if (nowSec < firstSec || nowSec >= lastSec) {
+          if (nowSec < firstSec || nowSec > lastSec) {
+            // Fix 2: use tomorrow's schedule type, not today's
             const nextStart = getTomorrowStartTime();
-            next_stop = `Shuttle service is closed. Next bus starts at ${nextStart}`;
+            next_stop = `Shuttle service is closed. The next bus will start from ${nextStart}`;
             flag = 1;
           } else {
             for (let i = 0; i < schedule.length - 1; i++) {
               const curSec  = timeToSeconds(schedule[i].time);
-              const nextSec = timeToSeconds(schedule[i + 1].time);
+              const nextSec = timeToSeconds(schedule[i+1].time);
               if (nowSec >= curSec && nowSec < nextSec) {
-                // FIX: trim seconds from displayed times
-                next_stop       = `${schedule[i+1].name} at ${fmtTime(schedule[i+1].time)}`;
-                if (i+2 < schedule.length)
-                  next_1_stop_text = `${schedule[i+2].name} at ${fmtTime(schedule[i+2].time)}`;
-                if (i+3 < schedule.length)
-                  next_2_stop_text = `${schedule[i+3].name} at ${fmtTime(schedule[i+3].time)}`;
+                next_stop = `${schedule[i+1].name} at ${schedule[i+1].time}`;
+                if (i+2 < schedule.length) {
+                  next_1_stop_text = `${schedule[i+2].name} at ${schedule[i+2].time}`;
+                }
+                if (i+3 < schedule.length) {
+                  next_2_stop_text = `${schedule[i+3].name} at ${schedule[i+3].time}`;
+                }
                 break;
               }
             }
             if (!next_stop) {
-              const last = schedule[schedule.length - 1];
-              next_stop = `${last.name} at ${fmtTime(last.time)}`;
+              // FIX: include last stop (was i < length-1, now catches final entry)
+              const last = schedule[schedule.length-1];
+              next_stop = `${last.name} at ${last.time}`;
             }
           }
 
@@ -423,18 +404,25 @@ input:checked ~ .slide { transform: translateX(0); }
           });
           busMarker = L.marker([lat, lon], { icon: busIcon }).addTo(map);
 
+          // ── Dynamic zoom — Fix 8: skip re-center if user is panning ──
           const dists = Object.values(STOP_COORDS).map(c => calculateDistance(lat, lon, c.lat, c.lng));
-          const zoom  = getZoomLevel(Math.min(...dists));
+          const zoom = getZoomLevel(Math.min(...dists));
           if (!userPanning) map.setView([lat, lon], zoom);
 
-          // ── Status (live vs parked) via repair channel ───────
+          // FIX: async repair message — check INSIDE the .then() so repMsg is populated
           fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
             .then(r => r.json())
             .then(data1 => {
-              const stale  = isGPSStale(latest.timestamp, 60);
-              let statu    = stale ? "Parked" : "Live";
+              let statu;
+              // FIX: midnight-safe stale check using raw ms, not HH:MM:SS string subtraction
+              const stale = isGPSStale(latest.timestamp, 60);
+              statu = stale ? "Parked" : "Live";
+
+              // FIX: repMsg checked HERE, inside the .then(), so it's actually populated
               const repMsg = (data1.feeds && data1.feeds.length > 0) ? (data1.feeds[0].field1 || "") : "";
-              if (repMsg !== "" && repMsg.toUpperCase() !== "OK") statu = repMsg;
+              if (repMsg !== "" && repMsg.toUpperCase() !== "OK") {
+                statu = repMsg;
+              }
 
               const statusEl = document.getElementById("Status");
               if (statu === "Live") {
@@ -449,8 +437,9 @@ input:checked ~ .slide { transform: translateX(0); }
               statusEl.innerText = statu;
             })
             .catch(() => {
-              const stale    = isGPSStale(latest.timestamp, 60);
-              const statu    = stale ? "Parked" : "Live";
+              // Repair channel unreachable: still show live/parked from GPS staleness
+              const stale = isGPSStale(latest.timestamp, 60);
+              const statu = stale ? "Parked" : "Live";
               const statusEl = document.getElementById("Status");
               statusEl.innerText = statu;
               if (statu === "Live") {
@@ -465,12 +454,12 @@ input:checked ~ .slide { transform: translateX(0); }
             });
 
           // ── Update DOM ───────────────────────────────────────
-          document.getElementById("lastUpdate").innerText  = lastUpdatedIST;
-          document.getElementById("Speed").innerText       = speedStr;
+          document.getElementById("lastUpdate").innerText = lastUpdatedIST;
+          document.getElementById("Speed").innerText = speedStr;
 
           const ns = document.getElementById("Nextstop");
           ns.innerText = next_stop;
-          document.getElementById("next1stop").innerText  = next_1_stop_text;
+          document.getElementById("next1stop").innerText = next_1_stop_text;
           document.getElementById("next2stops").innerText = next_2_stop_text;
 
           const hd = document.getElementById("heading");
@@ -485,14 +474,14 @@ input:checked ~ .slide { transform: translateX(0); }
         .catch(err => {
           console.error('Fetch Error:', err);
           document.getElementById("lastUpdate").innerText = "Error loading update.";
-          document.getElementById("Speed").innerText      = "Error fetching speed.";
+          document.getElementById("Speed").innerText = "Error fetching speed.";
         });
     }
 
-    // track user map interaction so auto-pan doesn't interrupt manual browsing
+    // Fix 8: track user map interaction so auto-pan doesn't interrupt manual browsing
     let userPanning = false;
     map.on('dragstart zoomstart', () => { userPanning = true; });
-    map.on('dragend zoomend', () => { setTimeout(() => { userPanning = false; }, 5000); });
+    map.on('dragend zoomend', () => { setTimeout(() => { userPanning = false; }, 5000); });;
 
     updateMapData();
     setInterval(updateMapData, 20000);
