@@ -1,517 +1,305 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CLT — Bus Tracking</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+  <title>CLT</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Shared timetable, helpers, and holiday list -->
   <script src="schedule.js"></script>
+
+  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PXLX7BYBKZ"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PXLX7BYBKZ');</script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PXLX7BYBKZ');
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
   <style>
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-    html,body{height:100%;font-family:'Poppins',sans-serif;background:#f4f0f5;overflow:hidden;}
-    .page-wrapper{height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+html, body { height:100%; margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(145deg,#fafafa,#f0f0f0); }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+body { display:flex; flex-direction:column; }
+.map-container { background:#fff; box-shadow:2px 2px 5px rgba(0,0,0,.1); width:60%; height:100%; position:relative; z-index:1; }
+#map { width:100%; height:100%; }
+.sidebar { flex:1; padding:20px; background:linear-gradient(145deg,#fafafa,#f0f0f0); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:0; position:relative; width:40%; height:100%; box-shadow:-2px 0 10px rgba(0,0,0,.2); overflow:hidden; }
+.sidebar::before { content:""; position:absolute; top:0; left:0; right:0; bottom:0; background-image:url('../Pics/IITDH_logo2.jpg'); background-repeat:no-repeat; background-position:center; background-size:95%; opacity:.16; z-index:-1; }
+.sidebar h2 { font-size:24px; color:#d42e2e; font-weight:bold; text-align:center; }
+.sidebar h3 { font-size:28px; color:#802485; text-align:center; font-family:Arial,Helvetica,sans-serif; font-weight:bold; }
+.sidebar p { font-size:18px; color:#555; text-align:center; margin:10px 0; }
+.sidebar .updated-time { font-size:20px; color:#802485; font-family:'Roboto',sans-serif; font-weight:500; letter-spacing:.5px; }
+.sidebar .updated-time-not-live { font-size:20px; color:#c47a00; font-family:'Roboto',sans-serif; font-weight:500; letter-spacing:.5px; }
+.yes { display:none; }
+.slide { height:100%; width:200px; position:fixed; top:0; left:0; background-color:#89288f; transition:.5s ease; transform:translateX(-200px); z-index:1002; box-shadow:1px 0 10px rgba(0,0,0,.2); }
+.leaflet-control-zoom { position:fixed !important; top:40px; left:2px; z-index:1000; }
+h1 { color:#ffffffe2; font-weight:bold; text-align:right; padding:10px 0; padding-top:20px; padding-right:50px; pointer-events:none; }
+ul li { list-style:none; }
+ul li a { color:#ffffffe2; font-weight:500; padding:5px 0; display:block; text-transform:capitalize; text-decoration:none; transition:.2s ease-out; }
+ul li:hover a { color:#89288f; background-color:white; }
+ul li a i { width:30px; text-align:center; color:#ffffffe2; }
+input { display:none; visibility:hidden; -webkit-appearance:none; }
+.toggle { position:fixed; height:30px; width:30px; top:2.75px; left:7px; z-index:1003; cursor:pointer; border-radius:2px; background-color:#89288f; box-shadow:2px 0 10px rgba(0,0,0,.2); }
+.toggle .common { position:absolute; height:2px; width:20px; background-color:white; border-radius:50px; transition:.5s ease; }
+.toggle .top_line { top:30%; left:50%; transform:translate(-50%,-50%); }
+.toggle .middle_line { top:50%; left:50%; transform:translate(-50%,-50%); }
+.toggle .bottom_line { top:70%; left:50%; transform:translate(-50%,-50%); }
+input:checked ~ .toggle .top_line { left:2px; top:14px; width:25px; transform:rotate(45deg); }
+input:checked ~ .toggle .bottom_line { left:2px; top:14px; width:25px; transform:rotate(-45deg); }
+input:checked ~ .toggle .middle_line { opacity:0; transform:translateX(20px); }
+input:checked ~ .slide { transform:translateX(0); }
 
-    /* ── Navbar ── */
-    .navbar-bar{height:48px;background:#89288f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:600;flex-shrink:0;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.25);}
-    .navbar-logo-link{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:1100;}
-    .navbar-logo-link img{height:28px;width:auto;}
-    .hamburger-input{display:none;}
-    .toggle{position:absolute;left:10px;top:50%;transform:translateY(-50%);height:30px;width:30px;cursor:pointer;border-radius:2px;background:#89288f;z-index:1003;}
-    .toggle .common{position:absolute;height:2px;width:20px;background:#fff;border-radius:50px;transition:.4s ease;}
-    .toggle .top_line{top:30%;left:50%;transform:translate(-50%,-50%);}
-    .toggle .middle_line{top:50%;left:50%;transform:translate(-50%,-50%);}
-    .toggle .bottom_line{top:70%;left:50%;transform:translate(-50%,-50%);}
-    .hamburger-input:checked~.toggle .top_line{left:2px;top:14px;width:25px;transform:rotate(45deg);}
-    .hamburger-input:checked~.toggle .bottom_line{left:2px;top:14px;width:25px;transform:rotate(-45deg);}
-    .hamburger-input:checked~.toggle .middle_line{opacity:0;transform:translateX(20px);}
-    .hamburger-input:checked~.slide{transform:translateX(0);}
-    .slide{width:210px;height:100%;position:fixed;top:0;left:0;background:#89288f;transform:translateX(-210px);transition:.5s ease;z-index:1002;box-shadow:2px 0 12px rgba(0,0,0,.25);overflow-y:auto;}
-    .slide h1{color:#ffffffe2;font-weight:700;text-align:right;padding:20px 16px 10px 0;font-size:1.1rem;pointer-events:none;}
-    .slide ul{padding:0 0 20px 0;}
-    .slide ul li{list-style:none;}
-    .slide ul li.nav-lbl{margin-top:10px;color:#eaeaead9;font-weight:300;font-size:.78rem;padding:0 12px;}
-    .slide ul li a{color:#ffffffe2;font-weight:500;padding:6px 12px;display:block;text-decoration:none;transition:.2s;}
-    .slide ul li a i{width:26px;text-align:center;}
-    .slide ul li:not(.nav-lbl):hover a{color:#89288f;background:#fff;}
-
-    /* ── Main split layout ── */
-    .main-split{flex:1;display:flex;overflow:hidden;min-height:0;}
-
-    /* ── Map pane ── */
-    .map-pane{position:relative;background:#e8e0ea;}
-    #map{width:100%;height:100%;}
-    .leaflet-control-zoom{position:absolute!important;top:10px;left:10px;z-index:900;}
-
-    /* ── Info pane ── */
-    .info-pane{
-      background:linear-gradient(160deg,#faf7fb 0%,#f0eaf2 100%);
-      display:flex;flex-direction:column;overflow:hidden;position:relative;
-      box-shadow:-3px 0 14px rgba(137,40,143,.13);
-    }
-    .info-pane::before{
-      content:"";position:absolute;inset:0;
-      background:url('../Pics/IITDH_logo2.jpg') no-repeat center/80%;
-      opacity:.08;pointer-events:none;z-index:0;
-    }
-    .info-inner{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;padding:18px 20px;gap:10px;overflow-y:auto;min-height:0;}
-
-    /* Status bar at top of info pane */
-    .status-bar{
-      background:rgba(255,255,255,.7);
-      border:1px solid rgba(137,40,143,.15);
-      border-radius:10px;
-      padding:10px 14px;
-      display:flex;flex-direction:column;gap:5px;
-      backdrop-filter:blur(4px);
-    }
-    .status-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-    .status-label{font-size:.75rem;color:#888;font-weight:500;white-space:nowrap;}
-    .status-value{font-size:.85rem;color:#333;font-weight:600;text-align:right;font-family:'Roboto',sans-serif;}
-    .status-value.live{color:#188038;}
-    .status-value.parked{color:#c47a00;}
-    .status-value.nosig{color:#c00;}
-
-    /* Upcoming buses card */
-    .upcoming-card{
-      background:rgba(255,255,255,.75);
-      border:1px solid rgba(137,40,143,.15);
-      border-radius:10px;
-      padding:12px 14px;
-      backdrop-filter:blur(4px);
-      display:flex;flex-direction:column;
-    }
-    .upcoming-title{font-size:.72rem;font-weight:600;color:#89288f;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
-    .bus-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0e8f1;}
-    .bus-row:last-child{border-bottom:none;}
-    .bus-time-badge{
-      background:#89288f;color:#fff;
-      border-radius:6px;padding:4px 9px;
-      font-size:.78rem;font-weight:600;
-      white-space:nowrap;font-family:'Roboto',sans-serif;
-      flex-shrink:0;
-    }
-    .bus-dest{font-size:.82rem;color:#333;font-weight:500;}
-    .bus-dest .arrow{color:#89288f;margin-right:4px;font-size:.7rem;}
-    .closed-msg{font-size:.88rem;color:#802485;font-weight:500;line-height:1.5;}
-
-    /* Footer */
-    .info-footer{
-      flex-shrink:0;padding:9px 14px;
-      background:rgba(255,255,255,.6);
-      border-top:1px solid rgba(137,40,143,.1);
-      display:flex;flex-direction:column;gap:3px;
-      position:relative;z-index:1;
-    }
-    .info-footer a{color:#89288f;text-decoration:underline;font-weight:500;}
-    .info-footer p{font-size:.72rem;color:#666;margin:0;}
-
-    /* ── Desktop ≥ 768px ── */
-    @media(min-width:768px){
-      .map-pane{width:60%;height:100%;}
-      .info-pane{width:40%;}
-      .info-inner{padding:22px 24px;gap:14px;}
-      .upcoming-card{flex:1;min-height:0;overflow-y:auto;}
-      .status-value{font-size:.9rem;}
-      .bus-dest{font-size:.87rem;}
-    }
-
-    /* ── Mobile < 768px ── */
-    @media(max-width:767px){
-      .main-split{flex-direction:column;}
-      .map-pane{width:100%;height:35dvh;flex-shrink:0;}
-      /* info-pane fills remaining height, scrolls as one unit */
-      .info-pane{width:100%;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;}
-      /* info-inner is NOT a scroll container on mobile — pane itself scrolls */
-      .info-inner{overflow:visible;padding:10px 12px;gap:8px;flex:none;}
-      /* upcoming-card: natural height, no flex stretch, no overflow clipping */
-      .upcoming-card{flex:none;overflow:visible;padding:9px 10px;}
-      /* status */
-      .status-bar{padding:8px 10px;gap:4px;}
-      .status-label{font-size:.7rem;}
-      .status-value{font-size:.78rem;}
-      /* bus rows */
-      .bus-time-badge{font-size:.72rem;padding:3px 8px;}
-      .bus-dest{font-size:.76rem;}
-      .bus-row{padding:5px 0;gap:8px;}
-      /* footer — now INSIDE info-inner, scrolls naturally with content */
-      .info-footer{margin-top:4px;border-radius:10px;border-top:1px solid rgba(137,40,143,.1);}
-      .info-footer p{font-size:.65rem;}
-    }
-
-    /* Alert button */
-    .alert-btn-wrap{display:flex;justify-content:center;}
-    .alert-btn{
-      display:inline-flex;align-items:center;gap:8px;
-      background:#89288f;color:#fff;border:none;
-      border-radius:8px;padding:9px 22px;font-size:.85rem;font-weight:600;
-      cursor:pointer;transition:background .2s;font-family:'Poppins',sans-serif;
-      box-shadow:0 2px 8px rgba(137,40,143,.3);
-    }
-    .alert-btn:hover{background:#6a1a70;}
-    /* Alert modal (custom) */
-    .alert-modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;z-index:2000;align-items:center;justify-content:center;}
-    .alert-modal.show{display:flex;}
-    .alert-box{background:#fff;border-radius:14px;padding:24px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2);text-align:center;}
-    .alert-box h3{color:#89288f;font-size:1.1rem;font-weight:700;margin-bottom:10px;}
-    .alert-box p{font-size:.9rem;color:#333;margin-bottom:18px;line-height:1.5;}
-    .alert-box button{background:#89288f;color:#fff;border:none;border-radius:7px;padding:8px 24px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;}
-    .alert-box button:hover{background:#6a1a70;}
-    /* Preferences modal */
-    .modal-header{border-bottom:none;padding-bottom:0;}
-    .form-group{margin-bottom:14px;}
-    .form-group label{font-size:.85rem;font-weight:600;margin-bottom:4px;display:block;}
-    .form-group select{width:100%;padding:8px 10px;border-radius:7px;border:1px solid #ddd;font-size:.85rem;font-family:'Poppins',sans-serif;}
+@media (max-width:768px) {
+  .maincontent { display:flex; flex-direction:column; height:95dvh !important; min-height:0; overflow:hidden; }
+  .map-container { width:100%; height:47dvh; min-height:0; }
+  .sidebar { width:100%; height:48dvh; min-height:0; padding:10px 12px; justify-content:center; overflow:hidden; }
+  .sidebar p { font-size:14px; line-height:1.3; margin:3px 0; }
+  .sidebar .updated-time, .sidebar .updated-time-not-live { font-size:15px; line-height:1.3; }
+  .inner { height:auto !important; width:100%; display:flex; flex-direction:column; justify-content:center; }
+  #heading { margin-top:4px; }
+  .hello { z-index:1001; top:6px; position:fixed; height:30px; left:auto; right:8px; width:30px; }
+}
+@media (min-width:768px) {
+  .maincontent { display:flex; flex-direction:row; }
+  .map-container { width:60%; }
+  .sidebar { width:40%; }
+  .inner { display:grid; place-content:center; }
+  .hello { z-index:1001; top:1.5px; position:fixed; height:35px; left:96%; width:35px; }
+}
   </style>
 </head>
 <body>
-<div class="page-wrapper">
+  <div style="height:100vh; display:flex; flex-direction:column;">
 
-  <a href="https://www.iitdh.ac.in/hi" target="_blank" class="navbar-logo-link">
-    <img src="../Pics/logo-intranet-white.png" alt="IIT Dharwad">
-  </a>
-  <nav class="navbar-bar">
-    <label style="position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;padding-left:8px;cursor:pointer;z-index:1004;">
-      <input class="hamburger-input" type="checkbox">
-      <div class="toggle">
-        <span class="top_line common"></span>
-        <span class="middle_line common"></span>
-        <span class="bottom_line common"></span>
+    <!-- Navigation Bar -->
+    <a href="https://www.iitdh.ac.in/hi" target="_blank">
+      <img src="../Pics/logo-intranet-white.png" class="hello" alt="Logo">
+    </a>
+    <nav style="height:5%;background-color:#89288f;position:relative;">
+      <div style="color:#f7efefe2;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:600;">
+          CLT
       </div>
-      <div class="slide">
-        <h1>Menu</h1>
-        <ul>
-          <li class="nav-lbl">Main Menu</li>
-          <li><a href="Main_Menu.html"><i class="fas fa-home"></i> Home</a></li>
-          <li class="nav-lbl">Live Bus Tracking</li>
-          <li><a href="Bus_Tracking.html"><i class="fa-solid fa-location-dot"></i> Track Bus</a></li>
-          <li class="nav-lbl">Monitor Stops</li>
-          <li><a href="Main_Gate.html"><i class="fas fa-tv"></i> Main Gate</a></li>
-          <li><a href="A1.html"><i class="fas fa-tv"></i> A1</a></li>
-          <li><a href="A2.html"><i class="fas fa-tv"></i> A2</a></li>
-          <li><a href="Hostel.html"><i class="fas fa-tv"></i> Hostel</a></li>
-          <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
-          <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
-          <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
-          <li><a href="Jubilee_Circle.html"><i class="fas fa-tv"></i> Jubilee Circle</a></li>
-          <li class="nav-lbl">More Information</li>
-          <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
-        </ul>
+      <label>
+        <input type="checkbox">
+        <div class="toggle">
+          <span class="top_line common"></span>
+          <span class="middle_line common"></span>
+          <span class="bottom_line common"></span>
+        </div>
+        <div class="slide">
+          <h1>Menu</h1>
+          <ul>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">Main Menu</li>
+            <li><a href="Main_Menu.html"><i class="fas fa-home"></i> Home</a></li>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">Live Bus Tracking</li>
+            <li><a href="Bus_Tracking.html"><i class="fa-solid fa-location-dot"></i> Track Bus</a></li>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">Monitor Stops</li>
+            <li><a href="Main_Gate.html"><i class="fas fa-tv"></i> Main Gate</a></li>
+            <li><a href="A1.html"><i class="fas fa-tv"></i> A1</a></li>
+            <li><a href="A2.html"><i class="fas fa-tv"></i> A2</a></li>
+            <li><a href="Hostel.html"><i class="fas fa-tv"></i> Hostel</a></li>
+            <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
+            <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
+            <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
+            <li><a href="Jubilee_Circle.html"><i class="fas fa-tv"></i> Jubilee Circle</a></li>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">More Information</li>
+            <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
+          </ul>
+        </div>
+      </label>
+    </nav>
+
+    <!-- Main Content -->
+    <div style="height:95%" class="maincontent">
+      <div class="map-container">
+        <div id="map"></div>
       </div>
-    </label>
-    <i class="fa-solid fa-chalkboard" style="font-size:.9rem;margin-right:7px;opacity:.85;"></i>CLT
-  </nav>
-
-  <div class="main-split">
-    <div class="map-pane">
-      <div id="map"></div>
-    </div>
-    <div class="info-pane">
-      <div class="info-inner">
-
-        <div class="status-bar">
-          <div class="status-row">
-            <span class="status-label"><i class="fas fa-circle-dot" style="font-size:.6rem;margin-right:4px;"></i>Status</span>
-            <span class="status-value" id="Status">Loading…</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label"><i class="fas fa-clock" style="font-size:.65rem;margin-right:4px;"></i>Last Updated</span>
-            <span class="status-value" id="lastUpdate">—</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label"><i class="fas fa-gauge-high" style="font-size:.65rem;margin-right:4px;"></i>Speed</span>
-            <span class="status-value" id="Speed">—</span>
-          </div>
-        </div>
-
-        <div class="upcoming-card">
-          <div class="upcoming-title"><i class="fas fa-bus" style="margin-right:5px;"></i>Upcoming Buses</div>
-          <div id="busRows">
-            <div class="bus-row"><span class="closed-msg">Loading…</span></div>
-          </div>
-        </div>
-
-        <div class="alert-btn-wrap">
-          <button class="alert-btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            <i class="fa-solid fa-bell"></i>Create Alert
-          </button>
-        </div>
-
-        <div class="info-footer">
-          <p><i class="fas fa-calendar-alt" style="margin-right:4px;color:#89288f;"></i>Official bus schedule: <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank">click here</a></p>
-          <p><i class="fas fa-bug" style="margin-right:4px;color:#89288f;"></i>Report bugs/issues: <a href="mailto:ee23bt041@iitdh.ac.in">ee23bt041@iitdh.ac.in</a></p>
-          <p><i class="fas fa-comment-dots" style="margin-right:4px;color:#89288f;"></i>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform">feedback!</a></p>
+      <div class="sidebar">
+        <div class="inner" style="height:90%">
+          <p>Status: <span class="updated-time" id="Status">Loading...</span></p>
+          <p>Last Updated: <span class="updated-time" id="lastUpdate">Loading...</span></p>
+          <p>Current Speed: <span class="updated-time" id="Speed">Calculating...</span></p>
+          <p id="heading">Upcoming buses in:</p>
+          <p class="updated-time" id="Nextstop">...</p>
+          <p class="updated-time" id="next1stop">...</p>
+          <p class="updated-time" id="next2stops">...</p>
+          <p style="color:#666;">Report bugs or issues — <a href="mailto:ee23bt041@iitdh.ac.in" style="color:#802485;text-decoration:underline;">ee23bt041@iitdh.ac.in</a></p>
+          <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform?usp=dialog" style="color:#89288f;text-decoration:underline;">feedback!</a></p>
         </div>
       </div>
     </div>
   </div>
 
-</div>
+  <script>
+    const STOP_NAME = "CLT";
+    const STOP_LAT  = 15.484073;
+    const STOP_LNG  = 74.934991;
+    const STOP_ZOOM = 16;
 
-  <!-- Preferences Modal (Bootstrap) -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content" style="border-radius:14px;overflow:hidden;">
-        <div class="modal-header" style="background:linear-gradient(90deg,#89288f,#6a1a70);padding:14px 20px;">
-          <h5 style="color:#fff;font-weight:700;margin:0;font-size:1rem;"><i class="fa-solid fa-bell me-2"></i>Create Alert</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div style="padding:20px;">
-          <div class="form-group">
-            <label for="fromLocation">From Location</label>
-            <select id="fromLocation" class="form-control">
-              <option value="">Select starting point</option>
-              <option value="Hostel">Hostel</option>
-              <option value="Main Gate">Main Gate</option>
-              <option value="NFSU">NFSU</option>
-              <option value="New Bus Stand">New Bus Stand</option>
-              <option value="Jubilee Circle">Jubilee Circle</option>
-              <option value="A1">A1</option>
-              <option value="A2">A2</option>
-              <option value="CLT">CLT</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="toLocation">To Location</label>
-            <select id="toLocation" class="form-control">
-              <option value="">Select destination</option>
-              <option value="Hostel">Hostel</option>
-              <option value="Main Gate">Main Gate</option>
-              <option value="NFSU">NFSU</option>
-              <option value="New Bus Stand">New Bus Stand</option>
-              <option value="Jubilee Circle">Jubilee Circle</option>
-              <option value="A1">A1</option>
-              <option value="A2">A2</option>
-              <option value="CLT">CLT</option>
-            </select>
-          </div>
-          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:6px;">
-            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-            <button id="savePreferences" class="btn btn-sm" style="background:#89288f;color:#fff;font-weight:600;" data-bs-dismiss="modal">Save</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    // ── Map ─────────────────────────────────────────────────
+    var map = L.map('map').setView([STOP_LAT, STOP_LNG], STOP_ZOOM);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
 
-  <!-- Custom alert popup -->
-  <div id="alertModal" class="alert-modal">
-    <div class="alert-box">
-      <h3><i class="fa-solid fa-bell" style="margin-right:7px;"></i>Bus Alert</h3>
-      <p id="alertMessage"></p>
-      <button id="closeAlert">OK</button>
-    </div>
-  </div>
+    let tailMarkerGroup = L.layerGroup().addTo(map);
+    var busMarker = null;
 
-<script>
-  const STOP_NAME = "CLT";
-  const STOP_LAT  = 15.484073;
-  const STOP_LNG  = 74.934991;
-  const STOP_ZOOM = 17;
+    // Static stop marker for this stop
+    var stopMarker = L.marker([STOP_LAT, STOP_LNG]).addTo(map);
+    stopMarker.bindPopup("<b>" + STOP_NAME + "</b>").openPopup();
 
-  var map = L.map('map').setView([STOP_LAT, STOP_LNG], STOP_ZOOM);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '&copy; OpenStreetMap'
-  }).addTo(map);
+    // ── Main update ──────────────────────────────────────────  // calculateDistance + getZoomLevel are now in schedule.js
+    function updateMapData() {
+      fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
+        .then(r => r.json())
+        .then(data => {
+          const feeds = data.feeds
+            .slice(-5)
+            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            .map(f => ({
+              latitude:  parseFloat(f.field1),
+              longitude: parseFloat(f.field2),
+              speed:     parseInt(f.field3, 10),
+              timestamp: f.created_at
+            }));
 
-  let tailMarkerGroup = L.layerGroup().addTo(map);
-  var busMarker = null;
+          const latest = feeds[feeds.length - 1];
 
-  var stopIcon = L.divIcon({
-    html: '<div style="font-size:22px;line-height:28px;text-align:center;">🚏</div>',
-    className: '', iconSize: [28,28], iconAnchor: [14,14]
-  });
-  L.marker([STOP_LAT, STOP_LNG], { icon: stopIcon }).addTo(map)
-   .bindPopup("<b>" + STOP_NAME + "</b>").openPopup();
+          // Fix 3: guard against null/missing GPS fields (device offline or bad upload)
+          if (!isFinite(latest.latitude) || !isFinite(latest.longitude)) {
+            document.getElementById("lastUpdate").innerText = "GPS signal lost — retrying…";
+            document.getElementById("Status").innerText = "No Signal";
+            return;
+          }
 
-  function renderBusRows(upcoming, flag, trip1) {
-    const el = document.getElementById('busRows');
-    if (flag) {
-      el.innerHTML = '<div class="bus-row"><span class="closed-msg">' + trip1 + '</span></div>';
-      return;
-    }
-    if (upcoming.length === 0) {
-      el.innerHTML = '<div class="bus-row"><span class="closed-msg">No more buses today</span></div>';
-      return;
-    }
-    el.innerHTML = upcoming.map(b =>
-      '<div class="bus-row">' +
-      '<span class="bus-time-badge">' + b.timeLabel + '</span>' +
-      '<span class="bus-dest"><span class="arrow">&#9658;</span>' + b.dest + '</span>' +
-      '</div>'
-    ).join('');
-  }
-
-  function updateMapData() {
-    fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
-      .then(r => r.json())
-      .then(data => {
-        const feeds = data.feeds.slice(-5).map(f => ({
-          latitude:  parseFloat(f.field1),
-          longitude: parseFloat(f.field2),
-          speed:     parseFloat(f.field3) || NaN,
-          timestamp: f.created_at
-        }));
-
-        const latest = feeds[feeds.length - 1];
-
-        if (!isFinite(latest.latitude) || !isFinite(latest.longitude)) {
-          document.getElementById('lastUpdate').innerText = 'GPS signal lost — retrying…';
-          document.getElementById('Status').textContent = 'No Signal';
-          document.getElementById('Status').className = 'status-value nosig';
-          return;
-        }
-
-        // Trail
-        tailMarkerGroup.clearLayers();
-        feeds.slice(0, 4).forEach((entry, i) => {
-          if (!isFinite(entry.latitude) || !isFinite(entry.longitude)) return;
-          const icon = L.divIcon({
-            html: '<div style="font-size:16px;opacity:' + TRAIL_OPACITIES[i] + '">🔹</div>',
-            iconSize: [22,22], iconAnchor: [11,11], className: ''
+          // Fading trail (oldest = most transparent)
+          tailMarkerGroup.clearLayers();
+          feeds.slice(0,4).forEach((entry, i) => {
+            if (!isFinite(entry.latitude) || !isFinite(entry.longitude)) return;
+            const icon = L.divIcon({
+              html: `<div style="font-size:18px;opacity:${TRAIL_OPACITIES[i]}">🔹</div>`,
+              iconSize: [24,24], iconAnchor: [12,12]
+            });
+            L.marker([entry.latitude, entry.longitude], { icon }).addTo(tailMarkerGroup);
           });
-          L.marker([entry.latitude, entry.longitude], { icon }).addTo(tailMarkerGroup);
+
+          const lat = latest.latitude, lon = latest.longitude, spd = latest.speed;
+          const speedStr = isFinite(spd) ? spd + " km/h" : "—";  // Fix 3: guard NaN speed
+          const lastUpdatedIST = utcToISTString(latest.timestamp);
+
+          // FIX: real wall-clock IST — not GPS timestamp
+          const { timeStr: currentISTTime, dayName, dateKey } = getCurrentIST();
+          const nowSec = timeToSeconds(currentISTTime);
+
+          // FIX: pick schedule accounting for institute holidays too
+          const schedule = getTodaySchedule();
+          const isWeekendOrHoliday = (dayName === "Saturday" || dayName === "Sunday"
+                                      || INSTITUTE_HOLIDAYS_2026.has(dateKey));
+
+          // FIX: getUpcomingBuses uses currentISTTime (wall clock) inside schedule.js
+          const upcoming = getUpcomingBuses(schedule, STOP_NAME);
+
+          let trip1 = "", trip2 = "", trip3 = "", flag = 0;
+          const firstSec = timeToSeconds(scheduleFirstTime(schedule));
+          const lastSec  = timeToSeconds(scheduleLastTime(schedule));
+
+          // FIX: closed check uses stop_thatday (schedule), not hardcoded weekday array
+          // FIX: closed message matches the real next-start time for the schedule type
+          if (nowSec < firstSec || nowSec > lastSec) {
+            // Fix 2: check tomorrow's schedule type, not today's
+            trip1 = `Shuttle service is closed. The next bus will start from ${getTomorrowStartTime()}`;
+            flag = 1;
+          } else if (upcoming.length === 0) {
+            trip1 = "No more buses today";
+            flag = 1;
+          } else {
+            if (upcoming.length > 0) trip1 = `${upcoming[0].timeLabel} → ${upcoming[0].dest}`;
+            if (upcoming.length > 1) trip2 = `${upcoming[1].timeLabel} → ${upcoming[1].dest}`;
+            if (upcoming.length > 2) trip3 = `${upcoming[2].timeLabel} → ${upcoming[2].dest}`;
+          }
+
+          // Bus marker + zoom
+          if (busMarker) map.removeLayer(busMarker);
+          const busIcon = L.divIcon({
+            html: '<div style="font-size:24px;line-height:30px;text-align:center;">🚍</div>',
+            className: 'emoji-marker', iconSize: [60,60], iconAnchor: [15,15]
+          });
+          busMarker = L.marker([lat, lon], { icon: busIcon }).addTo(map);
+          const dist = calculateDistance(lat, lon, STOP_LAT, STOP_LNG);
+          if (!userPanning) map.setView([lat, lon], getZoomLevel(dist));  // Fix 8: respect user pan
+
+          // FIX: repair-message fetch async-correct — status set INSIDE .then()
+          fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
+            .then(r => r.json())
+            .then(data1 => {
+              // FIX: midnight-safe stale check via raw ms
+              const stale = isGPSStale(latest.timestamp, 60);
+              let statu = stale ? "Parked" : "Live";
+              const repMsg = (data1.feeds && data1.feeds.length > 0) ? (data1.feeds[0].field1 || "") : "";
+              if (repMsg !== "" && repMsg.toUpperCase() !== "OK") statu = repMsg;
+
+              const statusEl = document.getElementById("Status");
+              statusEl.innerText = statu;
+              if (statu === "Live") {
+                statusEl.classList.remove("updated-time-not-live");
+                statusEl.classList.add("updated-time");
+                statusEl.style.color = "#188038";
+              } else {
+                statusEl.classList.remove("updated-time");
+                statusEl.classList.add("updated-time-not-live");
+                statusEl.style.color = "#c47a00";
+              }
+            })
+            .catch(() => {
+              const stale = isGPSStale(latest.timestamp, 60);
+              const statu = stale ? "Parked" : "Live";
+              const statusEl = document.getElementById("Status");
+              statusEl.innerText = statu;
+              statusEl.style.color = statu === "Live" ? "#188038" : "#c47a00";
+            });
+
+          // Update DOM
+          document.getElementById("lastUpdate").innerText = lastUpdatedIST;
+          document.getElementById("Speed").innerText = speedStr;
+
+          const ns = document.getElementById("Nextstop");
+          ns.innerText = trip1;
+          document.getElementById("next1stop").innerText  = trip2;
+          document.getElementById("next2stops").innerText = trip3;
+
+          const hd = document.getElementById("heading");
+          if (flag) {
+            hd.classList.add("yes");
+            ns.style.color = "#802485";
+          } else {
+            hd.classList.remove("yes");
+            ns.style.color = "";
+          }
+        })
+        .catch(err => {
+          console.error('Fetch Error:', err);
+          document.getElementById("lastUpdate").innerText = "Error loading update.";
+          document.getElementById("Status").innerText = "Error loading update.";
+          document.getElementById("Speed").innerText = "Error fetching speed.";
+          document.getElementById("Nextstop").innerText = "Error retrieving next bus.";
         });
-
-        const lat = latest.latitude, lon = latest.longitude, spd = latest.speed;
-        const speedStr = (isFinite(spd) && !isNaN(spd) && spd >= 0) ? Math.round(spd) + ' km/h' : '—';
-        const lastUpdatedIST = utcToISTString(latest.timestamp);
-
-        const { timeStr: currentISTTime, dayName, dateKey } = getCurrentIST();
-        const nowSec = timeToSeconds(currentISTTime);
-        const schedule = getTodaySchedule();
-        const upcoming = getUpcomingBuses(schedule, STOP_NAME);
-        checkForUserAlert(schedule);
-        const firstSec = timeToSeconds(scheduleFirstTime(schedule));
-        const lastSec  = timeToSeconds(scheduleLastTime(schedule));
-
-        let trip1 = '', flag = 0;
-        if (nowSec < firstSec || nowSec > lastSec) {
-          trip1 = 'Shuttle service is closed. Next bus from ' + getTomorrowStartTime();
-          flag = 1;
-        }
-
-        // Bus marker
-        if (busMarker) map.removeLayer(busMarker);
-        const busIcon = L.divIcon({
-          html: '<div style="font-size:24px;line-height:30px;text-align:center;">🚍</div>',
-          className: '', iconSize: [30,30], iconAnchor: [15,15]
-        });
-        busMarker = L.marker([lat, lon], { icon: busIcon }).addTo(map);
-        const dist = calculateDistance(lat, lon, STOP_LAT, STOP_LNG);
-        if (!userPanning) map.setView([lat, lon], getZoomLevel(dist));
-
-        // DOM
-        document.getElementById('lastUpdate').innerText = lastUpdatedIST;
-        document.getElementById('Speed').innerText = speedStr;
-        renderBusRows(upcoming, flag, trip1);
-
-        // Set status immediately from GPS staleness — no flicker waiting for inner fetch
-        const staleImmediate = isGPSStale(latest.timestamp, 60);
-        const statuImmediate = staleImmediate ? 'Parked' : 'Live';
-        const statusEl = document.getElementById('Status');
-        statusEl.textContent = statuImmediate;
-        statusEl.className = 'status-value ' + (statuImmediate === 'Live' ? 'live' : 'parked');
-
-        // Status channel fetch — overrides only if maintenance message present
-        fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
-          .then(r => r.json())
-          .then(data1 => {
-            const repMsg = (data1.feeds && data1.feeds.length > 0) ? (data1.feeds[0].field1 || '') : '';
-            if (repMsg !== '' && repMsg.toUpperCase() !== 'OK') {
-              statusEl.textContent = repMsg;
-              statusEl.className = 'status-value parked';
-            }
-          })
-          .catch(() => { /* keep GPS-based status already shown */ });
-      })
-      .catch(err => {
-        console.error('Fetch Error:', err);
-        document.getElementById('lastUpdate').innerText = 'Error loading update.';
-        document.getElementById('Status').innerText = 'Error';
-        document.getElementById('busRows').innerHTML = '<div class="bus-row"><span class="closed-msg">Could not load data. Check connection.</span></div>';
-      });
-  }
-
-  let userPanning = false;
-  map.on('dragstart zoomstart', () => { userPanning = true; });
-  map.on('dragend zoomend', () => { setTimeout(() => { userPanning = false; }, 5000); });
-
-    // ── Alert system ──
-    let userPreferences = {
-      fromLocation: localStorage.getItem('fromLocation') || '',
-      toLocation:   localStorage.getItem('toLocation')   || '',
-      alertShown:   false
-    };
-    if (userPreferences.fromLocation) document.getElementById('fromLocation').value = userPreferences.fromLocation;
-    if (userPreferences.toLocation)   document.getElementById('toLocation').value   = userPreferences.toLocation;
-
-    const alertModal   = document.getElementById('alertModal');
-    const alertMessage = document.getElementById('alertMessage');
-    document.getElementById('closeAlert').addEventListener('click', () => alertModal.classList.remove('show'));
-    alertModal.addEventListener('click', e => { if (e.target === alertModal) alertModal.classList.remove('show'); });
-
-    document.getElementById('savePreferences').addEventListener('click', () => {
-      userPreferences.fromLocation = document.getElementById('fromLocation').value;
-      userPreferences.toLocation   = document.getElementById('toLocation').value;
-      if (userPreferences.fromLocation && userPreferences.toLocation &&
-          userPreferences.fromLocation === userPreferences.toLocation) {
-        alert('\'From\' and \'To\' locations must be different.');
-        return;
-      }
-      userPreferences.alertShown = false;
-      localStorage.setItem('fromLocation', userPreferences.fromLocation);
-      localStorage.setItem('toLocation',   userPreferences.toLocation);
-      if (userPreferences.fromLocation && userPreferences.toLocation) {
-        alert('Alert saved! You will be notified when the bus is ~10 min from your stop.');
-      } else {
-        alert('Please select both From and To locations.');
-      }
-    });
-
-    function showBusAlert(message) {
-      if (!userPreferences.alertShown) {
-        alertMessage.textContent = message;
-        alertModal.classList.add('show');
-        userPreferences.alertShown = true;
-        setTimeout(() => { userPreferences.alertShown = false; }, 300000);
-      }
     }
 
-    function checkForUserAlert(schedule) {
-      if (!userPreferences.fromLocation || !userPreferences.toLocation) return;
-      const { timeStr } = getCurrentIST();
-      const nowSec = timeToSeconds(timeStr);
-      const fromIndices = schedule.reduce((acc, stop, i) => {
-        if (stop.name === userPreferences.fromLocation) acc.push(i); return acc;
-      }, []);
-      if (fromIndices.length === 0) return;
-      for (const fromIndex of fromIndices) {
-        const toIndex = schedule.findIndex((s, i) => s.name === userPreferences.toLocation && i > fromIndex);
-        if (toIndex === -1) continue;
-        const fromSec = timeToSeconds(schedule[fromIndex].time);
-        if (nowSec >= (fromSec - 600) && nowSec < fromSec) {
-          showBusAlert(`Bus arrives at ${userPreferences.fromLocation} in ${Math.ceil((fromSec - nowSec) / 60)} min → ${userPreferences.toLocation}`);
-          return;
-        } else if (nowSec >= fromSec && nowSec < fromSec + 60) {
-          showBusAlert(`Bus has arrived at ${userPreferences.fromLocation}.`);
-          return;
-        }
-      }
-    }
+    // Fix 8: track user map interaction so auto-pan doesn't interrupt manual browsing
+    let userPanning = false;
+    map.on('dragstart zoomstart', () => { userPanning = true; });
+    map.on('dragend zoomend', () => { setTimeout(() => { userPanning = false; }, 5000); });;
 
-  updateMapData();
-  setInterval(updateMapData, 20000);
-</script>
+    updateMapData();
+    setInterval(updateMapData, 20000);
+  </script>
 </body>
 </html>
