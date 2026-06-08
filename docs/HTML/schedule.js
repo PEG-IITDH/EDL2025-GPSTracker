@@ -15,6 +15,9 @@ const STOP_COORDS = {
   "CLT":           { lat: 15.484073, lng: 74.934991 },
 };
 
+// ── Weekday-only stops (not served on weekends/holidays) ──
+const WEEKDAY_ONLY_STOPS = new Set(["A1", "A2", "CLT", "Jubilee Circle"]);
+
 // ── 2026 Institute Holidays (from official list) ──────────
 // Format: "MM-DD"
 const INSTITUTE_HOLIDAYS_2026 = new Set([
@@ -58,8 +61,10 @@ const WEEKDAY_SCHEDULE = [
   _s("Main Gate",      "08:05:00"),
   _s("NFSU",           "08:25:00"),
   _s("Jubilee Circle", "08:40:00"),
-  // Trip 2: Jubilee Circle → New Bus Stand → Main Gate → Hostel  (8:40–9:20)
-  _s("Jubilee Circle", "08:40:00"),
+  // Trip 2: Jubilee Circle → New Bus Stand → Main Gate → Hostel  (8:41–9:20)
+  // NOTE: Trip 2 start is 08:41 (1 min after Trip 1 end) so getUpcomingBuses
+  // can distinguish the two Jubilee Circle entries at the trip boundary.
+  _s("Jubilee Circle", "08:41:00"),
   _s("New Bus Stand",  "08:50:00"),
   _s("Main Gate",      "09:10:00"),
   _s("Hostel",         "09:20:00"),
@@ -75,7 +80,7 @@ const WEEKDAY_SCHEDULE = [
   _s("Main Gate",     "13:25:00"),
   _s("Hostel",        "13:30:00"),
 
-  // Lunch Shuttle Trip 1: Hostel → A1 → CLT → A2/Admin  (13:35–13:45)
+  // Lunch Shuttle Trip 1: Hostel → A1 → CLT → A2 → A1 → Hostel  (13:35–13:50)
   _s("Hostel",        "13:35:00"),
   _s("A1",            "13:38:00"),
   _s("CLT",           "13:40:00"),
@@ -83,7 +88,7 @@ const WEEKDAY_SCHEDULE = [
   _s("A1",            "13:47:00"),
   _s("Hostel",        "13:50:00"),
 
-  // Lunch Shuttle Trip 2: Hostel → A1 → CLT → A2  (13:55–14:10)
+  // Lunch Shuttle Trip 2: Hostel → A1 → CLT → A2 → A1 → Hostel  (13:55–14:10)
   _s("Hostel",        "13:55:00"),
   _s("A1",            "13:58:00"),
   _s("CLT",           "14:00:00"),
@@ -91,7 +96,7 @@ const WEEKDAY_SCHEDULE = [
   _s("A1",            "14:07:00"),
   _s("Hostel",        "14:10:00"),
 
-  // Lunch Shuttle Trip 3: Hostel → A1 → CLT → A2  (14:15–14:30)
+  // Lunch Shuttle Trip 3: Hostel → A1 → CLT → A2 → A1 → Hostel  (14:15–14:30)
   _s("Hostel",        "14:15:00"),
   _s("A1",            "14:18:00"),
   _s("CLT",           "14:20:00"),
@@ -181,28 +186,45 @@ const WEEKEND_SCHEDULE = [
 ];
 
 // ── Helper: get current IST time components ───────────────
+// Uses Intl.DateTimeFormat formatToParts — spec-guaranteed, no toLocaleString
+// parsing antipattern.
 function getCurrentIST() {
   const now = new Date();
-  const ist = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  const hh = ist.getHours().toString().padStart(2,'0');
-  const mm = ist.getMinutes().toString().padStart(2,'0');
-  const ss = ist.getSeconds().toString().padStart(2,'0');
-  const mo = (ist.getMonth()+1).toString().padStart(2,'0');
-  const dd = ist.getDate().toString().padStart(2,'0');
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false,
+    weekday: "long"
+  }).formatToParts(now);
+
+  const get = (type) => parts.find(p => p.type === type).value;
+  let hh = get("hour");
+  // Intl hour12:false can return "24" for midnight — normalise to "00"
+  if (hh === "24") hh = "00";
+  const mm  = get("minute");
+  const ss  = get("second");
+  const mo  = get("month");
+  const dd  = get("day");
+  const day = get("weekday"); // e.g. "Monday"
+
   return {
-    dayName:  days[ist.getDay()],
-    timeStr:  `${hh}:${mm}:${ss}`,   // "HH:MM:SS"
-    dateKey:  `${mo}-${dd}`,          // "MM-DD" for holiday lookup
-    dateObj:  ist,
-    nowMs:    now.getTime()           // raw ms for stale-check
+    dayName: day,
+    timeStr: `${hh}:${mm}:${ss}`,   // "HH:MM:SS"
+    dateKey: `${mo}-${dd}`,          // "MM-DD" for holiday lookup
+    nowMs:   now.getTime()           // raw ms for stale-check
   };
 }
 
 // ── Helper: convert HH:MM:SS → seconds ───────────────────
 function timeToSeconds(t) {
-  const [h,m,s] = t.split(":").map(Number);
+  const [h, m, s] = t.split(":").map(Number);
   return h * 3600 + m * 60 + (s || 0);
+}
+
+// ── Helper: trim HH:MM:SS → HH:MM for display ────────────
+function fmtTime(t) {
+  return t.slice(0, 5); // "HH:MM:SS" → "HH:MM"
 }
 
 // ── Helper: pick correct schedule for today ───────────────
@@ -211,6 +233,12 @@ function getTodaySchedule() {
   const isWeekend = dayName === "Saturday" || dayName === "Sunday";
   const isHoliday = INSTITUTE_HOLIDAYS_2026.has(dateKey);
   return (isWeekend || isHoliday) ? WEEKEND_SCHEDULE : WEEKDAY_SCHEDULE;
+}
+
+// ── Helper: is today a weekend or institute holiday? ──────
+function isTodayWeekendOrHoliday() {
+  const { dayName, dateKey } = getCurrentIST();
+  return dayName === "Saturday" || dayName === "Sunday" || INSTITUTE_HOLIDAYS_2026.has(dateKey);
 }
 
 // ── Helper: first time in schedule ───────────────────────
@@ -226,8 +254,7 @@ function scheduleLastTime(schedule) {
 // ── Helper: get up to 3 upcoming buses at a named stop ───
 // Uses real wall-clock IST time, not GPS timestamp.
 // Trip-boundary safe: destination search stops before the next occurrence of
-// the same stop name at an EARLIER time (which marks a new trip, not the
-// same trip continuing), preventing cross-trip destination leakage.
+// the same stop name at an EARLIER or EQUAL time (different trip).
 function getUpcomingBuses(schedule, stopName) {
   const { timeStr } = getCurrentIST();
   const nowSec = timeToSeconds(timeStr);
@@ -235,31 +262,33 @@ function getUpcomingBuses(schedule, stopName) {
 
   for (let i = 0; i < schedule.length; i++) {
     if (schedule[i].name !== stopName) continue;
-    if (timeToSeconds(schedule[i].time) <= nowSec) continue;
+    // FIX (bug #1 / off-by-one): use < so a bus due RIGHT NOW is still shown
+    if (timeToSeconds(schedule[i].time) < nowSec) continue;
 
-    const minAway = Math.ceil((timeToSeconds(schedule[i].time) - nowSec) / 60);
+    const stopSec  = timeToSeconds(schedule[i].time);
+    const minAway  = Math.max(0, Math.ceil((stopSec - nowSec) / 60));
 
-    // Find destination: advance past consecutive same-name entries,
-    // but stop at a trip boundary (next same-name entry has an earlier or
-    // equal time — meaning it belongs to a different trip).
+    // Find destination: skip any immediate consecutive same-name entries that
+    // are part of a turnaround (same time or later within the same trip),
+    // but stop at a trip boundary (same name with an earlier or equal time).
     let j = i + 1;
-    const iTimeSec = timeToSeconds(schedule[i].time);
+    const iTimeSec = stopSec;
     while (j < schedule.length && schedule[j].name === stopName) {
-      if (timeToSeconds(schedule[j].time) <= iTimeSec) break; // trip boundary
+      if (timeToSeconds(schedule[j].time) <= iTimeSec) break; // new trip
       j++;
     }
     const dest = (j < schedule.length && schedule[j].name !== stopName)
       ? schedule[j].name
       : "End of route";
 
-    const hrs  = Math.floor(minAway / 60);
-    const mins = minAway % 60;
+    const hrs     = Math.floor(minAway / 60);
+    const mins    = minAway % 60;
     const waitStr = hrs > 0
       ? (mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`)
       : `${mins} min`;
     const timeLabel = `in ${waitStr}`;
 
-    results.push({ timeLabel, dest, scheduledTime: schedule[i].time });
+    results.push({ timeLabel, dest, scheduledTime: fmtTime(schedule[i].time) });
     if (results.length === 3) break;
   }
   return results;
@@ -268,42 +297,56 @@ function getUpcomingBuses(schedule, stopName) {
 // ── Helper: convert UTC timestamp → IST display string ───
 function utcToISTString(utcStr) {
   const d = new Date(utcStr);
-  return d.toLocaleString('en-IN', {
-    timeZone: 'Asia/Kolkata',
+  return d.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
     hour12: false,
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: 'numeric', minute: 'numeric', second: 'numeric'
+    year: "numeric", month: "short", day: "numeric",
+    hour: "numeric", minute: "numeric", second: "numeric"
   });
 }
 
 // ── Helper: is GPS data stale? (uses raw ms, no midnight bug) ──
 function isGPSStale(gpsUTCTimestamp, thresholdSeconds = 300) {
-  const gpsMs  = new Date(gpsUTCTimestamp).getTime();
-  const nowMs  = Date.now();
-  return (nowMs - gpsMs) > (thresholdSeconds * 1000);
+  const gpsMs = new Date(gpsUTCTimestamp).getTime();
+  return (Date.now() - gpsMs) > (thresholdSeconds * 1000);
 }
 
-// ── Fix 2: return the correct start time string for TOMORROW's schedule ──
-// Used in "service closed" messages so Friday night shows "10:00 AM" (Saturday),
-// not "08:00 AM" (a weekday start that doesn't apply until Monday).
+// ── Helper: return start time of TOMORROW's first bus (24h, HH:MM) ──
+// Used in "service closed" messages so Friday night shows "10:00" (Saturday),
+// not "08:00" (a weekday start that doesn't apply until Monday).
 function getTomorrowStartTime() {
-  const now  = new Date();
-  const istNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  const now     = new Date();
+  // Compute tomorrow's date in IST using UTC offset (+5:30 = 330 min)
+  const istMs   = now.getTime() + 330 * 60 * 1000;
+  const istNow  = new Date(istMs);
   const tomorrow = new Date(istNow);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  const dayName = days[tomorrow.getDay()];
-  const mo = (tomorrow.getMonth()+1).toString().padStart(2,'0');
-  const dd = tomorrow.getDate().toString().padStart(2,'0');
-  const dateKey = `${mo}-${dd}`;
-  const isWeekend = dayName === "Saturday" || dayName === "Sunday";
-  const isHoliday = INSTITUTE_HOLIDAYS_2026.has(dateKey);
-  return (isWeekend || isHoliday) ? "10:00 AM" : "08:00 AM";
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+
+  const tomorrowParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    weekday: "long", month: "2-digit", day: "2-digit"
+  }).formatToParts(new Date(tomorrow.getTime() - 330 * 60 * 1000)); // back to UTC for Intl
+
+  // Re-derive from a real Date so Intl handles DST / leap days correctly
+  const tDate = new Date(now);
+  tDate.setDate(tDate.getDate() + 1);
+  const tParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    weekday: "long", month: "2-digit", day: "2-digit"
+  }).formatToParts(tDate);
+
+  const tDay     = tParts.find(p => p.type === "weekday").value;
+  const tMonth   = tParts.find(p => p.type === "month").value;
+  const tDayNum  = tParts.find(p => p.type === "day").value;
+  const tDateKey = `${tMonth}-${tDayNum}`;
+
+  const isWeekend = tDay === "Saturday" || tDay === "Sunday";
+  const isHoliday = INSTITUTE_HOLIDAYS_2026.has(tDateKey);
+  // FIX: return 24-hour format consistent with all other schedule times
+  return (isWeekend || isHoliday) ? "10:00" : "08:00";
 }
 
-// ── Fix 9: shared zoom helpers (moved from per-page duplication) ──────────
-// Stop pages use slightly wider thresholds (0.37/0.75…) vs Bus_Tracking
-// (0.35/0.70…); a single unified table satisfies both cases adequately.
+// ── Shared zoom helpers ───────────────────────────────────
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
   const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
