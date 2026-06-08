@@ -362,7 +362,7 @@
           const feeds = data.feeds.slice(-5).map(f => ({
             latitude:  parseFloat(f.field1),
             longitude: parseFloat(f.field2),
-            speed:     parseInt(f.field3, 10),
+            speed:     parseFloat(f.field3) || NaN,
             timestamp: f.created_at
           }));
 
@@ -387,7 +387,7 @@
 
           const lat = latest.latitude, lon = latest.longitude;
           const spd = latest.speed;
-          const speedStr = isFinite(spd) ? spd + ' km/h' : '—';
+          const speedStr = (isFinite(spd) && !isNaN(spd) && spd >= 0) ? Math.round(spd) + ' km/h' : '—';
           const lastUpdatedIST = utcToISTString(latest.timestamp);
           const { timeStr: currentISTTime, dayName, dateKey } = getCurrentIST();
           const schedule = getTodaySchedule();
