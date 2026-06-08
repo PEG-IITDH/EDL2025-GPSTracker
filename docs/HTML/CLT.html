@@ -89,10 +89,7 @@
       border-radius:10px;
       padding:12px 14px;
       backdrop-filter:blur(4px);
-      flex:1;
       display:flex;flex-direction:column;
-      min-height:0;
-      overflow-y:auto;
     }
     .upcoming-title{font-size:.72rem;font-weight:600;color:#89288f;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
     .bus-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f0e8f1;}
@@ -124,6 +121,7 @@
       .map-pane{width:60%;height:100%;}
       .info-pane{width:40%;}
       .info-inner{padding:22px 24px;gap:14px;}
+      .upcoming-card{flex:1;min-height:0;overflow-y:auto;}
       .status-value{font-size:.9rem;}
       .bus-dest{font-size:.87rem;}
     }
@@ -132,31 +130,23 @@
     @media(max-width:767px){
       .main-split{flex-direction:column;}
       .map-pane{width:100%;height:35dvh;flex-shrink:0;}
-      .info-pane{width:100%;flex:1;min-height:0;overflow:hidden;}
-      .info-inner{padding:10px 12px;gap:6px;overflow-y:auto;justify-content:flex-start;min-height:0;}
+      /* info-pane fills remaining height, scrolls as one unit */
+      .info-pane{width:100%;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;}
+      /* info-inner is NOT a scroll container on mobile — pane itself scrolls */
+      .info-inner{overflow:visible;padding:10px 12px;gap:8px;flex:none;}
+      /* upcoming-card: natural height, no flex stretch, no overflow clipping */
+      .upcoming-card{flex:none;overflow:visible;padding:9px 10px;}
+      /* status */
       .status-bar{padding:8px 10px;gap:4px;}
       .status-label{font-size:.7rem;}
       .status-value{font-size:.78rem;}
-      .upcoming-card{padding:9px 10px;max-height:42dvh;min-height:0;overflow-y:auto;}
+      /* bus rows */
       .bus-time-badge{font-size:.72rem;padding:3px 8px;}
       .bus-dest{font-size:.76rem;}
       .bus-row{padding:5px 0;gap:8px;}
-      .info-footer{flex-shrink:0;overflow:visible;}.info-footer p{font-size:.65rem;}
-    }
-    /* Extra-compact: very short phones (iPhone SE, budget 5.5") */
-    @media(max-width:767px) and (max-height:680px){
-      .info-inner{gap:4px;padding:7px 10px;}
-      .status-bar{padding:5px 9px;gap:3px;}
-      .status-label{font-size:.66rem;}
-      .status-value{font-size:.72rem;}
-      .upcoming-card{padding:6px 9px;}
-      .upcoming-title{font-size:.66rem;margin-bottom:6px;}
-      .bus-row{padding:4px 0;gap:7px;}
-      .bus-time-badge{font-size:.68rem;padding:2px 6px;}
-      .bus-dest{font-size:.7rem;}
-      .closed-msg{font-size:.78rem;line-height:1.3;}
-      .info-footer{padding:6px 12px;gap:2px;flex-shrink:0;}
-      .info-footer p{font-size:.62rem;}
+      /* footer — now INSIDE info-inner, scrolls naturally with content */
+      .info-footer{margin-top:4px;border-radius:10px;border-top:1px solid rgba(137,40,143,.1);}
+      .info-footer p{font-size:.65rem;}
     }
 
     /* Alert button */
@@ -257,11 +247,11 @@
           </button>
         </div>
 
-      </div>
-      <div class="info-footer">
-        <p><i class="fas fa-calendar-alt" style="margin-right:4px;color:#89288f;"></i>Official bus schedule: <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank">click here</a></p>
-        <p><i class="fas fa-bug" style="margin-right:4px;color:#89288f;"></i>Report bugs/issues: <a href="mailto:ee23bt041@iitdh.ac.in">ee23bt041@iitdh.ac.in</a></p>
-        <p><i class="fas fa-comment-dots" style="margin-right:4px;color:#89288f;"></i>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform">feedback!</a></p>
+        <div class="info-footer">
+          <p><i class="fas fa-calendar-alt" style="margin-right:4px;color:#89288f;"></i>Official bus schedule: <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank">click here</a></p>
+          <p><i class="fas fa-bug" style="margin-right:4px;color:#89288f;"></i>Report bugs/issues: <a href="mailto:ee23bt041@iitdh.ac.in">ee23bt041@iitdh.ac.in</a></p>
+          <p><i class="fas fa-comment-dots" style="margin-right:4px;color:#89288f;"></i>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform">feedback!</a></p>
+        </div>
       </div>
     </div>
   </div>
