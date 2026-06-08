@@ -206,7 +206,7 @@ input:checked ~ .slide { transform:translateX(0); }
                                       || INSTITUTE_HOLIDAYS_2026.has(dateKey));
 
           // FIX: getUpcomingBuses uses currentISTTime (wall clock) inside schedule.js
-          const upcoming = getUpcomingBuses(schedule, STOP_NAME);
+          const upcoming = getUpcomingBuses(schedule, STOP_NAME).filter(b => b.dest !== "End of route");
 
           let trip1 = "", trip2 = "", trip3 = "", flag = 0;
           const firstSec = timeToSeconds(scheduleFirstTime(schedule));
