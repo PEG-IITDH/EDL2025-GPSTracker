@@ -379,12 +379,12 @@ input:checked ~ .slide { transform: translateX(0); }
               const curSec  = timeToSeconds(schedule[i].time);
               const nextSec = timeToSeconds(schedule[i+1].time);
               if (nowSec >= curSec && nowSec < nextSec) {
-                next_stop = `${schedule[i+1].name} at ${schedule[i+1].time}`;
+                next_stop = `${schedule[i+1].name} at ${schedule[i+1].time.slice(0,5)}`;
                 if (i+2 < schedule.length) {
-                  next_1_stop_text = `${schedule[i+2].name} at ${schedule[i+2].time}`;
+                  next_1_stop_text = `${schedule[i+2].name} at ${schedule[i+2].time.slice(0,5)}`;
                 }
                 if (i+3 < schedule.length) {
-                  next_2_stop_text = `${schedule[i+3].name} at ${schedule[i+3].time}`;
+                  next_2_stop_text = `${schedule[i+3].name} at ${schedule[i+3].time.slice(0,5)}`;
                 }
                 break;
               }
@@ -392,7 +392,7 @@ input:checked ~ .slide { transform: translateX(0); }
             if (!next_stop) {
               // FIX: include last stop (was i < length-1, now catches final entry)
               const last = schedule[schedule.length-1];
-              next_stop = `${last.name} at ${last.time}`;
+              next_stop = `${last.name} at ${last.time.slice(0,5)}`;
             }
           }
 
