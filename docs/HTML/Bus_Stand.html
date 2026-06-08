@@ -8,6 +8,7 @@
         integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -63,7 +64,7 @@
       background:url('../Pics/IITDH_logo2.jpg') no-repeat center/80%;
       opacity:.08;pointer-events:none;z-index:0;
     }
-    .info-inner{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;padding:18px 20px;gap:10px;overflow-y:auto;min-height:0;}
+    .info-inner{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;padding:18px 20px;gap:10px;overflow-y:auto;min-height:0;}
 
     /* Status bar at top of info pane */
     .status-bar{
@@ -130,9 +131,9 @@
     /* ── Mobile < 768px ── */
     @media(max-width:767px){
       .main-split{flex-direction:column;}
-      .map-pane{width:100%;height:40dvh;flex-shrink:0;}
+      .map-pane{width:100%;height:35dvh;flex-shrink:0;}
       .info-pane{width:100%;flex:1;min-height:0;overflow:hidden;}
-      .info-inner{padding:10px 12px;gap:6px;overflow-y:auto;justify-content:flex-start;}
+      .info-inner{padding:10px 12px;gap:6px;overflow-y:auto;justify-content:flex-start;min-height:0;}
       .status-bar{padding:8px 10px;gap:4px;}
       .status-label{font-size:.7rem;}
       .status-value{font-size:.78rem;}
@@ -157,6 +158,30 @@
       .info-footer{padding:6px 12px;gap:2px;}
       .info-footer p{font-size:.62rem;}
     }
+
+    /* Alert button */
+    .alert-btn-wrap{display:flex;justify-content:center;}
+    .alert-btn{
+      display:inline-flex;align-items:center;gap:8px;
+      background:#89288f;color:#fff;border:none;
+      border-radius:8px;padding:9px 22px;font-size:.85rem;font-weight:600;
+      cursor:pointer;transition:background .2s;font-family:'Poppins',sans-serif;
+      box-shadow:0 2px 8px rgba(137,40,143,.3);
+    }
+    .alert-btn:hover{background:#6a1a70;}
+    /* Alert modal (custom) */
+    .alert-modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;z-index:2000;align-items:center;justify-content:center;}
+    .alert-modal.show{display:flex;}
+    .alert-box{background:#fff;border-radius:14px;padding:24px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2);text-align:center;}
+    .alert-box h3{color:#89288f;font-size:1.1rem;font-weight:700;margin-bottom:10px;}
+    .alert-box p{font-size:.9rem;color:#333;margin-bottom:18px;line-height:1.5;}
+    .alert-box button{background:#89288f;color:#fff;border:none;border-radius:7px;padding:8px 24px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;}
+    .alert-box button:hover{background:#6a1a70;}
+    /* Preferences modal */
+    .modal-header{border-bottom:none;padding-bottom:0;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{font-size:.85rem;font-weight:600;margin-bottom:4px;display:block;}
+    .form-group select{width:100%;padding:8px 10px;border-radius:7px;border:1px solid #ddd;font-size:.85rem;font-family:'Poppins',sans-serif;}
   </style>
 </head>
 <body>
@@ -226,15 +251,77 @@
           </div>
         </div>
 
+        <div class="alert-btn-wrap">
+          <button class="alert-btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <i class="fa-solid fa-bell"></i>Create Alert
+          </button>
+        </div>
+
       </div>
       <div class="info-footer">
         <p><i class="fas fa-calendar-alt" style="margin-right:4px;color:#89288f;"></i>Official bus schedule: <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank">click here</a></p>
         <p><i class="fas fa-bug" style="margin-right:4px;color:#89288f;"></i>Report bugs/issues: <a href="mailto:ee23bt041@iitdh.ac.in">ee23bt041@iitdh.ac.in</a></p>
+        <p><i class="fas fa-comment-dots" style="margin-right:4px;color:#89288f;"></i>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSfe4h1xcUioc9UhPIDOdPLUyA-j3fb5H2R8MfTnoNL_fF9_KQ/viewform">feedback!</a></p>
       </div>
     </div>
   </div>
 
 </div>
+
+  <!-- Preferences Modal (Bootstrap) -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:14px;overflow:hidden;">
+        <div class="modal-header" style="background:linear-gradient(90deg,#89288f,#6a1a70);padding:14px 20px;">
+          <h5 style="color:#fff;font-weight:700;margin:0;font-size:1rem;"><i class="fa-solid fa-bell me-2"></i>Create Alert</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div style="padding:20px;">
+          <div class="form-group">
+            <label for="fromLocation">From Location</label>
+            <select id="fromLocation" class="form-control">
+              <option value="">Select starting point</option>
+              <option value="Hostel">Hostel</option>
+              <option value="Main Gate">Main Gate</option>
+              <option value="NFSU">NFSU</option>
+              <option value="New Bus Stand">New Bus Stand</option>
+              <option value="Jubilee Circle">Jubilee Circle</option>
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="CLT">CLT</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="toLocation">To Location</label>
+            <select id="toLocation" class="form-control">
+              <option value="">Select destination</option>
+              <option value="Hostel">Hostel</option>
+              <option value="Main Gate">Main Gate</option>
+              <option value="NFSU">NFSU</option>
+              <option value="New Bus Stand">New Bus Stand</option>
+              <option value="Jubilee Circle">Jubilee Circle</option>
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="CLT">CLT</option>
+            </select>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:6px;">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+            <button id="savePreferences" class="btn btn-sm" style="background:#89288f;color:#fff;font-weight:600;" data-bs-dismiss="modal">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom alert popup -->
+  <div id="alertModal" class="alert-modal">
+    <div class="alert-box">
+      <h3><i class="fa-solid fa-bell" style="margin-right:7px;"></i>Bus Alert</h3>
+      <p id="alertMessage"></p>
+      <button id="closeAlert">OK</button>
+    </div>
+  </div>
 
 <script>
   const STOP_NAME = "New Bus Stand";
@@ -314,6 +401,7 @@
         const nowSec = timeToSeconds(currentISTTime);
         const schedule = getTodaySchedule();
         const upcoming = getUpcomingBuses(schedule, STOP_NAME);
+        checkForUserAlert(schedule);
         const firstSec = timeToSeconds(scheduleFirstTime(schedule));
         const lastSec  = timeToSeconds(scheduleLastTime(schedule));
 
@@ -368,6 +456,69 @@
   let userPanning = false;
   map.on('dragstart zoomstart', () => { userPanning = true; });
   map.on('dragend zoomend', () => { setTimeout(() => { userPanning = false; }, 5000); });
+
+    // ── Alert system ──
+    let userPreferences = {
+      fromLocation: localStorage.getItem('fromLocation') || '',
+      toLocation:   localStorage.getItem('toLocation')   || '',
+      alertShown:   false
+    };
+    if (userPreferences.fromLocation) document.getElementById('fromLocation').value = userPreferences.fromLocation;
+    if (userPreferences.toLocation)   document.getElementById('toLocation').value   = userPreferences.toLocation;
+
+    const alertModal   = document.getElementById('alertModal');
+    const alertMessage = document.getElementById('alertMessage');
+    document.getElementById('closeAlert').addEventListener('click', () => alertModal.classList.remove('show'));
+    alertModal.addEventListener('click', e => { if (e.target === alertModal) alertModal.classList.remove('show'); });
+
+    document.getElementById('savePreferences').addEventListener('click', () => {
+      userPreferences.fromLocation = document.getElementById('fromLocation').value;
+      userPreferences.toLocation   = document.getElementById('toLocation').value;
+      if (userPreferences.fromLocation && userPreferences.toLocation &&
+          userPreferences.fromLocation === userPreferences.toLocation) {
+        alert('\'From\' and \'To\' locations must be different.');
+        return;
+      }
+      userPreferences.alertShown = false;
+      localStorage.setItem('fromLocation', userPreferences.fromLocation);
+      localStorage.setItem('toLocation',   userPreferences.toLocation);
+      if (userPreferences.fromLocation && userPreferences.toLocation) {
+        alert('Alert saved! You will be notified when the bus is ~10 min from your stop.');
+      } else {
+        alert('Please select both From and To locations.');
+      }
+    });
+
+    function showBusAlert(message) {
+      if (!userPreferences.alertShown) {
+        alertMessage.textContent = message;
+        alertModal.classList.add('show');
+        userPreferences.alertShown = true;
+        setTimeout(() => { userPreferences.alertShown = false; }, 300000);
+      }
+    }
+
+    function checkForUserAlert(schedule) {
+      if (!userPreferences.fromLocation || !userPreferences.toLocation) return;
+      const { timeStr } = getCurrentIST();
+      const nowSec = timeToSeconds(timeStr);
+      const fromIndices = schedule.reduce((acc, stop, i) => {
+        if (stop.name === userPreferences.fromLocation) acc.push(i); return acc;
+      }, []);
+      if (fromIndices.length === 0) return;
+      for (const fromIndex of fromIndices) {
+        const toIndex = schedule.findIndex((s, i) => s.name === userPreferences.toLocation && i > fromIndex);
+        if (toIndex === -1) continue;
+        const fromSec = timeToSeconds(schedule[fromIndex].time);
+        if (nowSec >= (fromSec - 600) && nowSec < fromSec) {
+          showBusAlert(`Bus arrives at ${userPreferences.fromLocation} in ${Math.ceil((fromSec - nowSec) / 60)} min → ${userPreferences.toLocation}`);
+          return;
+        } else if (nowSec >= fromSec && nowSec < fromSec + 60) {
+          showBusAlert(`Bus has arrived at ${userPreferences.fromLocation}.`);
+          return;
+        }
+      }
+    }
 
   updateMapData();
   setInterval(updateMapData, 20000);
