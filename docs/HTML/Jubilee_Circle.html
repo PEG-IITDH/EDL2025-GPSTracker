@@ -248,7 +248,7 @@ input:checked ~ .slide { transform:translateX(0); }
             .then(r => r.json())
             .then(data1 => {
               // FIX: midnight-safe stale check via raw ms
-              const stale = isGPSStale(latest.timestamp, 130);
+              const stale = isGPSStale(latest.timestamp, 300);
               let statu = stale ? "Parked" : "Live";
               const repMsg = (data1.feeds && data1.feeds.length > 0) ? (data1.feeds[0].field1 || "") : "";
               if (repMsg !== "" && repMsg.toUpperCase() !== "OK") statu = repMsg;
@@ -266,7 +266,7 @@ input:checked ~ .slide { transform:translateX(0); }
               }
             })
             .catch(() => {
-              const stale = isGPSStale(latest.timestamp, 130);
+              const stale = isGPSStale(latest.timestamp, 300);
               const statu = stale ? "Parked" : "Live";
               const statusEl = document.getElementById("Status");
               statusEl.innerText = statu;
