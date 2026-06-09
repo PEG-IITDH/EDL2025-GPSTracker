@@ -415,7 +415,7 @@ input:checked ~ .slide { transform: translateX(0); }
             .then(data1 => {
               let statu;
               // FIX: midnight-safe stale check using raw ms, not HH:MM:SS string subtraction
-              const stale = isGPSStale(latest.timestamp, 300);
+              const stale = isGPSStale(latest.timestamp, 130);
               statu = stale ? "Parked" : "Live";
 
               // FIX: repMsg checked HERE, inside the .then(), so it's actually populated
@@ -438,7 +438,7 @@ input:checked ~ .slide { transform: translateX(0); }
             })
             .catch(() => {
               // Repair channel unreachable: still show live/parked from GPS staleness
-              const stale = isGPSStale(latest.timestamp, 300);
+              const stale = isGPSStale(latest.timestamp, 130);
               const statu = stale ? "Parked" : "Live";
               const statusEl = document.getElementById("Status");
               statusEl.innerText = statu;
