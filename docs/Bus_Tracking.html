@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="../Pics/minecraft_compass.png">
+  <title>About — IIT Dharwad Bus Tracking</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PXLX7BYBKZ"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PXLX7BYBKZ');</script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;font-family:'Poppins',sans-serif;background:#f4f0f5;overflow:hidden;}
+    .page-wrapper{height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+    /* Navbar */
+    .navbar-bar{height:48px;background:#89288f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:600;flex-shrink:0;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+    .navbar-logo-link{position:absolute;right:10px;top:50%;transform:translateY(-50%);}
+    .navbar-logo-link img{height:28px;width:auto;}
+
+    /* Hamburger */
+    .hamburger-input{display:none;}
+    .toggle{position:absolute;left:10px;top:50%;transform:translateY(-50%);height:30px;width:30px;cursor:pointer;border-radius:2px;background:#89288f;z-index:1003;}
+    .toggle .common{position:absolute;height:2px;width:20px;background:#fff;border-radius:50px;transition:.4s ease;}
+    .toggle .top_line{top:30%;left:50%;transform:translate(-50%,-50%);}
+    .toggle .middle_line{top:50%;left:50%;transform:translate(-50%,-50%);}
+    .toggle .bottom_line{top:70%;left:50%;transform:translate(-50%,-50%);}
+    .hamburger-input:checked~.toggle .top_line{left:2px;top:14px;width:25px;transform:rotate(45deg);}
+    .hamburger-input:checked~.toggle .bottom_line{left:2px;top:14px;width:25px;transform:rotate(-45deg);}
+    .hamburger-input:checked~.toggle .middle_line{opacity:0;transform:translateX(20px);}
+    .hamburger-input:checked~.slide{transform:translateX(0);}
+
+    /* Drawer */
+    .slide{width:210px;height:100%;position:fixed;top:0;left:0;background:#89288f;transform:translateX(-210px);transition:.5s ease;z-index:1002;box-shadow:2px 0 12px rgba(0,0,0,.25);overflow-y:auto;}
+    .slide h1{color:#ffffffe2;font-weight:700;text-align:right;padding:20px 16px 10px 0;font-size:1.1rem;pointer-events:none;}
+    .slide ul{padding:0 0 20px 0;}
+    .slide ul li{list-style:none;}
+    .slide ul li.nav-lbl{margin-top:10px;color:#eaeaead9;font-weight:300;font-size:.78rem;padding:0 12px;}
+    .slide ul li a{color:#ffffffe2;font-weight:500;padding:6px 12px;display:block;text-decoration:none;transition:.2s;}
+    .slide ul li a i{width:26px;text-align:center;}
+    .slide ul li:not(.nav-lbl):hover a{color:#89288f;background:#fff;}
+
+    /* Scroll area */
+    .content-scroll{flex:1;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;background:#f4f0f5;}
+    .content-scroll::-webkit-scrollbar{display:none;}
+
+    /* Hero */
+    .hero-banner{width:100%;height:200px;overflow:hidden;position:relative;flex-shrink:0;}
+    .hero-banner img{width:100%;height:100%;object-fit:cover;object-position:center 60%;display:block;}
+    .hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(137,40,143,.18) 0%,rgba(30,10,32,.58) 100%);display:flex;align-items:flex-end;padding:18px 24px;}
+    .hero-overlay h2{color:#fff;font-size:1.35rem;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.45);}
+
+    /* Cards */
+    .cards-area{max-width:860px;margin:0 auto;padding:24px 16px 36px;display:flex;flex-direction:column;gap:20px;}
+    .card{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(137,40,143,.09);overflow:hidden;}
+    .card-header{background:linear-gradient(90deg,#89288f 0%,#6a1a70 100%);padding:12px 20px;display:flex;align-items:center;gap:10px;}
+    .card-header i{color:#fff;font-size:.95rem;}
+    .card-header h3{color:#fff;font-size:.97rem;font-weight:600;margin:0;}
+    .card-body{padding:18px 20px;}
+    .card-body p{font-size:.9rem;line-height:1.75;color:#333;}
+    .card-body p+p{margin-top:9px;}
+    .card-body a{color:#89288f;font-weight:500;text-decoration:underline;}
+
+    /* Chips */
+    .route-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px;}
+    .chip{background:#f3eaf4;color:#6a1a70;border:1px solid #d4a8d8;border-radius:20px;padding:3px 12px;font-size:.8rem;font-weight:500;display:flex;align-items:center;gap:5px;}
+    .chip i{font-size:.72rem;}
+
+    /* Info grid */
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-top:14px;}
+    .info-item{display:flex;align-items:flex-start;gap:8px;}
+    .info-item i{color:#89288f;margin-top:3px;font-size:.82rem;flex-shrink:0;}
+    .info-item span{font-size:.85rem;color:#333;line-height:1.55;}
+
+    /* Tech pills */
+    .tech-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px;}
+    .tech-pill{background:#1e1e2e;color:#e0d7ff;border-radius:6px;padding:3px 11px;font-size:.78rem;font-family:'Roboto',monospace;font-weight:500;}
+
+    /* People */
+    .people-list{display:flex;flex-direction:column;gap:13px;margin-top:4px;}
+    .person-row{display:flex;align-items:center;gap:13px;}
+    .person-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#c179c8,#89288f);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.95rem;flex-shrink:0;}
+    .person-info{display:flex;flex-direction:column;}
+    .person-name{font-size:.9rem;font-weight:600;color:#222;}
+    .person-role{font-size:.78rem;color:#777;margin-top:1px;}
+    .person-email{font-size:.78rem;color:#89288f;text-decoration:underline;margin-top:1px;}
+    .badge-maintainer{display:inline-block;background:#89288f;color:#fff;font-size:.65rem;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle;letter-spacing:.3px;}
+
+    /* Dividers */
+    .card-divider{border:none;border-top:1px solid #f0e8f1;margin:15px 0;}
+    .subsection-label{font-size:.75rem;font-weight:600;color:#89288f;text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px;}
+
+    /* Footer strip */
+    .about-footer{background:#fff;border-top:1px solid #e8dded;padding:13px 16px;text-align:center;font-size:.8rem;color:#888;flex-shrink:0;}
+    .about-footer a{color:#89288f;text-decoration:underline;}
+
+    @media(max-width:600px){
+      .hero-banner{height:150px;}
+      .hero-overlay h2{font-size:1.05rem;}
+      .cards-area{padding:14px 10px 28px;gap:14px;}
+      .info-grid{grid-template-columns:1fr;}
+      .card-body p{font-size:.85rem;}
+      .card-body{padding:14px 14px;}
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <a href="https://www.iitdh.ac.in/hi" target="_blank" class="navbar-logo-link" style="z-index:1100;">
+    <img src="../Pics/logo-intranet-white.png" alt="IIT Dharwad">
+  </a>
+  <nav class="navbar-bar">
+    <label style="position:absolute;left:0;top:0;height:100%;display:flex;align-items:center;padding-left:8px;cursor:pointer;z-index:1004;">
+      <input class="hamburger-input" type="checkbox">
+      <div class="toggle">
+        <span class="top_line common"></span>
+        <span class="middle_line common"></span>
+        <span class="bottom_line common"></span>
+      </div>
+      <div class="slide">
+        <h1>Menu</h1>
+        <ul>
+          <li class="nav-lbl">Main Menu</li>
+          <li><a href="Main_Menu.html"><i class="fas fa-home"></i> Home</a></li>
+          <li class="nav-lbl">Live Bus Tracking</li>
+          <li><a href="Bus_Tracking.html"><i class="fa-solid fa-location-dot"></i> Track Bus</a></li>
+          <li class="nav-lbl">Monitor Stops</li>
+          <li><a href="Main_Gate.html"><i class="fas fa-tv"></i> Main Gate</a></li>
+          <li><a href="A1.html"><i class="fas fa-tv"></i> A1</a></li>
+          <li><a href="A2.html"><i class="fas fa-tv"></i> A2</a></li>
+          <li><a href="Hostel.html"><i class="fas fa-tv"></i> Hostel</a></li>
+          <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
+          <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
+          <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
+          <li><a href="Jubilee_Circle.html"><i class="fas fa-tv"></i> Jubilee Circle</a></li>
+          <li class="nav-lbl">More Information</li>
+          <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
+        </ul>
+      </div>
+    </label>
+    About
+  </nav>
+
+  <div class="content-scroll">
+    <div class="hero-banner">
+      <img src="../Pics/bus1.jpg" alt="IIT Dharwad campus shuttle">
+      <div class="hero-overlay">
+        <h2>IIT Dharwad — Real-Time Bus Tracking System</h2>
+      </div>
+    </div>
+
+    <div class="cards-area">
+
+      <!-- About the Service -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-bus"></i><h3>About the Shuttle Service</h3></div>
+        <div class="card-body">
+          <p>The IIT Dharwad Shuttle Bus Service provides reliable transportation between the <strong>Permanent Campus</strong> and key city locations, ensuring smooth daily mobility for students, faculty, and staff.</p>
+          <p>Schedules follow the official institute timetable. For the latest timings and route details, refer to the <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank">official schedule</a>.</p>
+          <div class="route-chips">
+            <span class="chip"><i class="fas fa-map-marker-alt"></i> Hostel</span>
+            <span class="chip"><i class="fas fa-map-marker-alt"></i> Main Gate</span>
+            <span class="chip"><i class="fas fa-map-marker-alt"></i> NFSU</span>
+            <span class="chip"><i class="fas fa-map-marker-alt"></i> New Bus Stand</span>
+            <span class="chip"><i class="fas fa-map-marker-alt"></i> Jubilee Circle</span>
+            <span class="chip"><i class="fas fa-map-marker-alt"></i> A1 / A2 / CLT</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-satellite-dish"></i><h3>How It Works</h3></div>
+        <div class="card-body">
+          <p>An onboard GPS + LTE module pushes live location data to the ThingSpeak IoT cloud. The web app fetches this every 20–60 seconds and overlays the bus position on an interactive map, combined with schedule data so every page stays accurate without a manual refresh.</p>
+          <div class="tech-pills">
+            <span class="tech-pill">Arduino Mega</span>
+            <span class="tech-pill">SIMCom A7672S LTE</span>
+            <span class="tech-pill">GPS</span>
+            <span class="tech-pill">ThingSpeak API</span>
+            <span class="tech-pill">Leaflet.js</span>
+            <span class="tech-pill">HTML / CSS / JS</span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item"><i class="fas fa-clock"></i><span>GPS updates every <strong>60 s</strong> (tracking page) and <strong>20 s</strong> (stop pages)</span></div>
+            <div class="info-item"><i class="fas fa-calendar-check"></i><span>Timetable auto-switches between weekday and weekend / holiday schedules</span></div>
+            <div class="info-item"><i class="fas fa-bell"></i><span>Proximity alerts notify you when the bus is ~10 min from your chosen stop</span></div>
+            <div class="info-item"><i class="fas fa-wifi"></i><span>Status shows <strong style="color:#188038;">Live</strong> or <strong style="color:#c47a00;">Parked</strong> based on GPS staleness</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-envelope"></i><h3>Contact Information</h3></div>
+        <div class="card-body">
+          <p>For queries or assistance regarding the shuttle service, please contact:</p>
+          <div class="people-list" style="margin-top:13px;">
+            <div class="person-row">
+              <div class="person-avatar">AK</div>
+              <div class="person-info">
+                <span class="person-name">Prof. Amarkumar Ayodhyasingh Kushwaha</span>
+                <span class="person-role">Faculty Coordinator, Shuttle Service</span>
+                <a class="person-email" href="mailto:amarkumar@iitdh.ac.in">amarkumar@iitdh.ac.in</a>
+              </div>
+            </div>
+          </div>
+          <hr class="card-divider">
+          <p>To report bugs or issues with this website:</p>
+          <div class="people-list" style="margin-top:10px;">
+            <div class="person-row">
+              <div class="person-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a5fc8);">KA</div>
+              <div class="person-info">
+                <span class="person-name">Kaushal A. B.</span>
+                <span class="person-role">Electronics Club — Current Maintainer</span>
+                <a class="person-email" href="mailto:ee23bt041@iitdh.ac.in">ee23bt041@iitdh.ac.in</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project Team -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-users"></i><h3>Project Team</h3></div>
+        <div class="card-body">
+          <p>Developed as part of the <strong>Electronic Design Laboratory (EDL) 2025</strong> at IIT Dharwad, this system integrates embedded hardware, cellular networking, and web technologies to build a smarter, more connected campus.</p>
+          <hr class="card-divider">
+          <p class="subsection-label">Original Developers</p>
+          <div class="people-list">
+            <div class="person-row"><div class="person-avatar">AP</div><div class="person-info"><span class="person-name">Aman Patidar</span><span class="person-role">EDL 2025, IIT Dharwad</span></div></div>
+            <div class="person-row"><div class="person-avatar">AC</div><div class="person-info"><span class="person-name">Akshata C. S.</span><span class="person-role">EDL 2025, IIT Dharwad</span></div></div>
+            <div class="person-row"><div class="person-avatar">ML</div><div class="person-info"><span class="person-name">Magham Likhita</span><span class="person-role">EDL 2025, IIT Dharwad</span></div></div>
+          </div>
+          <hr class="card-divider">
+          <p class="subsection-label">Faculty Supervisors</p>
+          <div class="people-list">
+            <div class="person-row"><div class="person-avatar" style="background:linear-gradient(135deg,#e07b39,#b85a1a);">AK</div><div class="person-info"><span class="person-name">Prof. Abhijit Kshirsagar</span><span class="person-role">Faculty Supervisor, EDL 2025</span></div></div>
+            <div class="person-row"><div class="person-avatar" style="background:linear-gradient(135deg,#e07b39,#b85a1a);">AK</div><div class="person-info"><span class="person-name">Prof. Amarkumar Ayodhyasingh Kushwaha</span><span class="person-role">Faculty Supervisor, EDL 2025</span></div></div>
+          </div>
+          <hr class="card-divider">
+          <p class="subsection-label">Other Contributors</p>
+          <div class="people-list">
+            <div class="person-row">
+              <div class="person-avatar" style="background:linear-gradient(135deg,#5b8dee,#3a5fc8);">KA</div>
+              <div class="person-info">
+                <span class="person-name">Kaushal A. B. <span class="badge-maintainer">Current Maintainer</span></span>
+                <span class="person-role">Electronics Club, IIT Dharwad</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="about-footer">
+    <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank">Official Schedule</a>
+    &nbsp;·&nbsp;
+    We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSdrWpL_qXOd76jAhdK4Gj7uApiXCLHt1CTUhl2vkMCNPSIstQ/viewform?usp=sharing&ouid=104480273185756109591">feedback!</a>
+    &nbsp;·&nbsp;
+    Report bugs to <a href="mailto:ee23bt041@iitdh.ac.in">ee23bt041@iitdh.ac.in</a>
+  </div>
+
+</div>
+</body>
+</html>
