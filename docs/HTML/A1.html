@@ -1,195 +1,307 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/png" href="../Pics/minecraftt_compass.png">
-  <title>A1 — Under Maintenance</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+  <title>A1</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Shared timetable, helpers, and holiday list -->
+  <script src="schedule.js"></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PXLX7BYBKZ"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PXLX7BYBKZ');
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
   <style>
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html, body { height:100%; font-family:'Poppins',sans-serif; background:linear-gradient(145deg,#fafafa,#f0f0f0); }
-    body { display:flex; flex-direction:column; }
+html, body { height:100%; margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(145deg,#fafafa,#f0f0f0); }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+body { display:flex; flex-direction:column; }
+.map-container { background:#fff; box-shadow:2px 2px 5px rgba(0,0,0,.1); width:60%; height:100%; position:relative; z-index:1; }
+#map { width:100%; height:100%; }
+.sidebar { flex:1; padding:20px; background:linear-gradient(145deg,#fafafa,#f0f0f0); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:0; position:relative; width:40%; height:100%; box-shadow:-2px 0 10px rgba(0,0,0,.2); overflow:hidden; }
+.sidebar::before { content:""; position:absolute; top:0; left:0; right:0; bottom:0; background-image:url('../Pics/IITDH_logo2.jpg'); background-repeat:no-repeat; background-position:center; background-size:95%; opacity:.16; z-index:-1; }
+.sidebar h2 { font-size:24px; color:#d42e2e; font-weight:bold; text-align:center; }
+.sidebar h3 { font-size:28px; color:#802485; text-align:center; font-family:Arial,Helvetica,sans-serif; font-weight:bold; }
+.sidebar p { font-size:18px; color:#555; text-align:center; margin:10px 0; }
+.sidebar .updated-time { font-size:20px; color:#802485; font-family:'Roboto',sans-serif; font-weight:500; letter-spacing:.5px; }
+.sidebar .updated-time-not-live { font-size:20px; color:#d32f2f; font-family:'Roboto',sans-serif; font-weight:500; letter-spacing:.5px; }
+.yes { display:none; }
+.slide { height:100%; width:200px; position:fixed; top:0; left:0; background-color:#89288f; transition:.5s ease; transform:translateX(-200px); z-index:1002; box-shadow:1px 0 10px rgba(0,0,0,.2); }
+.leaflet-control-zoom { position:fixed !important; top:40px; left:2px; z-index:1000; }
+h1 { color:#ffffffe2; font-weight:bold; text-align:right; padding:10px 0; padding-top:20px; padding-right:50px; pointer-events:none; }
+ul li { list-style:none; }
+ul li a { color:#ffffffe2; font-weight:500; padding:5px 0; display:block; text-transform:capitalize; text-decoration:none; transition:.2s ease-out; }
+ul li:hover a { color:#89288f; background-color:white; }
+ul li a i { width:30px; text-align:center; color:#ffffffe2; }
+input { display:none; visibility:hidden; -webkit-appearance:none; }
+.toggle { position:fixed; height:30px; width:30px; top:2.75px; left:7px; z-index:1003; cursor:pointer; border-radius:2px; background-color:#89288f; box-shadow:2px 0 10px rgba(0,0,0,.2); }
+.toggle .common { position:absolute; height:2px; width:20px; background-color:white; border-radius:50px; transition:.5s ease; }
+.toggle .top_line { top:30%; left:50%; transform:translate(-50%,-50%); }
+.toggle .middle_line { top:50%; left:50%; transform:translate(-50%,-50%); }
+.toggle .bottom_line { top:70%; left:50%; transform:translate(-50%,-50%); }
+input:checked ~ .toggle .top_line { left:2px; top:14px; width:25px; transform:rotate(45deg); }
+input:checked ~ .toggle .bottom_line { left:2px; top:14px; width:25px; transform:rotate(-45deg); }
+input:checked ~ .toggle .middle_line { opacity:0; transform:translateX(20px); }
+input:checked ~ .slide { transform:translateX(0); }
 
-    /* NAVBAR */
-    nav.topnav {
-      height:5%; min-height:42px; background-color:#89288f;
-      position:relative; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.2);
-    }
-    .nav-title {
-      color:#f7efefe2; height:100%; display:flex;
-      align-items:center; justify-content:center;
-      font-size:1.15rem; font-weight:600;
-    }
-    .intranet-logo { position:fixed; height:30px; z-index:1001; top:6px; right:8px; width:30px; }
-
-    .hamburger-input { display:none; }
-    .toggle {
-      position:fixed; height:30px; width:30px; top:2.75px; left:7px;
-      z-index:1003; cursor:pointer; border-radius:2px;
-      background-color:#89288f; box-shadow:2px 0 10px rgba(0,0,0,0.2);
-    }
-    .toggle .common { position:absolute; height:2px; width:20px; background-color:white; border-radius:50px; transition:0.5s ease; }
-    .toggle .top_line    { top:30%; left:50%; transform:translate(-50%,-50%); }
-    .toggle .middle_line { top:50%; left:50%; transform:translate(-50%,-50%); }
-    .toggle .bottom_line { top:70%; left:50%; transform:translate(-50%,-50%); }
-    .hamburger-input:checked ~ .toggle .top_line    { left:2px; top:14px; width:25px; transform:rotate(45deg); }
-    .hamburger-input:checked ~ .toggle .bottom_line { left:2px; top:14px; width:25px; transform:rotate(-45deg); }
-    .hamburger-input:checked ~ .toggle .middle_line { opacity:0; transform:translateX(20px); }
-    .hamburger-input:checked ~ .slide               { transform:translateX(0); }
-
-    .slide {
-      height:100%; width:200px; position:fixed; top:0; left:0;
-      background-color:#89288f; transition:0.5s ease;
-      transform:translateX(-200px); z-index:1002;
-      box-shadow:1px 0 10px rgba(0,0,0,0.2); overflow-y:auto;
-    }
-    .slide h1 { color:#ffffffe2; font-weight:bold; text-align:right; padding:20px 50px 10px 0; pointer-events:none; }
-    .slide ul li { list-style:none; }
-    .slide ul li.section-label { margin-top:1rem; color:#eaeaead9; font-weight:300; padding:0 12px; font-size:0.8rem; }
-    .slide ul li a { color:#ffffffe2; font-weight:500; padding:5px 12px; display:block; text-transform:capitalize; text-decoration:none; transition:0.2s ease-out; }
-    .slide ul li a i { width:30px; text-align:center; color:#ffffffe2; }
-    .slide ul li:not(.section-label):hover a { color:#89288f; background-color:white; }
-    .slide ul li:not(.section-label):hover a i { color:#89288f; }
-
-    /* SPLIT LAYOUT */
-    .maincontent { flex:1; display:flex; min-height:0; }
-
-    .map-placeholder {
-      background:#e8e0e9; position:relative;
-      overflow:hidden; display:flex; align-items:center; justify-content:center;
-    }
-    .map-placeholder::before {
-      content:""; position:absolute; inset:0;
-      background:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(137,40,143,0.05) 20px,rgba(137,40,143,0.05) 40px);
-    }
-    .map-placeholder-inner {
-      position:relative; z-index:1; display:flex; flex-direction:column;
-      align-items:center; gap:12px; color:#a07ba3; text-align:center; padding:20px;
-    }
-    .map-placeholder-inner i { font-size:3rem; }
-    .map-placeholder-inner p { font-size:0.9rem; font-weight:500; }
-
-    .sidebar {
-      background:linear-gradient(145deg,#fafafa,#f0f0f0);
-      display:flex; flex-direction:column; justify-content:center; align-items:center;
-      padding:24px 20px; position:relative; overflow:hidden;
-      box-shadow:-2px 0 10px rgba(0,0,0,0.15);
-    }
-    .sidebar::before {
-      content:""; position:absolute; inset:0;
-      background-image:url('../Pics/IITDH_logo2.jpg');
-      background-repeat:no-repeat; background-position:center; background-size:95%;
-      opacity:0.16; z-index:0;
-    }
-    .sidebar > * { position:relative; z-index:1; }
-
-    .inner { display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; text-align:center; }
-
-    .gear-wrap { position:relative; width:60px; height:60px; }
-    .gear-wrap .gear-main { font-size:60px; color:#89288f; animation:spin 6s linear infinite; display:block; line-height:1; }
-    .gear-wrap .gear-small { position:absolute; font-size:26px; color:#b35ab9; bottom:-4px; right:-8px; animation:spin-rev 4s linear infinite; }
-    @keyframes spin     { from{ transform:rotate(0deg); }   to{ transform:rotate(360deg); } }
-    @keyframes spin-rev { from{ transform:rotate(0deg); }   to{ transform:rotate(-360deg); } }
-
-    .stop-name { font-size:1.4rem; color:#802485; font-family:Arial,Helvetica,sans-serif; font-weight:bold; }
-    .maint-title { font-size:1.1rem; font-weight:700; color:#d42e2e; }
-    .maint-sub { font-size:0.92rem; color:#555; line-height:1.55; max-width:260px; }
-
-    .progress-wrap { width:100%; max-width:260px; }
-    .progress-label { font-size:0.75rem; font-weight:500; color:#777; margin-bottom:5px; text-align:left; }
-    .progress-track { width:100%; height:5px; background:#e0d5e1; border-radius:99px; overflow:hidden; }
-    .progress-bar { height:100%; width:65%; background:linear-gradient(90deg,#89288f,#c46bcc); border-radius:99px; animation:pulse-bar 2.5s ease-in-out infinite; }
-    @keyframes pulse-bar { 0%,100%{ opacity:1; } 50%{ opacity:0.55; } }
-
-    .contact-note { font-size:0.82rem; color:#555; font-family:'Roboto',sans-serif; }
-    .contact-note a { color:#802485; text-decoration:underline; }
-
-    @media (max-width:768px) {
-      .maincontent { flex-direction:column; height:95dvh; }
-      .map-placeholder { width:100%; height:47dvh; }
-      .sidebar { width:100%; height:48dvh; padding:12px 14px; justify-content:center; overflow:hidden; }
-      .inner { gap:10px; }
-      .gear-wrap { width:44px; height:44px; }
-      .gear-wrap .gear-main { font-size:44px; }
-      .gear-wrap .gear-small { font-size:20px; }
-      .stop-name { font-size:1.1rem; }
-      .maint-title { font-size:0.95rem; }
-      .maint-sub { font-size:0.82rem; }
-    }
-    @media (min-width:768px) {
-      .intranet-logo { top:1.5px; height:35px; left:96%; right:auto; }
-      .maincontent { flex-direction:row; height:calc(100vh - 5%); }
-      .map-placeholder { width:60%; }
-      .sidebar { width:40%; }
-    }
+@media (max-width:768px) {
+  .maincontent { display:flex; flex-direction:column; height:95dvh !important; min-height:0; overflow:hidden; }
+  .map-container { width:100%; height:47dvh; min-height:0; }
+  .sidebar { width:100%; height:48dvh; min-height:0; padding:10px 12px; justify-content:center; overflow:hidden; }
+  .sidebar p { font-size:14px; line-height:1.3; margin:3px 0; }
+  .sidebar .updated-time, .sidebar .updated-time-not-live { font-size:15px; line-height:1.3; }
+  .inner { height:auto !important; width:100%; display:flex; flex-direction:column; justify-content:center; }
+  #heading { margin-top:4px; }
+  .hello { z-index:1001; top:6px; position:fixed; height:30px; left:auto; right:8px; width:30px; }
+}
+@media (min-width:768px) {
+  .maincontent { display:flex; flex-direction:row; }
+  .map-container { width:60%; }
+  .sidebar { width:40%; }
+  .inner { display:grid; place-content:center; }
+  .hello { z-index:1001; top:1.5px; position:fixed; height:35px; left:96%; width:35px; }
+}
   </style>
 </head>
 <body>
-  <a href="https://www.iitdh.ac.in/hi" target="_blank">
-    <img src="../Pics/logo-intranet-white.png" class="intranet-logo" alt="IIT DH Logo">
-  </a>
-  <nav class="topnav">
-    <div class="nav-title">A1</div>
-    <label>
-      <input type="checkbox" class="hamburger-input">
-      <div class="toggle">
-        <span class="top_line common"></span>
-        <span class="middle_line common"></span>
-        <span class="bottom_line common"></span>
+  <div style="height:100vh; display:flex; flex-direction:column;">
+
+    <!-- Navigation Bar -->
+    <a href="https://www.iitdh.ac.in/hi" target="_blank">
+      <img src="../Pics/logo-intranet-white.png" class="hello" alt="Logo">
+    </a>
+    <nav style="height:5%;background-color:#89288f;position:relative;">
+      <div style="color:#f7efefe2;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:600;">
+          A1
       </div>
-      <div class="slide">
-        <h1>Menu</h1>
-        <ul>
-          <li class="section-label">Main Menu</li>
-          <li><a href="Main_Menu.html"><i class="fas fa-home"></i> Home</a></li>
-          <li class="section-label">Live Bus Tracking</li>
-          <li><a href="Bus_Tracking.html"><i class="fa-solid fa-location-dot"></i> Track Bus</a></li>
-          <li class="section-label">Monitor Stops</li>
-          <li><a href="Main_Gate.html"><i class="fas fa-tv"></i> Main Gate</a></li>
-          <li><a href="A1.html"><i class="fas fa-tv"></i> A1</a></li>
-          <li><a href="A2.html"><i class="fas fa-tv"></i> A2</a></li>
-          <li><a href="Hostel.html"><i class="fas fa-tv"></i> Hostel</a></li>
-          <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
-          <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
-          <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
-          <li><a href="Jubilee_Circle.html"><i class="fas fa-tv"></i> Jubilee Circle</a></li>
-          <li class="section-label">More Information</li>
-          <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
-        </ul>
-      </div>
-    </label>
-  </nav>
-  <div class="maincontent">
-    <div class="map-placeholder">
-      <div class="map-placeholder-inner">
-        <i class="fas fa-map-location-dot"></i>
-        <p>Map unavailable<br>during maintenance</p>
-      </div>
-    </div>
-    <div class="sidebar">
-      <div class="inner">
-        <div class="gear-wrap">
-          <i class="fas fa-gear gear-main"></i>
-          <i class="fas fa-gear gear-small"></i>
+      <label>
+        <input type="checkbox">
+        <div class="toggle">
+          <span class="top_line common"></span>
+          <span class="middle_line common"></span>
+          <span class="bottom_line common"></span>
         </div>
-        <div class="stop-name">A1</div>
-        <div class="maint-title">Service Under Maintenance</div>
-        <p class="maint-sub">
-          We're doing our best to bring this back as soon as possible.
-          Thank you for your patience!
-        </p>
-        <div class="progress-wrap">
-          <div class="progress-label">Restoration in progress…</div>
-          <div class="progress-track"><div class="progress-bar"></div></div>
+        <div class="slide">
+          <h1>Menu</h1>
+          <ul>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">Main Menu</li>
+            <li><a href="Main_Menu.html"><i class="fas fa-home"></i> Home</a></li>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">Live Bus Tracking</li>
+            <li><a href="Bus_Tracking.html"><i class="fa-solid fa-location-dot"></i> Track Bus</a></li>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">Monitor Stops</li>
+            <li><a href="Main_Gate.html"><i class="fas fa-tv"></i> Main Gate</a></li>
+            <li><a href="A1.html"><i class="fas fa-tv"></i> A1</a></li>
+            <li><a href="A2.html"><i class="fas fa-tv"></i> A2</a></li>
+            <li><a href="Hostel.html"><i class="fas fa-tv"></i> Hostel</a></li>
+            <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
+            <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
+            <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
+            <li><a href="Jubilee_Circle.html"><i class="fas fa-tv"></i> Jubilee Circle</a></li>
+            <li style="margin-top:1rem;color:#eaeaead9;font-weight:300;">More Information</li>
+            <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
+          </ul>
         </div>
-        <p class="contact-note">
-          Issues? Write to
-          <a href="mailto:ee23bt041@iitdh.ac.in">ee23bt041@iitdh.ac.in</a>
-        </p>
+      </label>
+    </nav>
+
+    <!-- Main Content -->
+    <div style="height:95%" class="maincontent">
+      <div class="map-container">
+        <div id="map"></div>
+      </div>
+      <div class="sidebar">
+        <div class="inner" style="height:90%">
+          <p>Status: <span class="updated-time" id="Status">Loading...</span></p>
+          <p>Last Updated: <span class="updated-time" id="lastUpdate">Loading...</span></p>
+          <p>Speed: <span class="updated-time" id="Speed">Calculating...</span></p>
+          <p id="heading">Next buses from this stop:</p>
+          <p class="updated-time" id="Nextstop">...</p>
+          <p class="updated-time" id="next1stop">...</p>
+          <p class="updated-time" id="next2stops">...</p>
+          <p>Official bus schedule: <a href="https://www.iitdh.ac.in/hi/node/2863" target="_blank" style="color:#802485;text-decoration:underline;">click here</a></p>
+          <p style="color:#666;">Report bugs or issues — <a href="mailto:ee23bt041@iitdh.ac.in" style="color:#802485;text-decoration:underline;">ee23bt041@iitdh.ac.in</a></p>
+          <p>We'd love your <a href="https://docs.google.com/forms/d/e/1FAIpQLSdrWpL_qXOd76jAhdK4Gj7uApiXCLHt1CTUhl2vkMCNPSIstQ/viewform?usp=sharing&ouid=104480273185756109591" style="color:#89288f;text-decoration:underline;">feedback!</a></p>
+        </div>
       </div>
     </div>
   </div>
+
+  <script>
+    const STOP_NAME = "A1";
+    const STOP_LAT  = 15.484624;
+    const STOP_LNG  = 74.936509;
+    const STOP_ZOOM = 16;
+
+    // ── Map ─────────────────────────────────────────────────
+    var map = L.map('map').setView([STOP_LAT, STOP_LNG], STOP_ZOOM);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    let tailMarkerGroup = L.layerGroup().addTo(map);
+    var busMarker = null;
+
+    // Static stop marker for this stop
+    var stopMarker = L.marker([STOP_LAT, STOP_LNG]).addTo(map);
+    stopMarker.bindPopup("<b>" + STOP_NAME + "</b>").openPopup();
+
+    // ── Main update ──────────────────────────────────────────  // calculateDistance + getZoomLevel are now in schedule.js
+    function updateMapData() {
+      fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
+        .then(r => r.json())
+        .then(data => {
+          const feeds = data.feeds
+            .slice(-5)
+            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            .map(f => ({
+              latitude:  parseFloat(f.field1),
+              longitude: parseFloat(f.field2),
+              speed:     parseInt(f.field3, 10),
+              timestamp: f.created_at
+            }));
+
+          const latest = feeds[feeds.length - 1];
+
+          // Fix 3: guard against null/missing GPS fields (device offline or bad upload)
+          if (!isFinite(latest.latitude) || !isFinite(latest.longitude)) {
+            document.getElementById("lastUpdate").innerText = "GPS signal lost — retrying…";
+            document.getElementById("Status").innerText = "No Signal";
+            return;
+          }
+
+          // Fading trail (oldest = most transparent)
+          tailMarkerGroup.clearLayers();
+          feeds.slice(0,4).forEach((entry, i) => {
+            if (!isFinite(entry.latitude) || !isFinite(entry.longitude)) return;
+            const icon = L.divIcon({
+              html: `<div style="font-size:18px;opacity:${TRAIL_OPACITIES[i]}">🔹</div>`,
+              iconSize: [24,24], iconAnchor: [12,12]
+            });
+            L.marker([entry.latitude, entry.longitude], { icon }).addTo(tailMarkerGroup);
+          });
+
+          const lat = latest.latitude, lon = latest.longitude, spd = latest.speed;
+          const speedStr = isFinite(spd) ? spd + " km/h" : "—";  // Fix 3: guard NaN speed
+          const lastUpdatedIST = utcToISTString(latest.timestamp);
+
+          // FIX: real wall-clock IST — not GPS timestamp
+          const { timeStr: currentISTTime, dayName, dateKey } = getCurrentIST();
+          const nowSec = timeToSeconds(currentISTTime);
+
+          // FIX: pick schedule accounting for institute holidays too
+          const schedule = getTodaySchedule();
+          const isWeekendOrHoliday = (dayName === "Saturday" || dayName === "Sunday"
+                                      || INSTITUTE_HOLIDAYS_2026.has(dateKey));
+
+          // FIX: getUpcomingBuses uses currentISTTime (wall clock) inside schedule.js
+          const upcoming = getUpcomingBuses(schedule, STOP_NAME);
+
+          let trip1 = "", trip2 = "", trip3 = "", flag = 0;
+          const firstSec = timeToSeconds(scheduleFirstTime(schedule));
+          const lastSec  = timeToSeconds(scheduleLastTime(schedule));
+
+          // FIX: closed check uses stop_thatday (schedule), not hardcoded weekday array
+          // FIX: closed message matches the real next-start time for the schedule type
+          if (nowSec < firstSec || nowSec > lastSec) {
+            // Fix 2: check tomorrow's schedule type, not today's
+            trip1 = `Shuttle service is closed. The next bus will start from ${getTomorrowStartTime()}`;
+            flag = 1;
+          } else if (upcoming.length === 0) {
+            trip1 = "No more buses today";
+            flag = 1;
+          } else {
+            if (upcoming.length > 0) trip1 = `${upcoming[0].timeLabel} (at ${upcoming[0].scheduledTime.slice(0,5)}) → ${upcoming[0].dest}`;
+            if (upcoming.length > 1) trip2 = `${upcoming[1].timeLabel} (at ${upcoming[1].scheduledTime.slice(0,5)}) → ${upcoming[1].dest}`;
+            if (upcoming.length > 2) trip3 = `${upcoming[2].timeLabel} (at ${upcoming[2].scheduledTime.slice(0,5)}) → ${upcoming[2].dest}`;
+          }
+
+          // Bus marker + zoom
+          if (busMarker) map.removeLayer(busMarker);
+          const busIcon = L.divIcon({
+            html: '<div style="font-size:24px;line-height:30px;text-align:center;">🚍</div>',
+            className: 'emoji-marker', iconSize: [60,60], iconAnchor: [15,15]
+          });
+          busMarker = L.marker([lat, lon], { icon: busIcon }).addTo(map);
+          const dist = calculateDistance(lat, lon, STOP_LAT, STOP_LNG);
+          if (!userPanning) map.setView([lat, lon], getZoomLevel(dist));  // Fix 8: respect user pan
+
+          // FIX: repair-message fetch async-correct — status set INSIDE .then()
+          fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
+            .then(r => r.json())
+            .then(data1 => {
+              // FIX: midnight-safe stale check via raw ms
+              const stale = isGPSStale(latest.timestamp, 105);
+              let statu = stale ? "Not live" : "Live";
+              const repMsg = (data1.feeds && data1.feeds.length > 0) ? (data1.feeds[0].field1 || "") : "";
+              if (repMsg !== "" && repMsg.toUpperCase() !== "OK") statu = repMsg;
+
+              const statusEl = document.getElementById("Status");
+              statusEl.innerText = statu;
+              if (statu === "Live") {
+                statusEl.classList.remove("updated-time-not-live");
+                statusEl.classList.add("updated-time");
+                statusEl.style.color = "#188038";
+              } else {
+                statusEl.classList.remove("updated-time");
+                statusEl.classList.add("updated-time-not-live");
+                statusEl.style.color = "#d32f2f";
+              }
+            })
+            .catch(() => {
+              const stale = isGPSStale(latest.timestamp, 105);
+              const statu = stale ? "Not live" : "Live";
+              const statusEl = document.getElementById("Status");
+              statusEl.innerText = statu;
+              statusEl.style.color = statu === "Live" ? "#188038" : "#d32f2f";
+            });
+
+          // Update DOM
+          document.getElementById("lastUpdate").innerText = lastUpdatedIST;
+          document.getElementById("Speed").innerText = speedStr;
+
+          const ns = document.getElementById("Nextstop");
+          ns.innerText = trip1;
+          document.getElementById("next1stop").innerText  = trip2;
+          document.getElementById("next2stops").innerText = trip3;
+
+          const hd = document.getElementById("heading");
+          if (flag) {
+            hd.classList.add("yes");
+            ns.style.color = "#802485";
+          } else {
+            hd.classList.remove("yes");
+            ns.style.color = "";
+          }
+        })
+        .catch(err => {
+          console.error('Fetch Error:', err);
+          document.getElementById("lastUpdate").innerText = "Error loading update.";
+          document.getElementById("Status").innerText = "Error loading update.";
+          document.getElementById("Speed").innerText = "Error fetching speed.";
+          document.getElementById("Nextstop").innerText = "Error retrieving next bus.";
+        });
+    }
+
+    // Fix 8: track user map interaction so auto-pan doesn't interrupt manual browsing
+    let userPanning = false;
+    map.on('dragstart zoomstart', () => { userPanning = true; });
+    map.on('dragend zoomend', () => { setTimeout(() => { userPanning = false; }, 5000); });;
+
+    updateMapData();
+    setInterval(updateMapData, 20000);
+  </script>
 </body>
 </html>
