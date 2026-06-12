@@ -1,195 +1,232 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="../Pics/minecraftt_compass.png">
-  <title>CLT — Under Maintenance</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html, body { height:100%; font-family:'Poppins',sans-serif; background:linear-gradient(145deg,#fafafa,#f0f0f0); }
-    body { display:flex; flex-direction:column; }
+// ============================================================
+//  IIT Dharwad Bus Tracker — Optimised GPS Upload
+//  ThingSpeak Free Tier: hard minimum 15 s between updates
+//
+//  Strategy
+//  --------
+//  • Poll GPS every loop() iteration (no blocking delay).
+//  • Enforce a 15 s hard floor between HTTP posts (ThingSpeak limit).
+//  • Skip the post if the bus hasn't moved > MIN_MOVE_METRES —
+//    saves quota when the bus is parked / stationary at a stop.
+//  • Speed zones handled automatically:
+//      inside campus  ≤ 50 km/h → moves ≤ ~208 m in 15 s  (fine grain)
+//      outside campus ≤ 80 km/h → moves ≤ ~333 m in 15 s  (fine grain)
+//  Both are well within the inter-stop distances, so no position
+//  updates are ever "missed" between stops.
+// ============================================================
 
-    /* NAVBAR */
-    nav.topnav {
-      height:5%; min-height:42px; background-color:#89288f;
-      position:relative; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.2);
+#include <TinyGPS++.h>
+
+#define SIM_SERIAL  Serial1   // A7672S  TX→19, RX→18
+#define GPS_SERIAL  Serial2   // GPS     TX→17, RX→16
+
+const int GSM_PWRKEY_PIN = 3;
+const int GSM_RESET_PIN  = 2;
+const int INDI_PIN       = 11;
+
+// ── Timing ──────────────────────────────────────────────────
+// ThingSpeak free tier: 1 update per 15 seconds (hard limit).
+// Setting SEND_INTERVAL to exactly 15 000 ms keeps us on the
+// safe side; you can raise it if you want to conserve quota
+// even more (e.g. 20 000 ms at night).
+const unsigned long SEND_INTERVAL = 15000UL;   // ms — DO NOT go below 15000
+
+// ── Movement threshold ───────────────────────────────────────
+// Don't POST if the bus has moved less than this many metres
+// since the last successful upload.  Avoids burning quota
+// while the bus is parked at a stop.
+const float MIN_MOVE_METRES = 10.0f;           // ~2 bus-lengths
+
+// ── ThingSpeak ───────────────────────────────────────────────
+const char* API_KEY = "AYDHNWSD93VRXC1S";
+
+// ── State ────────────────────────────────────────────────────
+TinyGPSPlus gps;
+unsigned long lastSendMillis = 0;
+double lastSentLat  = 0.0;
+double lastSentLng  = 0.0;
+bool   firstFix     = true;   // always send the very first valid fix
+
+// ── Forward declarations ─────────────────────────────────────
+bool  initializeGSM();
+void  hardwareResetGSM();
+void  sendGpsToThingSpeak(double lat, double lng, float spd);
+bool  sendATcommand(String cmd, String expected, unsigned int timeout);
+void  glowLED(unsigned int pin, unsigned int times, unsigned int del);
+float haversineMetres(double lat1, double lng1, double lat2, double lng2);
+
+// ════════════════════════════════════════════════════════════
+void setup() {
+    Serial.begin(115200);
+    SIM_SERIAL.begin(115200);
+    GPS_SERIAL.begin(9600);
+
+    pinMode(INDI_PIN,       OUTPUT);
+    pinMode(GSM_RESET_PIN,  OUTPUT);
+    pinMode(GSM_PWRKEY_PIN, OUTPUT);
+
+    Serial.println(F("Initialising GSM module..."));
+    hardwareResetGSM();
+
+    if (!initializeGSM()) {
+        Serial.println(F("ERROR: SIM module not responding."));
+        glowLED(INDI_PIN, 3, 500);
     }
-    .nav-title {
-      color:#f7efefe2; height:100%; display:flex;
-      align-items:center; justify-content:center;
-      font-size:1.15rem; font-weight:600;
+}
+
+// ════════════════════════════════════════════════════════════
+void loop() {
+    // Feed every available GPS byte to TinyGPS+
+    while (GPS_SERIAL.available()) {
+        gps.encode(GPS_SERIAL.read());
     }
-    .intranet-logo { position:fixed; height:30px; z-index:1001; top:6px; right:8px; width:30px; }
 
-    .hamburger-input { display:none; }
-    .toggle {
-      position:fixed; height:30px; width:30px; top:2.75px; left:7px;
-      z-index:1003; cursor:pointer; border-radius:2px;
-      background-color:#89288f; box-shadow:2px 0 10px rgba(0,0,0,0.2);
+    unsigned long now = millis();
+
+    // ── Rate-gate: respect ThingSpeak's 15 s minimum ─────────
+    if (now - lastSendMillis < SEND_INTERVAL) return;
+
+    // ── Need a valid GPS fix ──────────────────────────────────
+    if (!gps.location.isValid()) {
+        Serial.println(F("Waiting for GPS fix..."));
+        glowLED(INDI_PIN, 2, 300);
+        return;
     }
-    .toggle .common { position:absolute; height:2px; width:20px; background-color:white; border-radius:50px; transition:0.5s ease; }
-    .toggle .top_line    { top:30%; left:50%; transform:translate(-50%,-50%); }
-    .toggle .middle_line { top:50%; left:50%; transform:translate(-50%,-50%); }
-    .toggle .bottom_line { top:70%; left:50%; transform:translate(-50%,-50%); }
-    .hamburger-input:checked ~ .toggle .top_line    { left:2px; top:14px; width:25px; transform:rotate(45deg); }
-    .hamburger-input:checked ~ .toggle .bottom_line { left:2px; top:14px; width:25px; transform:rotate(-45deg); }
-    .hamburger-input:checked ~ .toggle .middle_line { opacity:0; transform:translateX(20px); }
-    .hamburger-input:checked ~ .slide               { transform:translateX(0); }
 
-    .slide {
-      height:100%; width:200px; position:fixed; top:0; left:0;
-      background-color:#89288f; transition:0.5s ease;
-      transform:translateX(-200px); z-index:1002;
-      box-shadow:1px 0 10px rgba(0,0,0,0.2); overflow-y:auto;
+    double curLat = gps.location.lat();
+    double curLng = gps.location.lng();
+    float  curSpd = gps.speed.kmph();
+
+    // ── Movement gate: skip if bus hasn't moved ───────────────
+    if (!firstFix) {
+        float moved = haversineMetres(lastSentLat, lastSentLng, curLat, curLng);
+        if (moved < MIN_MOVE_METRES) {
+            Serial.print(F("Bus stationary ("));
+            Serial.print(moved, 1);
+            Serial.println(F(" m) — skipping upload to save quota."));
+            lastSendMillis = now;   // still reset timer so we recheck in 15 s
+            return;
+        }
     }
-    .slide h1 { color:#ffffffe2; font-weight:bold; text-align:right; padding:20px 50px 10px 0; pointer-events:none; }
-    .slide ul li { list-style:none; }
-    .slide ul li.section-label { margin-top:1rem; color:#eaeaead9; font-weight:300; padding:0 12px; font-size:0.8rem; }
-    .slide ul li a { color:#ffffffe2; font-weight:500; padding:5px 12px; display:block; text-transform:capitalize; text-decoration:none; transition:0.2s ease-out; }
-    .slide ul li a i { width:30px; text-align:center; color:#ffffffe2; }
-    .slide ul li:not(.section-label):hover a { color:#89288f; background-color:white; }
-    .slide ul li:not(.section-label):hover a i { color:#89288f; }
 
-    /* SPLIT LAYOUT */
-    .maincontent { flex:1; display:flex; min-height:0; }
+    // ── All checks passed — upload ────────────────────────────
+    sendGpsToThingSpeak(curLat, curLng, curSpd);
 
-    .map-placeholder {
-      background:#e8e0e9; position:relative;
-      overflow:hidden; display:flex; align-items:center; justify-content:center;
+    lastSentLat    = curLat;
+    lastSentLng    = curLng;
+    lastSendMillis = now;
+    firstFix       = false;
+}
+
+// ════════════════════════════════════════════════════════════
+//  Haversine distance between two GPS coordinates (metres)
+// ════════════════════════════════════════════════════════════
+float haversineMetres(double lat1, double lng1, double lat2, double lng2) {
+    const double R = 6371000.0;  // Earth radius in metres
+    double dLat = radians(lat2 - lat1);
+    double dLng = radians(lng2 - lng1);
+    double a    = sin(dLat / 2) * sin(dLat / 2)
+                + cos(radians(lat1)) * cos(radians(lat2))
+                * sin(dLng / 2) * sin(dLng / 2);
+    return (float)(R * 2.0 * atan2(sqrt(a), sqrt(1.0 - a)));
+}
+
+// ════════════════════════════════════════════════════════════
+//  ThingSpeak HTTP POST
+// ════════════════════════════════════════════════════════════
+void sendGpsToThingSpeak(double lat, double lng, float spd) {
+    Serial.print(F("Lat: "));  Serial.println(lat, 6);
+    Serial.print(F("Lng: "));  Serial.println(lng, 6);
+    Serial.print(F("Spd: "));  Serial.print(spd, 2);
+    Serial.println(F(" km/h"));
+
+    String url  = "http://api.thingspeak.com/update?api_key=";
+    url += API_KEY;
+    url += "&field1=" + String(lat, 6);
+    url += "&field2=" + String(lng, 6);
+    url += "&field3=" + String(spd, 2);
+
+    bool ok1 = sendATcommand("AT+HTTPINIT",                               "OK", 5000);
+    bool ok2 = sendATcommand("AT+HTTPPARA=\"URL\",\"" + url + "\"",       "OK", 5000);
+    bool ok3 = sendATcommand("AT+HTTPACTION=0",                           "200", 30000);
+
+    if (ok1 && ok2 && ok3) {
+        Serial.println(F("✓ Data sent to ThingSpeak."));
+        glowLED(INDI_PIN, 1, 1000);
+        sendATcommand("AT+HTTPREAD", "OK", 10000);
+    } else {
+        Serial.println(F("✗ ThingSpeak upload failed."));
+        glowLED(INDI_PIN, 3, 1000);
     }
-    .map-placeholder::before {
-      content:""; position:absolute; inset:0;
-      background:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(137,40,143,0.05) 20px,rgba(137,40,143,0.05) 40px);
+
+    sendATcommand("AT+HTTPTERM", "OK", 5000);
+}
+
+// ════════════════════════════════════════════════════════════
+//  GSM init
+// ════════════════════════════════════════════════════════════
+bool initializeGSM() {
+    if (!sendATcommand("AT", "OK", 5000)) {
+        Serial.println(F("AT failed"));
+        return false;
     }
-    .map-placeholder-inner {
-      position:relative; z-index:1; display:flex; flex-direction:column;
-      align-items:center; gap:12px; color:#a07ba3; text-align:center; padding:20px;
+    Serial.println(F("SIM module ready."));
+
+    sendATcommand("AT+CPIN?",  "OK", 5000);
+    sendATcommand("AT+CSQ",    "OK", 5000);
+    sendATcommand("AT+CREG?",  "OK", 5000);
+    sendATcommand("AT+CGATT?", "OK", 5000);
+
+    // Airtel APN
+    sendATcommand("AT+CGDCONT=1,\"IP\",\"airtelgprs.com\"", "OK", 5000);
+
+    if (sendATcommand("AT+CREG?", "+CREG: 0,1", 5000) ||
+        sendATcommand("AT+CREG?", "+CREG: 0,5", 5000)) {
+        Serial.println(F("Network registered."));
+        return true;
     }
-    .map-placeholder-inner i { font-size:3rem; }
-    .map-placeholder-inner p { font-size:0.9rem; font-weight:500; }
 
-    .sidebar {
-      background:linear-gradient(145deg,#fafafa,#f0f0f0);
-      display:flex; flex-direction:column; justify-content:center; align-items:center;
-      padding:24px 20px; position:relative; overflow:hidden;
-      box-shadow:-2px 0 10px rgba(0,0,0,0.15);
+    Serial.println(F("ERROR: Not registered on network!"));
+    return false;
+}
+
+void hardwareResetGSM() {
+    delay(2000);
+    digitalWrite(GSM_PWRKEY_PIN, HIGH);
+    Serial.println(F("Resetting A7672S..."));
+    digitalWrite(GSM_PWRKEY_PIN, LOW);
+    delay(200);
+    digitalWrite(GSM_PWRKEY_PIN, HIGH);
+    delay(10000);
+    Serial.println(F("Reset complete."));
+}
+
+// ════════════════════════════════════════════════════════════
+//  Helpers
+// ════════════════════════════════════════════════════════════
+void glowLED(unsigned int pin, unsigned int times, unsigned int del) {
+    for (unsigned int i = 0; i < times; i++) {
+        digitalWrite(pin, HIGH); delay(del);
+        digitalWrite(pin, LOW);  delay(del);
     }
-    .sidebar::before {
-      content:""; position:absolute; inset:0;
-      background-image:url('../Pics/IITDH_logo2.jpg');
-      background-repeat:no-repeat; background-position:center; background-size:95%;
-      opacity:0.16; z-index:0;
+}
+
+bool sendATcommand(String command, String expected_response, unsigned int timeout) {
+    String response = "";
+    SIM_SERIAL.println(command);
+    unsigned long start = millis();
+    while (millis() - start < timeout) {
+        if (SIM_SERIAL.available()) {
+            char c = SIM_SERIAL.read();
+            response += c;
+            if (response.indexOf(expected_response) != -1) {
+                Serial.println(F("AT OK"));
+                Serial.println(response);
+                return true;
+            }
+        }
     }
-    .sidebar > * { position:relative; z-index:1; }
-
-    .inner { display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; text-align:center; }
-
-    .gear-wrap { position:relative; width:60px; height:60px; }
-    .gear-wrap .gear-main { font-size:60px; color:#89288f; animation:spin 6s linear infinite; display:block; line-height:1; }
-    .gear-wrap .gear-small { position:absolute; font-size:26px; color:#b35ab9; bottom:-4px; right:-8px; animation:spin-rev 4s linear infinite; }
-    @keyframes spin     { from{ transform:rotate(0deg); }   to{ transform:rotate(360deg); } }
-    @keyframes spin-rev { from{ transform:rotate(0deg); }   to{ transform:rotate(-360deg); } }
-
-    .stop-name { font-size:1.4rem; color:#802485; font-family:Arial,Helvetica,sans-serif; font-weight:bold; }
-    .maint-title { font-size:1.1rem; font-weight:700; color:#d42e2e; }
-    .maint-sub { font-size:0.92rem; color:#555; line-height:1.55; max-width:260px; }
-
-    .progress-wrap { width:100%; max-width:260px; }
-    .progress-label { font-size:0.75rem; font-weight:500; color:#777; margin-bottom:5px; text-align:left; }
-    .progress-track { width:100%; height:5px; background:#e0d5e1; border-radius:99px; overflow:hidden; }
-    .progress-bar { height:100%; width:65%; background:linear-gradient(90deg,#89288f,#c46bcc); border-radius:99px; animation:pulse-bar 2.5s ease-in-out infinite; }
-    @keyframes pulse-bar { 0%,100%{ opacity:1; } 50%{ opacity:0.55; } }
-
-    .contact-note { font-size:0.82rem; color:#555; font-family:'Roboto',sans-serif; }
-    .contact-note a { color:#802485; text-decoration:underline; }
-
-    @media (max-width:768px) {
-      .maincontent { flex-direction:column; height:95dvh; }
-      .map-placeholder { width:100%; height:47dvh; }
-      .sidebar { width:100%; height:48dvh; padding:12px 14px; justify-content:center; overflow:hidden; }
-      .inner { gap:10px; }
-      .gear-wrap { width:44px; height:44px; }
-      .gear-wrap .gear-main { font-size:44px; }
-      .gear-wrap .gear-small { font-size:20px; }
-      .stop-name { font-size:1.1rem; }
-      .maint-title { font-size:0.95rem; }
-      .maint-sub { font-size:0.82rem; }
-    }
-    @media (min-width:768px) {
-      .intranet-logo { top:1.5px; height:35px; left:96%; right:auto; }
-      .maincontent { flex-direction:row; height:calc(100vh - 5%); }
-      .map-placeholder { width:60%; }
-      .sidebar { width:40%; }
-    }
-  </style>
-</head>
-<body>
-  <a href="https://www.iitdh.ac.in/hi" target="_blank">
-    <img src="../Pics/logo-intranet-white.png" class="intranet-logo" alt="IIT DH Logo">
-  </a>
-  <nav class="topnav">
-    <div class="nav-title">CLT</div>
-    <label>
-      <input type="checkbox" class="hamburger-input">
-      <div class="toggle">
-        <span class="top_line common"></span>
-        <span class="middle_line common"></span>
-        <span class="bottom_line common"></span>
-      </div>
-      <div class="slide">
-        <h1>Menu</h1>
-        <ul>
-          <li class="section-label">Main Menu</li>
-          <li><a href="Main_Menu.html"><i class="fas fa-home"></i> Home</a></li>
-          <li class="section-label">Live Bus Tracking</li>
-          <li><a href="Bus_Tracking.html"><i class="fa-solid fa-location-dot"></i> Track Bus</a></li>
-          <li class="section-label">Monitor Stops</li>
-          <li><a href="Main_Gate.html"><i class="fas fa-tv"></i> Main Gate</a></li>
-          <li><a href="A1.html"><i class="fas fa-tv"></i> A1</a></li>
-          <li><a href="A2.html"><i class="fas fa-tv"></i> A2</a></li>
-          <li><a href="Hostel.html"><i class="fas fa-tv"></i> Hostel</a></li>
-          <li><a href="NFSU.html"><i class="fas fa-tv"></i> NFSU</a></li>
-          <li><a href="CLT.html"><i class="fas fa-tv"></i> CLT</a></li>
-          <li><a href="Bus_Stand.html"><i class="fas fa-tv"></i> New Bus Stand</a></li>
-          <li><a href="Jubilee_Circle.html"><i class="fas fa-tv"></i> Jubilee Circle</a></li>
-          <li class="section-label">More Information</li>
-          <li><a href="About.html"><i class="fa-solid fa-circle-info"></i> About</a></li>
-        </ul>
-      </div>
-    </label>
-  </nav>
-  <div class="maincontent">
-    <div class="map-placeholder">
-      <div class="map-placeholder-inner">
-        <i class="fas fa-map-location-dot"></i>
-        <p>Map unavailable<br>during maintenance</p>
-      </div>
-    </div>
-    <div class="sidebar">
-      <div class="inner">
-        <div class="gear-wrap">
-          <i class="fas fa-gear gear-main"></i>
-          <i class="fas fa-gear gear-small"></i>
-        </div>
-        <div class="stop-name">CLT</div>
-        <div class="maint-title">Service Under Maintenance</div>
-        <p class="maint-sub">
-          We're doing our best to bring this back as soon as possible.
-          Thank you for your patience!
-        </p>
-        <div class="progress-wrap">
-          <div class="progress-label">Restoration in progress…</div>
-          <div class="progress-track"><div class="progress-bar"></div></div>
-        </div>
-        <p class="contact-note">
-          Issues? Write to
-          <a href="mailto:ee23bt041@iitdh.ac.in">ee23bt041@iitdh.ac.in</a>
-        </p>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
+    Serial.print(F("AT TIMEOUT | Response: "));
+    Serial.println(response);
+    return false;
+}
