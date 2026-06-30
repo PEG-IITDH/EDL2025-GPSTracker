@@ -32,6 +32,9 @@ html, body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(145deg, #fafafa, #f0f0f0);
+  overflow: hidden;        /* prevent page scroll so fixed elements never appear to drift */
+  position: fixed;         /* belt-and-suspenders: locks the viewport on iOS Safari too */
+  width: 100%;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 body { display: flex; flex-direction: column; }
@@ -95,7 +98,7 @@ input:checked ~ .slide { transform: translateX(0); }
   </style>
 </head>
 <body>
-  <div style="height:100vh; display: flex; flex-direction: column;">
+  <div style="height:100dvh; display: flex; flex-direction: column;">
 
     <!-- Navigation Bar -->
     <a href="https://www.iitdh.ac.in/hi" target="_blank">
@@ -312,7 +315,12 @@ input:checked ~ .slide { transform: translateX(0); }
 
     // ── Main update loop ─────────────────────────────────────
     function updateMapData() {
-      fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
+      // Cache-bust: append a unique timestamp so the browser/any intermediate
+      // proxy (common on mobile carrier networks) can never serve a stale
+      // cached copy of this request. cache:'no-store' reinforces this at the
+      // fetch API level too.
+      fetch(`https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5&_=${Date.now()}`,
+            { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           const feeds = data.feeds
@@ -411,7 +419,8 @@ input:checked ~ .slide { transform: translateX(0); }
           if (!userPanning) map.setView([lat, lon], zoom);
 
           // FIX: async repair message — check INSIDE the .then() so repMsg is populated
-          fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
+          fetch(`https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1&_=${Date.now()}`,
+                { cache: 'no-store' })
             .then(r => r.json())
             .then(data1 => {
               let statu;
@@ -485,7 +494,21 @@ input:checked ~ .slide { transform: translateX(0); }
     map.on('dragend zoomend', () => { setTimeout(() => { userPanning = false; }, 5000); });;
 
     updateMapData();
-    setInterval(updateMapData, 20000);
+    setInterval(updateMapData, 10000); // 10s — fast enough to catch new GPS
+                                         // uploads (Arduino sends every ~20-30s)
+                                         // without exceeding ThingSpeak's free-tier
+                                         // rate limit (~1 request per 15s/channel)
+
+    // FIX: browsers throttle/suspend setInterval in background tabs (Chrome can
+    // drop to ~once/minute or pause entirely on mobile). This caused stale
+    // "Not live" status and old positions to linger after switching back to
+    // the tab, until the next throttled tick (or a manual reload) caught up.
+    // Force an immediate refresh the moment the tab becomes visible again.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        updateMapData();
+      }
+    });
   </script>
 </body>
 </html>

@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
-html, body { height:100%; margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(145deg,#fafafa,#f0f0f0); }
+html, body { height:100%; margin:0; font-family:'Poppins',sans-serif; background:linear-gradient(145deg,#fafafa,#f0f0f0); overflow:hidden; position:fixed; width:100%; }
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
 body { display:flex; flex-direction:column; }
 .map-container { background:#fff; box-shadow:2px 2px 5px rgba(0,0,0,.1); width:60%; height:100%; position:relative; z-index:1; }
@@ -77,7 +77,7 @@ input:checked ~ .slide { transform:translateX(0); }
   </style>
 </head>
 <body>
-  <div style="height:100vh; display:flex; flex-direction:column;">
+  <div style="height:100dvh; display:flex; flex-direction:column;">
 
     <!-- Navigation Bar -->
     <a href="https://www.iitdh.ac.in/hi" target="_blank">
@@ -160,7 +160,7 @@ input:checked ~ .slide { transform:translateX(0); }
 
     // ── Main update ──────────────────────────────────────────  // calculateDistance + getZoomLevel are now in schedule.js
     function updateMapData() {
-      fetch('https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5')
+      fetch(`https://api.thingspeak.com/channels/2500568/feeds.json?api_key=3TVTGFNPIZH5T08Y&results=5&_=${Date.now()}`, { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           const feeds = data.feeds
@@ -239,7 +239,7 @@ input:checked ~ .slide { transform:translateX(0); }
           if (!userPanning) map.setView([lat, lon], getZoomLevel(dist));  // Fix 8: respect user pan
 
           // FIX: repair-message fetch async-correct — status set INSIDE .then()
-          fetch('https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1')
+          fetch(`https://api.thingspeak.com/channels/2882525/feeds.json?api_key=ONUVVE8QBZ5GH9ZP&results=1&_=${Date.now()}`, { cache: 'no-store' })
             .then(r => r.json())
             .then(data1 => {
               // FIX: midnight-safe stale check via raw ms
@@ -301,7 +301,16 @@ input:checked ~ .slide { transform:translateX(0); }
     map.on('dragend zoomend', () => { setTimeout(() => { userPanning = false; }, 5000); });;
 
     updateMapData();
-    setInterval(updateMapData, 20000);
+    setInterval(updateMapData, 10000); /* 10s, ThingSpeak rate-limit safe */
+
+    // FIX: force immediate refresh when tab regains focus, since browsers
+    // throttle/suspend setInterval in background tabs, causing stale
+    // status/position to linger until the next throttled tick or reload.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        updateMapData();
+      }
+    });
   </script>
 </body>
 </html>
