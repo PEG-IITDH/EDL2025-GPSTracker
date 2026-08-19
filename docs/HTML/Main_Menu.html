@@ -93,7 +93,9 @@
     .hamburger-input:checked ~ .toggle .middle_line { opacity:0; transform:translateX(20px); }
     .hamburger-input:checked ~ .slide               { transform:translateX(0); }
 
-    /* ── Slide-out drawer ── */
+    /* ── Slide-out drawer ──
+       Flex column so header + nav list always fit the viewport height,
+       with the list distributing its items evenly — no scrolling required. */
     .slide {
       width: 210px; height: 100%;
       position: fixed; top: 0; left: 0;
@@ -101,29 +103,40 @@
       transform: translateX(-210px);
       transition: transform 0.4s ease;
       z-index: 1002;
-      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       box-shadow: 2px 0 12px rgba(0,0,0,0.25);
     }
     .slide h1 {
+      flex: 0 0 auto;
       color: #ffffffe2; font-weight: 700;
       text-align: right;
-      padding: 18px 16px 10px 0;
-      font-size: 1.2rem;
+      padding: clamp(8px,2vh,18px) 16px 0 0;
+      font-size: clamp(1rem,2.4vh,1.2rem);
     }
-    .slide ul { padding-bottom: 24px; }
+    .slide ul {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      padding: 4px 0 12px;
+    }
     .slide ul li { list-style: none; }
     .slide ul li.section-label {
-      margin-top: 12px;
       color: #eaeaead9;
-      font-weight: 300; font-size: 0.75rem;
+      font-weight: 300; font-size: clamp(0.65rem,1.4vh,0.75rem);
       padding: 0 12px;
     }
     .slide ul li a {
       color: #ffffffe2; font-weight: 500;
-      padding: 6px 12px;
+      padding: clamp(2px,0.6vh,6px) 12px;
       display: block;
       text-decoration: none;
       transition: 0.2s;
+      font-size: clamp(0.8rem,1.7vh,0.9rem);
+      line-height: 1.3;
     }
     .slide ul li a i { width: 26px; text-align: center; }
     .slide ul li:not(.section-label):hover a { color: #89288f; background: white; }
