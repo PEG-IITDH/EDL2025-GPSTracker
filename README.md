@@ -2,3 +2,5 @@
 GPS Module for tracking Institute Bus
 
 Now Live at https://peg-iitdh.github.io/EDL2025-GPSTracker/
+
+Current Maintainer: Kaushal A. B. [ee23bt041]
